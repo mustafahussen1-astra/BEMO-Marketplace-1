@@ -1,0 +1,15 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),path=require('path');
+const root=path.resolve(__dirname,'../dist');const context={window:{}};vm.createContext(context);for(const f of ['catalog.js','design-preview/search-fixtures.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),context);
+const {search,validBadges,normalize}=context.window.BemoSearchProvider;const fixture=context.window.BEMO_SEARCH_FIXTURES;let n=0;const check=(name,fn)=>{fn();n++;console.log('PASS '+name)};
+check('Free shipping requires complete destination',()=>assert.equal(search({free:true}).total,0));
+check('Free shipping differs between destinations',()=>{const a=search({country:'A',region:'North',city:'Garden',free:true});const b=search({country:'B',region:'Coast',city:'Bay',free:true});assert(a.items.every(x=>x.store_id==='form-field'));assert(b.items.every(x=>x.store_id==='everyday'));assert(a.total>0&&b.total>0)});
+check('Unsupported destination excludes products',()=>assert.equal(search({country:'X'}).total,0));
+check('Badges use OR semantics',()=>{const a=search({badges:['verified']});const b=search({badges:['official']});assert.equal(search({badges:['verified','official']}).total,a.total+b.total)});
+check('Revoked and expired badges excluded',()=>{assert(!validBadges(fixture.stores[1]).includes('verified'));assert(!validBadges(fixture.stores[2]).includes('excellent'))});
+check('Exact public store lookup',()=>assert.equal(search({q:'Everyday Studio'}).stores[0].id,'everyday'));
+check('Combined category price stock constraints',()=>{const r=search({category:'electronics',min:60,max:100,stock:true});assert.equal(r.total,2);assert(r.items.every(p=>p.price>=60&&p.price<=100&&p.stock>0))});
+check('Incompatible currencies excluded',()=>assert.equal(search({currency:'EUR'}).total,0));
+check('Arabic marks normalization',()=>assert.equal(normalize('إِلِكترونيات'),'الكترونيات'));
+check('Bounded pagination',()=>{assert.equal(search({}).items.length,8);assert.equal(search({page:2}).items.length,4);assert.equal(search({page:100}).page,2)});
+check('Price sorting',()=>{const r=search({sort:'price_up'}).items;assert(r.every((p,i)=>!i||r[i-1].price<=p.price))});
+console.log(`${n} fixture search tests passed. Not a database/security test.`);
