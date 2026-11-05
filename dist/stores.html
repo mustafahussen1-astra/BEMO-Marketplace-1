@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><title>دليل المتاجر — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="stores.css"></head>
+<body>
+<a class="skip-link" href="#directoryMain" data-t="skip">انتقل إلى المحتوى</a>
+<div class="development-note" data-t="development">متاجر مسجّلة في BEMO · المنتجات والبيع الفعلي قيد الإعداد.</div>
+<header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html" data-route="index.html" aria-label="BEMO">BEMO<span>●</span></a><nav aria-label="التنقل"><a class="browse-link" href="account.html" data-route="account.html" data-t="account">حسابي ومتجري</a><button class="language-button" id="languageButton" type="button">English</button></nav></div></header>
+<main class="account-container directory-main" id="directoryMain">
+<section class="directory-intro"><div><span class="section-kicker" data-t="kicker">أصحاب متاجر. بدايات جديدة.</span><h1 data-t="title">اكتشف متاجر BEMO</h1><p class="section-copy" data-t="intro">تعرّف على المتاجر المسجّلة وأسمائها وأوصافها، وابحث عن متجر بالاسم أو المعرّف.</p></div><a class="primary-button" href="account.html#store" data-store-route data-t="create">افتح متجرك</a></section>
+<form id="directorySearch" class="directory-search" role="search"><label for="storeQuery" data-t="label">ابحث عن متجر</label><div><input id="storeQuery" name="q" type="search" maxlength="120" autocomplete="off" placeholder="اسم المتجر أو معرّفه"><button class="primary-button" type="submit" data-t="search">بحث</button></div></form>
+<div class="directory-toolbar"><p data-t="order">الأحدث انضماماً أولاً</p><button class="text-button" type="button" id="clearSearch" hidden data-t="clear">عرض جميع المتاجر</button></div>
+<p id="directoryStatus" class="directory-status" role="status" aria-live="polite"></p>
+<div id="directoryError" class="account-card directory-error" role="alert" hidden><p data-t="error">تعذّر تحميل المتاجر. تحقق من اتصالك وأعد المحاولة.</p><button id="directoryRetry" class="secondary-button" type="button" data-t="retry">إعادة المحاولة</button></div>
+<section id="directoryEmpty" class="account-card directory-empty" hidden><h2 data-t="emptyTitle">لا توجد متاجر هنا بعد</h2><p class="section-copy" id="emptyCopy"></p></section>
+<div id="directoryResults" class="directory-grid" aria-busy="true"></div>
+<nav class="directory-pagination" aria-label="صفحات المتاجر" id="directoryPagination" hidden><button id="previousPage" class="secondary-button" type="button" data-t="previous">السابق</button><span id="pageNumber"></span><button id="nextPage" class="secondary-button" type="button" data-t="next">التالي</button></nav>
+<aside class="directory-note"><h2 data-t="noteTitle">عن هذا الدليل</h2><p data-t="note">تظهر هنا بيانات المتاجر المسجّلة فعلياً. وجود المتجر في الدليل لا يعني حصوله على توثيق أو اعتماد من BEMO. عرض المنتجات والطلبات الحقيقية لم يُفعّل بعد.</p><a class="back-link" href="search.html" data-route="search.html" data-t="demo">استكشف المنتجات التجريبية</a></aside>
+</main><footer class="account-container account-footer"><span>© 2026 BEMO</span><span data-t="footer">عالم من الاكتشافات الجميلة.</span></footer>
+<noscript><p class="account-container">يلزم JavaScript لتحميل دليل المتاجر. Enable JavaScript to load stores.</p></noscript>
+<script src="backend-config.js"></script><script src="store-directory.js"></script><script src="stores-page.js"></script></body></html>

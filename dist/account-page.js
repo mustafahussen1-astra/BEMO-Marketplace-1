@@ -3,6 +3,7 @@
   const $ = id => document.getElementById(id);
   const isCallback = document.body.dataset.accountView === 'callback';
   const words = {
+    directory:['استعرض دليل المتاجر','Browse the store directory'],
     skip:['انتقل إلى المحتوى','Skip to content'], development:['نسخة تطوير — المنتجات والطلبات للتجربة؛ البيع الفعلي غير متاح بعد.','Development preview · Sample products and orders. Real selling is not available yet.'],
     browse:['استكشف المنتجات','Explore products'], yourSpace:['مساحتك في BEMO','YOUR SPACE AT BEMO'], welcome:['أهلاً بك.\nكل بداية جميلة، هنا.','Hello, you.\nGood things start here.'], welcomeCopy:['حساب واحد لملفك الشخصي ومتجرك. ابدأ بحساب Gmail الخاص بك.','One account for your profile and your store. Start with your Gmail account.'],
     benefitOne:['دخول مباشر باستخدام Google','Continue with Google'], benefitOneCopy:['استخدم حساب Gmail الذي تختاره.','Use the Gmail account you choose.'], benefitTwo:['متجر واحد باسمك','One store, your own name'], benefitTwoCopy:['اختر اسمه ومعرّفه ووصفه بعد إكمال حسابك.','Choose its name, identifier and description once your account is ready.'], benefitThree:['بداية بلا رسوم منصة','Start with zero platform fees'], benefitThreeCopy:['رسوم BEMO في الإصدار الأول صفر.','BEMO platform fees are zero in V1.'], backToMarket:['العودة إلى السوق التجريبي','Back to the demo marketplace'],

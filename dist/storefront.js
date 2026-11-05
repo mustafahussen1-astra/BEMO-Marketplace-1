@@ -135,7 +135,7 @@
       return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.charAt(0))}</div><div><h3>${escape(store)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.slice(0,3).map(product => `<img src="${product.image}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${searchUrl({store,scope:'products'})}">${t('visitStore')}</a></div></article>`;
     }).join('');
     for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl({offer:'1'});
-    $('#allStores').href = searchUrl({scope:'stores'});
+    $('#allStores').href = 'stores.html?lang=' + lang;
     for (const id of ['heroLink','browseMore']) $('#' + id).href = searchUrl();
     $('#mobileNav').innerHTML = `<a href="#" class="active">${icon('home')}<span>${t('homeNav')}</span></a><a href="#fastCategories">${icon('grid')}<span>${t('categories')}</span></a><a href="#deals">${icon('deals')}<span>${t('deals')}</span></a><button type="button" data-home-action="cart">${icon('bag')}<span>${t('cart')}</span><span class="cart-count" aria-hidden="true">0</span></button><button type="button" data-home-action="account">${icon('user')}<span>${t('account')}</span></button>`;
     $('#mobileNav').setAttribute('aria-label', lang === 'ar' ? 'التنقل الرئيسي' : 'Main navigation');
