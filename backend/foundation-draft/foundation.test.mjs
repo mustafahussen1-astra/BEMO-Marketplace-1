@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import test, { before, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -45,7 +45,10 @@ before(async()=>{
     grant usage on schema auth to anon,authenticated;
     grant execute on function auth.jwt(),auth.uid() to anon,authenticated;
   `);
-  await db.exec(await readFile(new URL('../../supabase/migrations/20261103153548_bemo_m1_foundation.sql',import.meta.url),'utf8'));
+  const migrationDirectory = new URL('../../supabase/migrations/',import.meta.url);
+  const migrations = (await readdir(migrationDirectory)).filter(name=>/^\d+_.+\.sql$/.test(name)).sort();
+  assert.ok(migrations.length > 0, 'Canonical migrations must exist');
+  for (const name of migrations) await db.exec(await readFile(new URL(name,migrationDirectory),'utf8'));
   console.log('Embedded engine:',(await db.query('select version()')).rows[0].version);
 });
 beforeEach(async()=>{
@@ -64,6 +67,18 @@ after(async()=>{await db?.close();});
 test('verified Google Gmail creates a stable application identity; retry keeps it',async()=>{
   const a=await onboard(); const b=await onboard(); assert.equal(a.id,b.id); assert.notEqual(a.id,users[0]);
   assert.equal((await db.query('select count(*)::int as n from bemo_private.app_users')).rows[0].n,1);
+});
+test('eligible first visit requires onboarding without creating a profile implicitly',async()=>{
+  await assert.rejects(()=>call('bemo_get_profile'),{code:'42501',message:'BEMO_PROFILE_REQUIRED'});
+  assert.equal((await db.query('select count(*)::int as n from bemo_private.app_users')).rows[0].n,0);
+  await onboard();
+  assert.equal((await call('bemo_get_profile')).status,'ACTIVE');
+});
+test('suspended profile stays unavailable and cannot be treated as new onboarding',async()=>{
+  await onboard();
+  await db.exec("update bemo_private.app_users set status='SUSPENDED'");
+  await assert.rejects(()=>call('bemo_get_profile'),{code:'42501',message:'BEMO_PROFILE_UNAVAILABLE'});
+  await assert.rejects(()=>onboard(),{code:'42501',message:'BEMO_PROFILE_UNAVAILABLE'});
 });
 test('anonymous visitors cannot onboard or read an application profile',async()=>{
   await expectDenied(()=>asRole('anon',{},"select public.bemo_onboard('Guest','ar')"));

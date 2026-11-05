@@ -34,6 +34,7 @@ Profile JSON: `id`, `email`, `display_name`, `locale`, `status`, `created_at`, `
 ## Expected error codes
 
 - `42501`: missing/ineligible identity, invalid session or unavailable/suspended profile. Messages start `BEMO_`.
+  - With the incremental `bemo_profile_required_status` migration, `BEMO_PROFILE_REQUIRED` means the verified caller has no application profile and may submit onboarding. `BEMO_PROFILE_UNAVAILABLE` means an existing profile is not active; it must never trigger automatic onboarding. Identity checks execute before this distinction.
 - `22023`: invalid text/locale/pagination or reserved slug.
 - `23505`: one-store conflict, slug collision, normalized title collision, or conflicting normalized email. UI must map constraints to safe localized errors, not display raw database details.
 

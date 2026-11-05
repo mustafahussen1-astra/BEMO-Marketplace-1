@@ -9,7 +9,7 @@ function boot(initial={},search=''){
  vm.createContext(context);for(const file of ['catalog.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
  function click(dataset,inside=true){const button={dataset,tagName:'BUTTON',hasAttribute:k=>k==='data-commerce'&&Object.hasOwn(dataset,'commerce'),closest:selector=>selector==='#modal'?(inside?modal:null):button};for(const fn of handlers.click||[])fn({target:button,preventDefault(){}})}
  function submit(id,values={}){const target={id,values,closest:()=>modal,querySelector:()=>({setCustomValidity(){}}),reportValidity(){}};for(const fn of handlers.submit||[])fn({target,preventDefault(){}})}
- return {api:context.window.BemoCommerce,events,content,modal,storage,click,submit,document};
+ return {api:context.window.BemoCommerce,events,content,modal,storage,click,submit,document,location:context.location};
 }
 let count=0;function test(name,fn){fn();console.log('PASS '+name);count++}
 test('Modern startup needs no original storefront elements and defaults Arabic',()=>assert.equal(boot().api.getState().lang,'ar'));
@@ -23,5 +23,5 @@ test('Cancel and accept remain independent; accepted cancellation requests suppo
 test('Modern shell buttons are ignored by delegated modal handler',()=>{const b=boot();b.click({add:'1'},false);assert.equal(b.api.getState().cart.length,0);b.click({add:'1'},true);assert.equal(b.api.getState().cart.length,1)});
 test('Saved and browse actions emit shell events; no navigation coupling',()=>{const b=boot();b.api.open('saved');assert.equal(b.events.at(-1).type,'bemo:saved');b.api.open('cart');b.click({action:'browse'});assert.equal(b.events.at(-1).type,'bemo:browse');assert.equal(b.modal.open,false)});
 test('Language change closes modal and persists shared preference',()=>{const b=boot();b.api.open('cart');b.api.setLanguage('en');assert.equal(b.modal.open,false);assert.equal(JSON.parse(b.storage.get('bemo-preview-v1')).lang,'en')});
-test('Persisted text is escaped when displayed',()=>{const b=boot({store:'<img src=x onerror=alert(1)>'});b.api.open('sell');assert(!b.content.innerHTML.includes('<img src=x'));assert(b.content.innerHTML.includes('&lt;img'));b.api.open('__proto__');b.api.showStore('__proto__');b.api.detail(999)});
+test('Account and seller links preserve locale and existing demo data',()=>{const demoStore='<img src=x onerror=alert(1)>', b=boot({store:demoStore,cart:[{id:1,qty:2}],saved:[1]},'?lang=en');const before=JSON.stringify(b.api.getState());b.api.open('account');assert.equal(b.location.href,'account.html?lang=en');assert.equal(b.modal.open,false);b.api.open('sell');assert.equal(b.location.href,'account.html?lang=en#store');assert.equal(JSON.stringify(b.api.getState()),before);assert.equal(b.api.getState().store,demoStore);assert(!b.content.innerHTML.includes(demoStore));b.api.setLanguage('ar');b.api.open('account');assert.equal(b.location.href,'account.html?lang=ar');b.api.open('__proto__');b.api.showStore('__proto__');b.api.detail(999)});
 console.log(`${count} shared-commerce state checks passed. These are local demo logic checks, not live backend tests.`);
