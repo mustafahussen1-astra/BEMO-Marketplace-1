@@ -341,8 +341,52 @@
       }
     }
   }
+  const merchantMethods = new Set(['bemo_merchant_catalog','bemo_save_store_settings','bemo_save_product','bemo_save_variant','bemo_adjust_stock','bemo_prepare_media','bemo_finish_media','bemo_product_status','bemo_merchant_media']);
+  const merchantErrors = new Set(['STORE_UNAVAILABLE','SETTINGS_INVALID','SETTINGS_REQUIRED','VERSION_CONFLICT','CURRENCY_LOCKED','PRODUCT_INVALID','PRODUCT_UNAVAILABLE','VARIANT_INVALID','VARIANT_UNAVAILABLE','VARIANT_LIMIT','STOCK_INVALID','INSUFFICIENT_STOCK','IDEMPOTENCY_CONFLICT','MEDIA_INVALID','MEDIA_LIMIT','MEDIA_UNAVAILABLE','MEDIA_UPLOAD_REQUIRED','PRODUCT_IMAGE_REQUIRED','VARIANT_REQUIRED','QUERY_INVALID']);
+  async function merchantRequest(name, args) {
+    if (!merchantMethods.has(name) || state.phase !== 'ready' || !actorId) return {data:null,error:failure('AUTH_REQUIRED')};
+    const ticket=epoch, expected=actorId;
+    try {
+      const who=await context(ticket,expected);
+      if (stale(ticket) || !who || actorId!==expected) return {data:null,error:failure('SESSION_CHANGED')};
+      const result=await who.api.rpc(name,args || {});
+      if (stale(ticket) || actorId!==expected) return {data:null,error:failure('SESSION_CHANGED')};
+      if(result.error) throw result.error;
+      return {data:result.data,error:null};
+    } catch(error) {
+      const code=typeof error?.message==='string' ? error.message.replace(/^BEMO_/,'') : '';
+      return {data:null,error:merchantErrors.has(code)?failure(code):error?.code==='23505'?failure('SKU_TAKEN'):errorFor(error)};
+    }
+  }
+  async function merchantMedia(action,path,file) {
+    if (state.phase!=='ready' || !actorId || !['upload','preview'].includes(action) || typeof path!=='string' || !/^[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.jpg$/i.test(path)) return {data:null,error:failure('MEDIA_INVALID')};
+    const ticket=epoch,expected=actorId;
+    try {
+      const who=await context(ticket,expected);
+      if(stale(ticket)||!who||actorId!==expected) return {data:null,error:failure('SESSION_CHANGED')};
+      let result;
+      if(action==='upload') {
+        if(!file || file.type!=='image/jpeg' || file.size<1 || file.size>5242880) return {data:null,error:failure('MEDIA_INVALID')};
+        result=await who.api.storage.from('bemo-products').upload(path,file,{contentType:'image/jpeg',upsert:false,cacheControl:'60'});
+      } else result=await who.api.storage.from('bemo-products').createSignedUrl(path,60);
+      if(stale(ticket)||actorId!==expected) return {data:null,error:failure('SESSION_CHANGED')};
+      if(result.error) throw result.error;
+      if(action==='preview') {
+        const url=new URL(result.data?.signedUrl);
+        if(url.origin!==config.url || !url.pathname.startsWith('/storage/v1/object/sign/bemo-products/')) throw {code:'RESPONSE_INVALID'};
+        return {data:{url:url.href},error:null};
+      }
+      return {data:{uploaded:true},error:null};
+    } catch(error) { return {data:null,error:errorFor(error)}; }
+  }
+  function merchantScope() {
+    const ticket=epoch,expected=actorId;
+    const valid=()=>expected && !stale(ticket) && actorId===expected && state.phase==='ready';
+    const changed=()=>Promise.resolve({data:null,error:failure('SESSION_CHANGED')});
+    return Object.freeze({request:(name,args)=>valid()?merchantRequest(name,args):changed(),media:(action,path,file)=>valid()?merchantMedia(action,path,file):changed()});
+  }
   window.BemoAccount = Object.freeze({
     initialize, getState: snapshot, subscribe(listener) { if (typeof listener !== 'function') return () => {}; listeners.add(listener); try { listener(snapshot()); } catch (_) { /* Isolate view failures. */ } return () => listeners.delete(listener); },
-    signIn, completeCallback, refresh, saveProfile, createStore, signOut
+    signIn, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope
   });
 })();

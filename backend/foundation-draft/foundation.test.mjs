@@ -37,6 +37,13 @@ before(async()=>{
     create role authenticated nologin;
     create role service_role nologin bypassrls;
     create schema auth;
+    create schema storage;
+    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text,metadata jsonb,unique(bucket_id,name));
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to anon,authenticated;
+    grant select on storage.objects to anon,authenticated;
+    grant insert on storage.objects to authenticated;
     create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,is_anonymous boolean default false,banned_until timestamptz,deleted_at timestamptz,raw_user_meta_data jsonb default '{}');
     create table auth.identities(user_id uuid references auth.users(id),provider text,identity_data jsonb);
     create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id),not_after timestamptz);
@@ -53,9 +60,10 @@ before(async()=>{
 });
 beforeEach(async()=>{
   // This database exists only in memory and contains only the fixture accounts.
-  const tables=await db.query("select quote_ident(schemaname)||'.'||quote_ident(tablename) as name from pg_tables where schemaname='bemo_private' and tablename<>'reserved_store_slugs'");
+  const tables=await db.query("select quote_ident(schemaname)||'.'||quote_ident(tablename) as name from pg_tables where schemaname='bemo_private' and tablename not in ('reserved_store_slugs','currencies')");
   if(tables.rows.length) await db.exec('truncate '+tables.rows.map(x=>x.name).join(',')+' restart identity cascade');
   await db.exec('truncate auth.users cascade');
+  await db.exec('truncate storage.objects');
   for(let i=0;i<2;i++){
     await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[users[i],`buyer${i}@gmail.com`]);
     await db.query('insert into auth.identities values($1,$2,$3)',[users[i],'google',{email:`buyer${i}@gmail.com`,email_verified:true}]);
@@ -63,6 +71,111 @@ beforeEach(async()=>{
   }
 });
 after(async()=>{await db?.close();});
+
+async function merchant(i=0) {
+ await onboard(i);await createStore(i,'متجر التاجر '+i,'merchant-'+i);
+ await call('bemo_save_store_settings',[2500,'IQD',0],i);
+ const p=await call('bemo_save_product',[null,'منتج التاجر الجديد','وصف مفصل للمنتج المادي المعروض للبيع','other',0],i);
+ const v=await call('bemo_save_variant',[p.id,null,'SKU-1','أساسي',150000,true,0],i);
+ return {p,v};
+}
+const requestA='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+async function mediaFor(p,i=0){
+ const m=await call('bemo_prepare_media',[p.id,requestA,'صورة توضيحية للمنتج'],i);
+ await asRole('authenticated',claims(i),'insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)', ['bemo-products',m.storage_key,{mimetype:'image/jpeg',size:1200}]);
+ await call('bemo_finish_media',[m.id,false],i);return m;
+}
+const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
+test('variant create retry does not duplicate stock positions',async()=>{
+ const {p}=await merchant();const args=[p.id,requestA,'SKU-RETRY','أزرق',1000,true,0];
+ const a=await call('bemo_save_variant',args),b=await call('bemo_save_variant',args);assert.equal(a.id,b.id);
+ assert.equal((await call('bemo_merchant_catalog')).products[0].variants.length,2);
+});
+test('published product retains an enabled variant and archive prevents edits',async()=>{
+ const {p,v}=await merchant();await mediaFor(p);const active=await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ await assert.rejects(()=>call('bemo_save_variant',[p.id,v.id,v.sku,v.label,v.price_minor,false,v.version]),/BEMO_VARIANT_REQUIRED/);
+ await call('bemo_product_status',[p.id,'ARCHIVED',active.version]);assert.deepEqual(await publicProducts(),[]);
+ await assert.rejects(()=>call('bemo_save_product',[p.id,p.title,p.description,p.category,3]),/BEMO_PRODUCT_UNAVAILABLE/);
+});
+test('explicit product IDs make create retries idempotent',async()=>{
+ await merchant();const args=[requestA,'منتج آخر للاختبار','هذا وصف منتج آخر لاختبار إعادة الطلب','other',0];
+ const first=await call('bemo_save_product',args);const second=await call('bemo_save_product',args);
+ assert.equal(first.id,second.id);assert.equal((await call('bemo_merchant_catalog')).products.length,2);
+});
+test('publication requires a variant and uploaded image; hidden products disappear',async()=>{
+ const {p}=await merchant();assert.deepEqual(await publicProducts(),[]);
+ await assert.rejects(()=>call('bemo_product_status',[p.id,'ACTIVE',1]),/BEMO_PRODUCT_IMAGE_REQUIRED/);
+ await mediaFor(p);const active=await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ let list=await publicProducts();assert.equal(list.length,1);assert.equal(list[0].delivery_fee_minor,2500);
+ assert.equal(list[0].email,undefined);assert.equal(list[0].owner_user_id,undefined);assert.equal(list[0].variants[0].sku,undefined);
+ await call('bemo_product_status',[p.id,'HIDDEN_BY_OWNER',active.version]);assert.deepEqual(await publicProducts(),[]);
+});
+test('private image RLS denies other sellers and public draft reads',async()=>{
+ const {p}=await merchant();await merchant(1);const m=await call('bemo_prepare_media',[p.id,requestA,'صورة المنتج']);
+ await expectDenied(()=>asRole('authenticated',claims(1),'insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)',['bemo-products',m.storage_key,{mimetype:'image/jpeg',size:1200}]));
+ await expectDenied(()=>call('bemo_finish_media',[m.id,false]));
+ await asRole('authenticated',claims(),'insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)',['bemo-products',m.storage_key,{mimetype:'image/jpeg',size:1200}]);
+ assert.equal((await asRole('anon',{},'select * from storage.objects')).length,0);
+ assert.equal((await asRole('authenticated',claims(1),'select * from storage.objects')).length,0);
+ assert.equal((await asRole('authenticated',claims(),'select * from storage.objects')).length,1);
+ await call('bemo_finish_media',[m.id,false]);await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ assert.equal((await asRole('anon',{},'select * from storage.objects')).length,1);
+});
+test('suspension removes public products and image access immediately',async()=>{
+ const {p}=await merchant();await mediaFor(p);await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ await db.query("update bemo_private.app_users set status='SUSPENDED' where auth_subject=$1",[users[0]]);
+ assert.deepEqual(await publicProducts(),[]);assert.equal((await asRole('anon',{},'select * from storage.objects')).length,0);
+});
+test('image removal is soft and cannot remove last published image',async()=>{
+ const {p}=await merchant();const m=await mediaFor(p);const active=await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ await assert.rejects(()=>call('bemo_finish_media',[m.id,true]),/BEMO_PRODUCT_IMAGE_REQUIRED/);
+ await call('bemo_product_status',[p.id,'HIDDEN_BY_OWNER',active.version]);await call('bemo_finish_media',[m.id,true]);
+ assert.deepEqual(await call('bemo_merchant_media',[p.id]),[]);
+ assert.equal((await db.query('select count(*)::int n from storage.objects')).rows[0].n,1);
+});
+test('merchant catalog starts empty and delivery fee is owner-editable',async()=>{
+ await onboard();await createStore();let c=await call('bemo_merchant_catalog');assert.deepEqual(c.products,[]);assert.equal(c.settings,null);
+ const first=await call('bemo_save_store_settings',[2500,'IQD',0]);assert.equal(first.delivery_fee_minor,2500);
+ const second=await call('bemo_save_store_settings',[0,'IQD',first.version]);assert.equal(second.delivery_fee_minor,0);
+ await assert.rejects(()=>call('bemo_save_store_settings',[100,'IQD',first.version]),/BEMO_VERSION_CONFLICT/);
+});
+test('product and variant edits preserve tenant ownership',async()=>{
+ const a=await merchant();await merchant(1);
+ await assert.rejects(()=>call('bemo_save_product',[a.p.id,'اسم منتج آخر','وصف آخر طويل بما يكفي للاختبار','home',1],1),/BEMO_PRODUCT_UNAVAILABLE/);
+ await assert.rejects(()=>call('bemo_save_variant',[a.p.id,a.v.id,'OTHER','',500,true,1],1),/BEMO_PRODUCT_UNAVAILABLE/);
+ const own=await call('bemo_merchant_catalog',[],1);assert.equal(own.products.length,1);assert.notEqual(own.products[0].id,a.p.id);
+});
+test('merchant product edits reject stale versions and invalid prices',async()=>{
+ const {p,v}=await merchant();
+ const updated=await call('bemo_save_product',[p.id,'اسم المنتج المعدل','وصف معدل مفصل للمنتج المعروض للبيع','home',p.version]);assert.equal(updated.version,2);
+ await assert.rejects(()=>call('bemo_save_product',[p.id,'اسم المنتج المعدل','وصف معدل مفصل للمنتج المعروض للبيع','home',p.version]),/BEMO_VERSION_CONFLICT/);
+ for(const price of [-1,0,1000000000000]) await assert.rejects(()=>call('bemo_save_variant',[p.id,v.id,'SKU-1','',price,true,v.version]),/BEMO_VARIANT_INVALID/);
+ const variant=await call('bemo_save_variant',[p.id,v.id,'SKU-2','لون أحمر',200000,true,v.version]);assert.equal(variant.sku,'SKU-2');
+});
+test('stock adjustments are idempotent and cannot become negative',async()=>{
+ const {v}=await merchant();const args=[v.id,5,'Initial stock',requestA,1];
+ const a=await call('bemo_adjust_stock',args);const b=await call('bemo_adjust_stock',args);assert.equal(a.id,b.id);
+ let c=await call('bemo_merchant_catalog');assert.equal(c.products[0].variants[0].stock_on_hand,5);
+ await assert.rejects(()=>call('bemo_adjust_stock',[v.id,6,'Initial stock',requestA,1]),/BEMO_IDEMPOTENCY_CONFLICT/);
+ await assert.rejects(()=>call('bemo_adjust_stock',[v.id,-6,'Damaged stock','dddddddd-dddd-4ddd-8ddd-dddddddddddd',2]),/BEMO_INSUFFICIENT_STOCK/);
+ c=await call('bemo_merchant_catalog');assert.equal(c.products[0].variants[0].stock_on_hand,5);
+ assert.equal((await db.query('select count(*)::int n from bemo_private.inventory_movements')).rows[0].n,1);
+});
+test('another merchant cannot adjust stock and revoked sessions fail closed',async()=>{
+ const {v}=await merchant();await merchant(1);
+ await assert.rejects(()=>call('bemo_adjust_stock',[v.id,5,'Initial stock',requestA,1],1),/BEMO_VARIANT_UNAVAILABLE/);
+ await db.query('delete from auth.sessions where id=$1',[sessions[0]]);
+ await expectDenied(()=>call('bemo_merchant_catalog'));await expectDenied(()=>call('bemo_adjust_stock',[v.id,5,'Initial stock',requestA,1]));
+});
+test('store currency cannot silently change established product prices',async()=>{
+ await merchant();await assert.rejects(()=>call('bemo_save_store_settings',[100,'USD',1]),/BEMO_CURRENCY_LOCKED/);
+ const c=await call('bemo_merchant_catalog');assert.equal(c.settings.currency,'IQD');assert.equal(c.products[0].variants[0].currency,'IQD');
+});
+test('anonymous and suspended accounts cannot access merchant operations',async()=>{
+ await merchant();await expectDenied(()=>asRole('anon',{},'select public.bemo_merchant_catalog()'));
+ await db.query("update bemo_private.app_users set status='SUSPENDED' where auth_subject=$1",[users[0]]);
+ await expectDenied(()=>call('bemo_merchant_catalog'));await expectDenied(()=>call('bemo_save_store_settings',[0,'IQD',1]));
+});
 
 test('verified Google Gmail creates a stable application identity; retry keeps it',async()=>{
   const a=await onboard(); const b=await onboard(); assert.equal(a.id,b.id); assert.notEqual(a.id,users[0]);

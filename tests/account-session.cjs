@@ -69,6 +69,26 @@ function boot(options = {}) {
 }
 const tests = [];
 const test = (name, run) => tests.push({ name, run });
+test('Merchant requests require verified readiness and an approved operation',async()=>{
+ const b=boot();await b.api.initialize();assert.equal((await b.api.merchantRequest('bemo_merchant_catalog')).error.code,'AUTH_REQUIRED');
+ b.setSession(session('A'));await b.api.refresh();const count=b.rpcCalls.length;
+ assert.equal((await b.api.merchantRequest('grant_admin')).data,null);assert.equal(b.rpcCalls.length,count);
+ b.hooks.rpc=(name,args,token)=>name==='bemo_merchant_catalog'?{data:{store:'own'},error:null}:undefined;
+ assert.equal((await b.api.merchantRequest('bemo_merchant_catalog')).data.store,'own');assert.equal(b.rpcCalls.at(-1).token,'private-token-A');
+});
+test('A merchant workflow scope cannot continue under a different identity',async()=>{
+ const b=boot({session:session('A')});await b.api.initialize();const scope=b.api.merchantScope();
+ b.setSession(session('B'));b.emit('SIGNED_IN');await b.flush();
+ const count=b.rpcCalls.length;assert.equal((await scope.request('bemo_save_product',{})).error.code,'SESSION_CHANGED');assert.equal(b.rpcCalls.length,count);
+});
+test('Late merchant responses are discarded after logout and raw errors stay private',async()=>{
+ const b=boot({session:session('A')});await b.api.initialize();const gate=deferred();
+ b.hooks.rpc=name=>name==='bemo_merchant_catalog'?gate.promise:undefined;
+ const pending=b.api.merchantRequest('bemo_merchant_catalog');await drain();await b.api.signOut();gate.resolve({data:{private:'store-data'},error:null});
+ const result=await pending;assert.equal(result.data,null);assert.equal(result.error.code,'SESSION_CHANGED');
+ b.setSession(session('A'));await b.api.refresh();b.hooks.rpc=()=>({data:null,error:{message:'secret raw database details'}});
+ assert(!JSON.stringify(await b.api.merchantRequest('bemo_save_product',{})).includes('secret'));
+});
 function privateClear(state) { assert.equal(state.identity, null); assert.equal(state.profile, null); assert.equal(state.store, null); }
 test('Guest initialization uses PKCE, explicit callback handling and separate auth storage', async () => {
   const b = boot(); const first = b.api.initialize(); assert.equal(first, b.api.initialize());
