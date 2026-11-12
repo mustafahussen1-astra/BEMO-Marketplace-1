@@ -1,4 +1,4 @@
-/* Approved storefront shell. Cart, orders and browser persistence reuse app.js. */
+/* Approved storefront shell connected to the real public catalog. */
 (() => {
   'use strict';
   const $ = selector => document.querySelector(selector);
@@ -9,13 +9,13 @@
   let category = 'all';
   let savedOnly = new URLSearchParams(location.search).get('saved') === '1';
   const copy = {
-    review: ['نسخة تجريبية · لا طلبات حقيقية', 'Demo catalog · No real orders'],
+    review: ['نسخة تطوير خاصة · منتجات يضيفها التجار', 'Private development · Seller-published products'],
     destination: ['متاجر متعددة، سلة واحدة · الدفع عند الاستلام لكل متجر', 'Many stores, one bag · Cash on delivery to each store'],
     help: ['كيف يعمل BEMO؟', 'How BEMO works'],
     search: ['بحث', 'Search'],
     placeholder: ['ابحث عن منتج، متجر أو اكتشاف جديد', 'Search products, stores or your next good find'],
     account: ['الحساب', 'Account'], saved: ['المفضلة', 'Saved'], orders: ['الطلبات', 'Orders'], cart: ['السلة', 'Cart'],
-    allCategories: ['كل التصنيفات', 'All categories'], deals: ['العروض', 'Deals'], merchant: ['بِع على BEMO', 'Sell on BEMO'],
+    allCategories: ['كل التصنيفات', 'All categories'], deals: ['الجديد', 'New arrivals'], merchant: ['بِع على BEMO', 'Sell on BEMO'],
     campaignSample: ['مختارات لحياتك اليومية', 'FINDS FOR YOUR EVERYDAY'], layoutSample: ['اكتشف المجموعة', 'EXPLORE THE COLLECTION'],
     hero: ['اكتشافات كثيرة.<br>مكان واحد يجمعها.', 'So much to discover.<br>One place to find it.'],
     heroCopy: ['من تفاصيل المنزل إلى احتياجاتك اليومية. اكتشف مختارات من متاجر مختلفة.', 'From home details to everyday essentials. Explore finds from different stores.'],
@@ -23,27 +23,29 @@
     techTitle: ['تقنية ترافق يومك', 'Tech for every day'], fashionTitle: ['تفاصيل على ذوقك', 'Everyday, your way'],
     seeCollection: ['استكشف المجموعة ←', 'Explore collection →'], home: ['المنزل والمعيشة', 'Home & living'],
     fashion: ['الأزياء', 'Fashion'], electronics: ['الإلكترونيات', 'Electronics'], beauty: ['الجمال', 'Beauty'], sports: ['الرياضة والأنشطة', 'Sports & outdoors'],
-    all: ['الكل', 'All'], moreCategories: ['كل المنتجات', 'All products'], sampleItems: ['منتجات تجريبية', 'Sample products'],
-    dealsEyebrow: ['اكتشافات بأسعار أقل', 'MORE TO DISCOVER'], dealsTitle: ['عروض تستحق الاكتشاف', 'A good find. A better price.'],
-    viewOffers: ['كل العروض ←', 'All offers →'], priceNote: ['المنتجات والأسعار تجريبية · الأسعار بالدولار الأمريكي', 'Sample products and prices · Prices in USD'],
+    all: ['الكل', 'All'], moreCategories: ['كل المنتجات', 'All products'], sampleItems: ['اكتشف التصنيف', 'Explore category'],
+    dealsEyebrow: ['الجديد من المتاجر', 'NEW FROM THE STORES'], dealsTitle: ['اكتشافات جديدة', 'Fresh finds'],
+    viewOffers: ['كل المنتجات ←', 'All products →'], priceNote: ['الأسعار بعملة كل متجر · رسوم التوصيل تظهر قبل إنشاء الطلب', 'Prices use each store’s currency · Review delivery fees before ordering'],
     storesEyebrow: ['تعرّف إلى مصادر الاكتشاف', 'DISCOVER THE STORES BEHIND THE FINDS'],
     storesTitle: ['متاجر مختلفة. اهتمامات كثيرة.', 'Different stores. More to explore.'], viewStores: ['استكشف المتاجر ←', 'Explore stores →'],
-    sampleStore: ['متجر تجريبي', 'Sample store'], storeCount: ['منتجات في العينة', 'sample products'], visitStore: ['عرض المتجر ←', 'View store →'],
+    sampleStore: ['متجر مسجّل', 'Registered store'], storeCount: ['منتجات معروضة هنا', 'products shown here'], visitStore: ['عرض المتجر ←', 'View store →'],
     editorialSample: ['مختارات BEMO', 'THE BEMO EDIT'], homeEditorial: ['مساحتك، بطريقتك.', 'Your space. Your style.'],
     homeCollection: ['اكتشف مختارات المنزل ←', 'Explore the home collection →'], beautyEditorial: ['تفاصيل صغيرة ليومك.', 'A little care, every day.'],
     beautyCollection: ['اكتشف مجموعة العناية ←', 'Explore the care collection →'], discoverEyebrow: ['تصفّح على ذوقك', 'A COLLECTION TO EXPLORE'],
     discoverTitle: ['اكتشف ما يناسبك', 'Find something for you'], sort: ['ترتيب حسب', 'Sort by'], featured: ['مختارة', 'Featured'],
-    low: ['السعر: الأقل أولاً', 'Price: low to high'], high: ['السعر: الأعلى أولاً', 'Price: high to low'], results: ['منتجات', 'products'],
+    low: ['العملة ثم السعر: الأقل', 'Currency, then price: low'], high: ['العملة ثم السعر: الأعلى', 'Currency, then price: high'], results: ['منتجات', 'products'],
     advancedSearch: ['استكشف البحث والفلاتر', 'Explore search and filters'],
     reviewTitle: ['سلة واحدة. طلب مستقل لكل متجر.', 'One bag. Independent store orders.'],
-    reviewCopy: ['جرّب إضافة منتجات من متاجر مختلفة، وراجع تكلفة كل متجر في السلة. الطلبات في هذه النسخة تجريبية وتُحفظ في هذا المتصفح فقط؛ لا يُرسل طلب ولا تُحصّل أموال.', 'Try products from different stores and review each store’s total in your bag. Orders in this version are demos saved only in this browser; nothing is sent and no money is collected.'],
+    reviewCopy: ['راجع قيمة المنتجات والتوصيل لكل متجر قبل إنشاء الطلب. يقبل كل تاجر طلبه بشكل مستقل، والدفع له أو لمندوبه عند الاستلام. إضافة المنتج للسلة لا تحجز مخزونه.', 'Review each store’s products and delivery fee before ordering. Sellers accept independently, and you pay each seller or courier on delivery. Adding to your bag does not reserve stock.'],
     footerTagline: ['اكتشافات تناسب يومك، من متاجر متعددة.', 'Everyday finds, from independent stores.'],
     discoverFooter: ['اكتشف BEMO', 'Discover BEMO'], categories: ['التصنيفات', 'Categories'], stores: ['المتاجر', 'Stores'],
-    yourBemo: ['تجربتك على BEMO', 'Your BEMO'], aboutPreview: ['عن النسخة التجريبية', 'About this demo'],
-    policiesPending: ['الصور توضيحية والمنتجات افتراضية. التسجيل والطلبات الحقيقية غير متاحة بعد.', 'Illustrative images and fictional products. Live sign-in and real orders are not available yet.'],
+    yourBemo: ['تجربتك على BEMO', 'Your BEMO'], aboutPreview: ['كيف يعمل BEMO', 'How BEMO works'],
+    policiesPending: ['صور الأقسام توضيحية. المنتجات ينشرها التجار. سياسات الإطلاق التجاري قيد الاستكمال.', 'Category images are illustrative. Products are listed by sellers. Commercial launch policies are still being finalized.'],
     copyright: ['© 2026 BEMO · عالم من الاكتشافات الجميلة', '© 2026 BEMO · A world of good finds'],
-    noOrders: ['لا طلبات حقيقية · لا تحصيل أموال', 'No real orders · No payments collected'],
-    sampleLabel: ['منتج تجريبي · صورة توضيحية', 'Sample item · Illustrative photo'],
+    noOrders: ['الدفع عند الاستلام · رسوم المنصة صفر', 'Cash on delivery · Zero platform fees'],
+    sampleLabel: ['من متجر مستقل', 'From an independent store'],
+    emptyCatalog: ['لا توجد منتجات منشورة بعد. ستكون هنا اكتشافات التجار القادمة.', 'No products have been published yet. Seller listings will appear here.'],
+    loading: ['جارٍ تحميل المنتجات…', 'Loading products…'], loadError: ['تعذّر تحميل المنتجات. افتح صفحة المنتجات لإعادة المحاولة.', 'Products could not load. Open the product page to try again.'],
     save: ['حفظ المنتج', 'Save product'], unsave: ['إزالة من المفضلة', 'Remove from saved'],
     savedTitle: ['منتجاتك المفضلة', 'Your saved finds'], emptySaved: ['لم تحفظ منتجات بعد. استخدم رمز القلب على أي بطاقة.', 'No saved products yet. Use the heart on any product card.'],
     browseAll: ['استكشف كل المنتجات', 'Explore all products'], add: ['أضف إلى السلة', 'Add to bag'], homeNav: ['الرئيسية', 'Home']
@@ -51,7 +53,7 @@
   const t = key => copy[key]?.[lang === 'ar' ? 0 : 1] || key;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const name = product => lang === 'ar' ? product.ar : product.name;
-  const money = amount => new Intl.NumberFormat(lang === 'ar' ? 'ar' : 'en-US', {style:'currency',currency:'USD'}).format(amount);
+  const money = (amount,currency) => new Intl.NumberFormat(lang === 'ar' ? 'ar-IQ' : 'en-US', {style:'currency',currency}).format(amount);
   const paths = {
     search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
     user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
@@ -71,13 +73,13 @@
   function searchUrl(filters = {}) {
     const values = {...filters};
     if (values.store) values.store = storeIds[values.store] || values.store;
-    return `search.html?${new URLSearchParams({lang,...values})}`;
+    return `market.html?${new URLSearchParams({lang,...values})}`;
   }
 
   function card(product) {
     const saved = state.saved.includes(product.id);
     const discount = product.oldPrice > product.price ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
-    return `<article class="product-card"><div class="product-photo"><button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}"><img src="${product.image}" alt="${escape(name(product))}" loading="lazy" width="320" height="320"></button>${discount ? `<span class="discount">−${discount}%</span>` : ''}<button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">${icon('heart')}</button></div><div class="product-info"><button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button><p class="product-price"><span>${money(product.price)}</span>${discount ? `<del>${money(product.oldPrice)}</del>` : ''}</p><div class="product-buy"><a class="product-store" href="${searchUrl({store:product.store,scope:'products'})}">${escape(product.store)}</a><button type="button" class="product-add" data-home-add="${product.id}" aria-label="${t('add')}: ${escape(name(product))}">+</button></div><p class="product-example">${t('sampleLabel')}</p></div></article>`;
+    return `<article class="product-card"><div class="product-photo"><button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">${product.image?`<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="320" height="320">`:''}</button><button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">${icon('heart')}</button></div><div class="product-info"><button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button><p class="product-price"><span>${money(product.price,product.currency)}</span></p><div class="product-buy"><a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">${escape(product.store)}</a><button type="button" class="product-add" data-home-add="${product.id}" aria-label="${t('add')}: ${escape(name(product))}">+</button></div><p class="product-example">${t('sampleLabel')}</p></div></article>`;
   }
 
   function updateCartCount() {
@@ -91,9 +93,9 @@
 
   function renderDiscovery() {
     let rows = products.filter(product => (category === 'all' || product.category === category) && (!savedOnly || state.saved.includes(product.id)));
-    if ($('#homeSort').value === 'low') rows.sort((a,b) => a.price - b.price);
-    if ($('#homeSort').value === 'high') rows.sort((a,b) => b.price - a.price);
-    $('#discoveryGrid').innerHTML = rows.length ? rows.map(card).join('') : `<div class="empty-saved"><p>${t('emptySaved')}</p><button type="button" class="button primary" data-home-filter="all">${t('browseAll')}</button></div>`;
+    if ($('#homeSort').value === 'low') rows.sort((a,b) => a.currency.localeCompare(b.currency)||a.price - b.price);
+    if ($('#homeSort').value === 'high') rows.sort((a,b) => a.currency.localeCompare(b.currency)||b.price - a.price);
+    $('#discoveryGrid').innerHTML = rows.length ? rows.map(card).join('') : `<div class="empty-saved"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':savedOnly?'emptySaved':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
     $('#productCount').textContent = `${rows.length} ${t('results')}`;
     $('#discoveryFilters').innerHTML = ['all',...categories].map(value => `<button type="button" data-home-filter="${value}" class="${category === value ? 'active' : ''}" aria-pressed="${category === value}">${t(value)}</button>`).join('');
     document.querySelector('[data-t="discoverTitle"]').textContent = t(savedOnly ? 'savedTitle' : 'discoverTitle');
@@ -124,15 +126,15 @@
     $('#categoryFlyout').innerHTML = $('#topCategories').innerHTML;
     document.querySelectorAll('[data-category]').forEach(element => {element.href = searchUrl({category:element.dataset.category});});
     $('#fastCategories').setAttribute('aria-label', t('categories'));
-    $('#fastCategories').innerHTML = categories.map(value => `<a class="fast-category" href="${searchUrl({category:value})}"><span class="fast-category-img"><img src="${products.find(product => product.id === categoryProducts[value]).image}" alt="" loading="lazy" width="62" height="62"></span><span><strong>${t(value)}</strong><small>${t('sampleItems')}</small></span></a>`).join('') + `<a class="fast-category fast-category-all" href="${searchUrl()}"><span class="fast-category-img">${icon('grid')}</span><span><strong>${t('moreCategories')}</strong><small>${t('sampleItems')}</small></span></a>`;
-    $('#techImage').src = products[1].image;
-    $('#fashionImage').src = products[2].image;
-    $('#homeEditImage').src = products[4].image;
-    $('#beautyEditImage').src = products[6].image;
-    $('#dealsGrid').innerHTML = products.filter(product => product.oldPrice > product.price).map(card).join('');
+    $('#fastCategories').innerHTML = categories.map(value => `<a class="fast-category" href="${searchUrl({category:value})}"><span class="fast-category-img"><img src="${window.BEMO_ILLUSTRATIONS[categoryProducts[value]]}" alt="" loading="lazy" width="62" height="62"></span><span><strong>${t(value)}</strong><small>${t('sampleItems')}</small></span></a>`).join('') + `<a class="fast-category fast-category-all" href="${searchUrl()}"><span class="fast-category-img">${icon('grid')}</span><span><strong>${t('moreCategories')}</strong><small>${t('sampleItems')}</small></span></a>`;
+    $('#techImage').src = window.BEMO_ILLUSTRATIONS[2];
+    $('#fashionImage').src = window.BEMO_ILLUSTRATIONS[4];
+    $('#homeEditImage').src = window.BEMO_ILLUSTRATIONS[1];
+    $('#beautyEditImage').src = window.BEMO_ILLUSTRATIONS[7];
+    $('#dealsGrid').innerHTML = products.slice(0,4).map(card).join('');
     $('#storesGrid').innerHTML = Object.keys(window.BEMO_STORES).map(store => {
       const rows = products.filter(product => product.store === store);
-      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.charAt(0))}</div><div><h3>${escape(store)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.slice(0,3).map(product => `<img src="${product.image}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${searchUrl({store,scope:'products'})}">${t('visitStore')}</a></div></article>`;
+      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.charAt(0))}</div><div><h3>${escape(store)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${escape(searchUrl({store:window.BEMO_STORES[store].slug}))}">${t('visitStore')}</a></div></article>`;
     }).join('');
     for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl({offer:'1'});
     $('#allStores').href = 'stores.html?lang=' + lang;
@@ -151,7 +153,7 @@
     if (previousLang !== lang) return render();
     updateCartCount();
     document.querySelectorAll('[data-home-save]').forEach(button => {
-      const product = products.find(item => item.id === Number(button.dataset.homeSave));
+      const product = products.find(item => item.id === button.dataset.homeSave);
       const saved = state.saved.includes(product.id);
       button.setAttribute('aria-pressed', String(saved));
       button.setAttribute('aria-label', `${t(saved ? 'unsave' : 'save')}: ${name(product)}`);
@@ -191,9 +193,9 @@
     if (event.target.closest('#modal')) return;
     const button = event.target.closest('button');
     if (button?.dataset.homeAction) commerce.open(button.dataset.homeAction);
-    if (button?.dataset.homeProduct) commerce.detail(Number(button.dataset.homeProduct));
-    if (button?.dataset.homeAdd) commerce.add(Number(button.dataset.homeAdd));
-    if (button?.dataset.homeSave) commerce.toggleSaved(Number(button.dataset.homeSave));
+    if (button?.dataset.homeProduct) commerce.detail(button.dataset.homeProduct);
+    if (button?.dataset.homeAdd) commerce.add(button.dataset.homeAdd);
+    if (button?.dataset.homeSave) commerce.toggleSaved(button.dataset.homeSave);
     if (button?.dataset.homeFilter) {
       browse(button.dataset.homeFilter);
       document.querySelector(`#discoveryFilters [data-home-filter="${category}"]`)?.focus({preventScroll:true});
@@ -209,6 +211,7 @@
   });
   $('#homeSort').addEventListener('change', renderDiscovery);
   window.addEventListener('bemo:state', syncState);
+  window.addEventListener('bemo:catalog',render);
   window.addEventListener('bemo:saved', showSaved);
   window.addEventListener('bemo:browse', event => browse(event.detail?.category));
   render();

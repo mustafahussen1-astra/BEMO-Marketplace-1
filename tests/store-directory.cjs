@@ -65,14 +65,14 @@ test('latest search wins when older response arrives last',async()=>{
   assert.equal(p.jobs[0].signal.aborted,true);
   p.jobs[1].resolve({stores:[row(2)],hasNext:false});await drain();
   p.jobs[0].resolve({stores:[row(1)],hasNext:true});await drain();
-  assert.equal(p.get('directoryResults').children[0].children[1].textContent,'Store 2');
+  assert.equal(p.get('directoryResults').children[0].children[1].children[0].textContent,'Store 2');
   assert.equal(p.get('directoryError').hidden,true);
 });
 test('late failure does not hide current results; markup is text',async()=>{
   const p=page();p.get('storeQuery').value='new';p.get('directorySearch').emit('submit');
   p.jobs[1].resolve({stores:[{...row(2),title:'<img onerror=bad()>',description:'<script>bad()</script>'}],hasNext:false});await drain();
   p.jobs[0].reject(new Error('offline'));await drain();
-  assert.equal(p.get('directoryResults').children[0].children[1].textContent,'<img onerror=bad()>');
+  assert.equal(p.get('directoryResults').children[0].children[1].children[0].textContent,'<img onerror=bad()>');
   assert.equal(p.get('directoryError').hidden,true);
 });
 test('offline results clear and retry recovers without fake listings',async()=>{

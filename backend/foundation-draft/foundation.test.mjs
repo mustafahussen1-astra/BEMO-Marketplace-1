@@ -2,11 +2,12 @@ import { PGlite } from '@electric-sql/pglite';
 import { readFile, readdir } from 'node:fs/promises';
 import test, { before, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 
 // A real embedded PostgreSQL engine. The auth schema/claims below are fixtures,
 // NOT live Supabase Auth, JWT signature verification, OAuth, or concurrency tests.
-const users = ['11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222'];
-const sessions = ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'];
+const users = ['11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333'];
+const sessions = ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','dddddddd-dddd-4ddd-8ddd-dddddddddddd'];
 let db;
 const claims = (i=0, extra={}) => ({sub:users[i],role:'authenticated',session_id:sessions[i],amr:[{method:'oauth',timestamp:1}],...extra});
 async function asRole(role, jwt, sql, params=[]) {
@@ -64,7 +65,7 @@ beforeEach(async()=>{
   if(tables.rows.length) await db.exec('truncate '+tables.rows.map(x=>x.name).join(',')+' restart identity cascade');
   await db.exec('truncate auth.users cascade');
   await db.exec('truncate storage.objects');
-  for(let i=0;i<2;i++){
+  for(let i=0;i<users.length;i++){
     await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[users[i],`buyer${i}@gmail.com`]);
     await db.query('insert into auth.identities values($1,$2,$3)',[users[i],'google',{email:`buyer${i}@gmail.com`,email_verified:true}]);
     await db.query('insert into auth.sessions(id,user_id) values($1,$2)',[sessions[i],users[i]]);
@@ -81,11 +82,182 @@ async function merchant(i=0) {
 }
 const requestA='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 async function mediaFor(p,i=0){
- const m=await call('bemo_prepare_media',[p.id,requestA,'صورة توضيحية للمنتج'],i);
+ const m=await call('bemo_prepare_media',[p.id,randomUUID(),'صورة توضيحية للمنتج'],i);
  await asRole('authenticated',claims(i),'insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)', ['bemo-products',m.storage_key,{mimetype:'image/jpeg',size:1200}]);
  await call('bemo_finish_media',[m.id,false],i);return m;
 }
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
+
+// Orders use only synthetic accounts and addresses in this in-memory database.
+const deliveryFixture={recipient:'Test Buyer',phone:'+9647000000000',country:'Test Country',region:'Test Region',city:'Test City',address:'Synthetic delivery address',note:'Fixture only'};
+async function stockedMerchant(i=0,quantity=10){
+ const {p,v}=await merchant(i);await mediaFor(p,i);await call('bemo_product_status',[p.id,'ACTIVE',1],i);
+ await call('bemo_adjust_stock',[v.id,quantity,'Test opening stock',randomUUID(),1],i);return {p,v};
+}
+async function quoted(v,qty=2,buyer=1){return call('bemo_quote_cart',[[{variant_id:v.id,quantity:qty}]],buyer);}
+async function ordered(v,qty=2,buyer=1){
+ const q=await quoted(v,qty,buyer);return call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],buyer);
+}
+const action=(o,a,i=0,reason='',key=randomUUID())=>call('bemo_order_action',[o.id,a,reason,o.version,key],i);
+const stockOf=async v=>(await db.query('select stock_on_hand from bemo_private.stock_positions where variant_id=$1',[v.id])).rows[0].stock_on_hand;
+
+async function support(i=2){await onboard(i);await db.query("insert into bemo_private.user_roles(user_id,role) select id,'support' from bemo_private.app_users where auth_subject=$1 on conflict do nothing",[users[i]]);}
+const cases=()=>call('bemo_support_queue',[],2);
+const decide=(c,o,decision,received=false,reason='Human reviewed the evidence and recorded the decision')=>call('bemo_support_decision',[c.id,decision,reason,received,o.version],2);
+test('support: 24h reminder and 48h escalation are durable and deduplicated without cancellation',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();const o=(await ordered(v)).suborders[0];
+ await db.query("update bemo_private.suborders set pending_since=now()-interval '25 hours' where id=$1",[o.id]);
+ assert.deepEqual((await db.query('select bemo_private.process_order_deadlines() value')).rows[0].value,{reminded:1,escalated:0});
+ assert.deepEqual((await db.query('select bemo_private.process_order_deadlines() value')).rows[0].value,{reminded:0,escalated:0});
+ await db.query("update bemo_private.suborders set pending_since=now()-interval '49 hours' where id=$1",[o.id]);
+ assert.equal((await db.query('select bemo_private.process_order_deadlines() value')).rows[0].value.escalated,1);
+ assert.equal((await db.query('select bemo_private.process_order_deadlines() value')).rows[0].value.escalated,0);
+ const updated=await call('bemo_get_order',[o.id],1);assert.equal(updated.state,'ESCALATED_TO_SUPPORT');assert.equal(await stockOf(v),10);
+ await assert.rejects(()=>action(updated,'ACCEPT'),/BEMO_TRANSITION_INVALID/);
+ assert.equal((await cases()).length,1);await assert.rejects(()=>asRole('authenticated',claims(),'select bemo_private.process_order_deadlines()'));
+});
+test('support: only assigned staff may read PII and all access is logged',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');o=await action(o,'REQUEST_CANCEL',1,'Please review the requested cancellation');
+ const c=(await cases())[0];await assert.rejects(()=>call('bemo_support_queue',[],1),/BEMO_SUPPORT_REQUIRED/);
+ await assert.rejects(()=>call('bemo_support_case',[c.id,false],2),/BEMO_CASE_NOT_ASSIGNED/);
+ const work=await call('bemo_support_case',[c.id,true],2);assert.equal(work.order.delivery.address,deliveryFixture.address);
+ assert.equal((await db.query("select count(*)::int n from bemo_private.order_access_log where purpose like 'SUPPORT_CASE:%'")).rows[0].n,1);
+ await db.query("insert into bemo_private.user_roles(user_id,role) select id,'support' from bemo_private.app_users where auth_subject=$1",[users[0]]);
+ await assert.rejects(()=>call('bemo_support_case',[c.id,true]),/BEMO_CASE_CONFLICT_OF_INTEREST/);
+ await db.query("delete from bemo_private.user_roles where user_id=(select id from bemo_private.app_users where auth_subject=$1)",[users[2]]);
+ await assert.rejects(()=>call('bemo_support_case',[c.id,false],2),/BEMO_SUPPORT_REQUIRED/);
+});
+test('support: cancellation only restocks on explicit goods receipt and is exactly once',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');o=await action(o,'REQUEST_CANCEL',1,'Cancellation requested for human review');
+ const c=(await cases())[0];await call('bemo_support_case',[c.id,true],2);const done=await decide(c,o,'APPROVE_CANCEL',true);
+ assert.equal(done.state,'CANCELLED_BY_SUPPORT');assert.equal(await stockOf(v),10);await decide(c,o,'APPROVE_CANCEL',true);assert.equal(await stockOf(v),10);
+ assert.equal((await db.query("select count(*)::int n from bemo_private.order_lines where debit_movement_id is not null and restore_movement_id is not null")).rows[0].n,1);
+});
+test('support: a failed/lost delivery does not silently return stock',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');o=await action(o,'SHIP');o=await action(o,'FAIL_DELIVERY',0,'Parcel was lost and is not physically returned');
+ const c=(await cases())[0];await call('bemo_support_case',[c.id,true],2);await decide(c,o,'APPROVE_CANCEL',false);assert.equal(await stockOf(v),8);
+});
+test('support: return confirmation requires review and verified physical receipt',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');o=await action(o,'SHIP');o=await action(o,'DELIVER');o=await action(o,'REQUEST_RETURN',1,'Please inspect the received product for return');
+ const c=(await cases())[0];await call('bemo_support_case',[c.id,true],2);
+ await assert.rejects(()=>decide(c,o,'CONFIRM_RETURN',true),/BEMO_TRANSITION_INVALID/);
+ o=await decide(c,o,'REVIEW_RETURN');await assert.rejects(()=>decide(c,o,'CONFIRM_RETURN',false),/BEMO_TRANSITION_INVALID/);
+ o=await decide(c,o,'CONFIRM_RETURN',true);assert.equal(o.state,'RETURNED');assert.equal(await stockOf(v),10);
+});
+test('support: follow-up resets deadline cycle and buyer cancellation closes delay case',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();let o=(await ordered(v)).suborders[0];
+ await db.query("update bemo_private.suborders set pending_since=now()-interval '49 hours' where id=$1",[o.id]);await db.query('select bemo_private.process_order_deadlines()');
+ o=await call('bemo_get_order',[o.id],1);let c=(await cases())[0];await call('bemo_support_case',[c.id,true],2);o=await decide(c,o,'FOLLOW_UP');assert.equal(o.state,'PENDING_SELLER');
+ assert.equal((await db.query('select bemo_private.process_order_deadlines() value')).rows[0].value.escalated,0);
+ await db.query("update bemo_private.suborders set pending_since=now()-interval '49 hours' where id=$1",[o.id]);await db.query('select bemo_private.process_order_deadlines()');
+ o=await call('bemo_get_order',[o.id],1);assert.equal((await cases()).length,1);await action(o,'CANCEL',1);assert.equal((await cases()).length,0);assert.equal(await stockOf(v),10);
+});
+test('notifications: inbox and mark-read cannot cross accounts',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const o=(await ordered(v)).suborders[0];const inbox=await call('bemo_notifications');assert.equal(inbox.length,1);assert.equal(inbox[0].user_id,undefined);
+ await call('bemo_notifications',[24,0,inbox[0].id],1);assert.equal((await call('bemo_notifications'))[0].read_at,null);
+ await call('bemo_notifications',[24,0,inbox[0].id]);assert.ok((await call('bemo_notifications'))[0].read_at);
+ await action(o,'ACCEPT');assert.equal((await call('bemo_notifications',[],1)).length,1);
+});
+
+test('orders: checkout creates immutable quote and does not reserve stock',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const order=await ordered(v);
+ assert.equal(order.suborders.length,1);assert.equal(order.total_minor,302500);assert.equal(await stockOf(v),10);
+ assert.equal(order.suborders[0].state,'PENDING_SELLER');assert.equal(order.suborders[0].delivery.recipient,'Test Buyer');
+ const seller=await call('bemo_get_order',[order.suborders[0].id]);
+ assert.equal(seller.delivery,null);assert.equal(seller.region,'Test Region');assert.equal(seller.buyer_id,undefined);
+ assert.ok(!JSON.stringify(seller).includes('7000000000'));assert.ok(!JSON.stringify(seller).includes('Test Buyer'));
+});
+test('orders: acceptance debits exactly once and releases delivery only to that merchant',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await onboard(2);const order=await ordered(v);let o=order.suborders[0];
+ const key=randomUUID();const accepted=await action(o,'ACCEPT',0,'',key);assert.equal(accepted.state,'ACCEPTED');assert.equal(await stockOf(v),8);
+ await action(o,'ACCEPT',0,'',key);assert.equal(await stockOf(v),8);
+ await assert.rejects(()=>action(accepted,'ACCEPT'),/BEMO_TRANSITION_INVALID/);
+ const seller=await call('bemo_get_order',[o.id]);assert.equal(seller.delivery.address,deliveryFixture.address);
+ await assert.rejects(()=>call('bemo_get_order',[o.id],2),/BEMO_ORDER_UNAVAILABLE/);
+ assert.deepEqual(await call('bemo_list_orders',['buyer',24,0],2),[]);
+ assert.equal((await db.query("select count(*)::int n from bemo_private.inventory_movements where kind='ACCEPT_DEBIT'")).rows[0].n,1);
+});
+test('orders: checkout retries and key mismatches cannot create duplicate parents',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const q=await quoted(v),key=randomUUID();
+ const a=await call('bemo_place_order',[q.id,deliveryFixture,key],1),b=await call('bemo_place_order',[q.id,deliveryFixture,key],1);
+ assert.equal(a.id,b.id);assert.equal((await call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],1)).id,a.id);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,{...deliveryFixture,recipient:'Changed Buyer'},key],1),/BEMO_REQUEST_CONFLICT/);
+ const other=await quoted(v);await assert.rejects(()=>call('bemo_place_order',[other.id,deliveryFixture,key],1),/BEMO_REQUEST_CONFLICT/);
+ assert.equal((await db.query('select count(*)::int n from bemo_private.parent_orders')).rows[0].n,1);
+});
+test('orders: quote price and delivery changes require a fresh customer quote',async()=>{
+ const {p,v}=await stockedMerchant();await onboard(1);let q=await quoted(v);
+ await call('bemo_save_store_settings',[3500,'IQD',1]);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],1),/BEMO_QUOTE_CHANGED/);
+ q=await quoted(v);await call('bemo_save_variant',[p.id,v.id,v.sku,v.label,160000,true,1]);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],1),/BEMO_QUOTE_CHANGED/);
+ const o=await ordered(v);assert.equal(o.total_minor,323500);
+ await call('bemo_save_store_settings',[5000,'IQD',2]);assert.equal((await call('bemo_get_order',[o.suborders[0].id],1)).delivery_fee_minor,3500);
+});
+test('orders: expired, foreign and malformed quotes leave no partial orders',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await onboard(2);const q=await quoted(v);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],2),/BEMO_QUOTE_EXPIRED/);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,{...deliveryFixture,address:'x'},randomUUID()],1));
+ await db.query("update bemo_private.checkout_quotes set expires_at=now()-interval '1 second' where id=$1",[q.id]);
+ await assert.rejects(()=>call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],1),/BEMO_QUOTE_EXPIRED/);
+ assert.equal((await db.query('select count(*)::int n from bemo_private.parent_orders')).rows[0].n,0);
+});
+test('orders: one checkout creates independent seller orders and charges each fee once',async()=>{
+ const a=await stockedMerchant(0),b=await stockedMerchant(1);await onboard(2);
+ const q=await call('bemo_quote_cart',[[{variant_id:a.v.id,quantity:2},{variant_id:b.v.id,quantity:3}]],2);
+ const po=await call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],2);assert.equal(po.suborders.length,2);assert.equal(po.total_minor,755000);
+ const first=po.suborders.find(x=>x.store_id===a.p.store_id),second=po.suborders.find(x=>x.store_id===b.p.store_id);
+ await action(first,'ACCEPT');await action(second,'CANCEL',2);
+ assert.equal(await stockOf(a.v),8);assert.equal(await stockOf(b.v),10);
+ assert.equal((await call('bemo_list_orders',['seller',24,0],0)).length,1);
+ await assert.rejects(()=>call('bemo_get_order',[second.id]),/BEMO_ORDER_UNAVAILABLE/);
+ assert.equal((await call('bemo_get_order',[first.id],2)).state,'ACCEPTED');
+});
+test('orders: all line debits roll back when a later stock check fails',async()=>{
+ const {p,v}=await stockedMerchant();await onboard(1);
+ const v2=await call('bemo_save_variant',[p.id,null,'SKU-2','Another',5000,true,0]);
+ await call('bemo_adjust_stock',[v2.id,10,'Fixture stock',randomUUID(),1]);
+ const q=await call('bemo_quote_cart',[[{variant_id:v.id,quantity:2},{variant_id:v2.id,quantity:2}]],1);
+ const po=await call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],1);
+ const last=[v,v2].sort((a,b)=>a.id.localeCompare(b.id))[1];await call('bemo_adjust_stock',[last.id,-10,'Unavailable inventory',randomUUID(),2]);
+ await assert.rejects(()=>action(po.suborders[0],'ACCEPT'),/BEMO_STOCK_INSUFFICIENT/);
+ assert.equal((await db.query("select count(*)::int n from bemo_private.inventory_movements where kind='ACCEPT_DEBIT'")).rows[0].n,0);
+ assert.equal((await call('bemo_get_order',[po.suborders[0].id])).delivery,null);
+ assert.equal(await stockOf([v,v2].find(x=>x.id!==last.id)),10);
+});
+test('orders: pending cancellation and rejection never debit or reveal delivery',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const a=await ordered(v),b=await ordered(v);
+ await action(a.suborders[0],'CANCEL',1);await action(b.suborders[0],'REJECT',0,'This item cannot be supplied currently');
+ assert.equal(await stockOf(v),10);assert.equal((await call('bemo_get_order',[a.suborders[0].id])).delivery,null);
+ await assert.rejects(()=>action(a.suborders[0],'ACCEPT'),/BEMO_VERSION_CONFLICT/);
+});
+test('orders: buyer cancellation after acceptance requires human support without restock',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');
+ await assert.rejects(()=>action(o,'CANCEL',1),/BEMO_TRANSITION_INVALID/);
+ o=await action(o,'REQUEST_CANCEL',1,'Please review cancellation of this order');assert.equal(o.state,'CANCEL_REQUESTED');assert.equal(await stockOf(v),8);
+ await assert.rejects(()=>action(o,'SHIP'),/BEMO_TRANSITION_INVALID/);
+ assert.equal((await db.query("select count(*)::int n from bemo_private.order_cases where kind='CANCELLATION'")).rows[0].n,1);
+});
+test('orders: fulfillment survives product archival and delivered return does not auto-restock',async()=>{
+ const {p,v}=await stockedMerchant();await onboard(1);let o=(await ordered(v)).suborders[0];o=await action(o,'ACCEPT');
+ await call('bemo_product_status',[p.id,'ARCHIVED',2]);o=await action(o,'PACK');o=await action(o,'SHIP');o=await action(o,'DELIVER');
+ assert.ok(o.delivered_at);o=await action(o,'REQUEST_RETURN',1,'The received item requires human inspection');assert.equal(o.state,'RETURN_REQUESTED');assert.equal(await stockOf(v),8);
+});
+test('orders: self ordering, duplicate variants, missing stock and mixed currencies are refused',async()=>{
+ const a=await stockedMerchant();await onboard(1);
+ await assert.rejects(()=>quoted(a.v,1,0),/BEMO_ITEM_UNAVAILABLE/);
+ await assert.rejects(()=>quoted(a.v,11),/BEMO_STOCK_INSUFFICIENT/);
+ await assert.rejects(()=>call('bemo_quote_cart',[[{variant_id:a.v.id,quantity:1},{variant_id:a.v.id,quantity:1}]],1),/BEMO_CART_INVALID/);
+ for(const cart of [null,[],{},[{variant_id:a.v.id,quantity:0}],[{variant_id:a.v.id,quantity:1.5}]]) await assert.rejects(()=>call('bemo_quote_cart',[cart],1));
+ const b=await stockedMerchant(2);await db.query("update bemo_private.product_variants set currency='USD' where id=$1",[b.v.id]);await db.query("update bemo_private.store_settings set currency='USD' where store_id=$1",[b.p.store_id]);
+ await assert.rejects(()=>call('bemo_quote_cart',[[{variant_id:a.v.id,quantity:1},{variant_id:b.v.id,quantity:1}]],1),/BEMO_MIXED_CURRENCY/);
+});
+test('orders: direct PII tables and internal projections are unavailable to every client role',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const o=(await ordered(v)).suborders[0];
+ for(const role of ['anon','authenticated']) for(const sql of ["select * from bemo_private.order_delivery",`select bemo_private.order_projection('${o.id}',true)`,`select bemo_private.quote_snapshot('[]',null)`]) await expectDenied(()=>asRole(role,claims(1),sql));
+ await expectDenied(()=>asRole('anon',{},'select public.bemo_list_orders()'));
+ await db.query('delete from auth.sessions where id=$1',[sessions[1]]);await assert.rejects(()=>call('bemo_get_order',[o.id],1),/BEMO_SESSION_INVALID/);
+});
 test('variant create retry does not duplicate stock positions',async()=>{
  const {p}=await merchant();const args=[p.id,requestA,'SKU-RETRY','أزرق',1000,true,0];
  const a=await call('bemo_save_variant',args),b=await call('bemo_save_variant',args);assert.equal(a.id,b.id);
