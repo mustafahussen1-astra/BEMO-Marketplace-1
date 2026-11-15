@@ -8,7 +8,7 @@
  const state=()=>({lang,saved:[...saved],cart:live.cart().map(x=>({qty:x.quantity}))});
  const emit=()=>window.dispatchEvent(new CustomEvent('bemo:state',{detail:state()}));
  const route=(file,params={})=>{location.href=file+'?'+new URLSearchParams({lang,...params});};
- function detail(id){const p=window.BEMO_CATALOG.find(x=>x.id===id);if(p)route('market.html',{q:p.name,store:p.store_slug});}
+ function detail(id){const p=window.BEMO_CATALOG.find(x=>x.id===id);if(p)route('product.html',{id:p.id});}
  window.BemoCommerce={getState:state,setLanguage(value){lang=value;emit();},add:detail,detail,open(action){if(action==='account')route('account.html');else if(action==='sell')route('merchant.html');else if(action==='orders')route('orders.html');else if(action==='cart'){location.href='market.html?view=cart&lang='+lang;}else if(action==='saved')window.dispatchEvent(new CustomEvent('bemo:saved'));else route('help.html');},toggleSaved(id){saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id].slice(-100);try{localStorage.setItem('bemo-live-saved-v1',JSON.stringify(saved));}catch(_){}emit();}};
  window.addEventListener('bemo:cart',emit);
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);

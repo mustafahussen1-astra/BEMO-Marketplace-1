@@ -88,6 +88,31 @@ async function mediaFor(p,i=0){
 }
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
 
+const publicProduct=id=>asRole('anon',{},'select public.bemo_get_product($1) as value',[id]).then(r=>r[0].value);
+test('product detail matches public listing, exposes no owner contact and hides drafts',async()=>{
+ const {p}=await merchant();assert.equal(await publicProduct(p.id),null);assert.equal(await publicProduct(randomUUID()),null);
+ await mediaFor(p);await call('bemo_product_status',[p.id,'ACTIVE',1]);
+ const detail=await publicProduct(p.id);assert.deepEqual(detail,(await publicProducts())[0]);
+ assert.deepEqual(Object.keys(detail).sort(),['id','store_id','title','description','category','store_title','store_slug','currency','delivery_fee_minor','media','variants'].sort());
+ await call('bemo_product_status',[p.id,'HIDDEN_BY_OWNER',2]);assert.equal(await publicProduct(p.id),null);
+});
+test('direct product links obey product, store, owner and auth visibility',async()=>{
+ const {p}=await stockedMerchant();
+ for(const status of ['HIDDEN_BY_OWNER','ARCHIVED','SUSPENDED']){await db.query('update bemo_private.products set status=$1 where id=$2',[status,p.id]);assert.equal(await publicProduct(p.id),null);}
+ await db.query("update bemo_private.products set status='ACTIVE' where id=$1",[p.id]);
+ await db.exec("update bemo_private.stores set status='CLOSED'");assert.equal(await publicProduct(p.id),null);
+ await db.exec("update bemo_private.stores set status='ACTIVE'; update bemo_private.app_users set status='SUSPENDED'");assert.equal(await publicProduct(p.id),null);
+ await db.exec("update bemo_private.app_users set status='ACTIVE'");
+ await db.query("update auth.users set banned_until=now()+interval '1 day' where id=$1",[users[0]]);assert.equal(await publicProduct(p.id),null);
+ await db.query('update auth.users set banned_until=null,deleted_at=now() where id=$1',[users[0]]);assert.equal(await publicProduct(p.id),null);
+});
+test('detail omits disabled variants and pending images',async()=>{
+ const {p,v}=await stockedMerchant();await call('bemo_prepare_media',[p.id,randomUUID(),'Pending image']);
+ await call('bemo_save_variant',[p.id,null,'SKU-2','Second option',250000,true,0]);
+ await call('bemo_save_variant',[p.id,v.id,'SKU-1','أساسي',150000,false,1]);
+ const detail=await publicProduct(p.id);assert.equal(detail.variants.length,1);assert.notEqual(detail.variants[0].id,v.id);assert.equal(detail.media.length,1);
+});
+
 // Orders use only synthetic accounts and addresses in this in-memory database.
 const deliveryFixture={recipient:'Test Buyer',phone:'+9647000000000',country:'Test Country',region:'Test Region',city:'Test City',address:'Synthetic delivery address',note:'Fixture only'};
 async function stockedMerchant(i=0,quantity=10){
