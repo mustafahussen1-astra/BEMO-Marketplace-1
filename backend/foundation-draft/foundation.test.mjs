@@ -89,6 +89,41 @@ async function mediaFor(p,i=0){
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
 
 const publicProduct=id=>asRole('anon',{},'select public.bemo_get_product($1) as value',[id]).then(r=>r[0].value);
+const publicStore=slug=>asRole('anon',{},'select public.bemo_get_store($1) as value',[slug]).then(r=>r[0].value);
+test('store profile: public empty store, safe projection, real product counts, suspension hiding',async()=>{
+ await onboard();await createStore();let s=await publicStore('good-finds');assert.equal(s.product_count,0);assert.equal(s.currency,null);assert.equal(s.owner_user_id,undefined);assert.equal(s.profile_version,undefined);
+ assert.equal(await publicStore('not-here'),null);await db.exec("update bemo_private.stores set status='SUSPENDED'");assert.equal(await publicStore('good-finds'),null);
+});
+test('store editing: owner isolation, exact version and unique title, no slug mutation',async()=>{
+ await onboard();await createStore();await onboard(1);await createStore(1,'Other Store','other-store');
+ const s=await call('bemo_save_store_profile',['My edited store','New description','Baghdad','New arrivals',1]);assert.equal(s.profile_version,2);assert.equal(s.slug,'good-finds');
+ assert.equal((await publicStore('good-finds')).headline,'New arrivals');assert.equal((await publicStore('other-store')).title,'Other Store');
+ await assert.rejects(()=>call('bemo_save_store_profile',['stale','','','',1]),/VERSION_CONFLICT/);
+ await assert.rejects(()=>call('bemo_save_store_profile',['Other Store','','','',2]),/TITLE_TAKEN/);
+ await expectDenied(()=>asRole('anon',{},"select public.bemo_store_workspace()"));
+ await db.query('update bemo_private.app_users set status=$1 where auth_subject=$2',['SUSPENDED',users[0]]);assert.equal(await publicStore('good-finds'),null);
+});
+test('dashboard: true aggregates across states, 14 days, empty currency stays unset and private totals isolated',async()=>{
+ const {v}=await stockedMerchant(0,4);await onboard(1);let d=await call('bemo_seller_dashboard');assert.equal(d.products,1);assert.equal(d.low_stock,1);assert.equal(d.orders,0);assert.equal(d.trend.length,14);assert.equal(d.cod_by_currency.length,0);
+ let o=(await ordered(v)).suborders[0];d=await call('bemo_seller_dashboard');assert.equal(d.pending,1);assert.equal(d.trend.reduce((n,x)=>n+x.orders,0),1);assert.equal(d.cod_by_currency.length,0);
+ o=await action(o,'ACCEPT');o=await action(o,'SHIP');o=await action(o,'DELIVER');d=await call('bemo_seller_dashboard');assert.equal(d.pending,0);assert.equal(d.cod_by_currency[0].total_minor,o.total_minor);assert.equal(d.recent_orders.length,1);assert.equal(d.recent_orders[0].buyer_id,undefined);
+ await createStore(1,'Buyer Store','buyer-store');assert.equal((await call('bemo_seller_dashboard',[],1)).orders,0);
+});
+test('saved addresses: own rows only, version control, retry safety and bounded validation',async()=>{
+ await onboard();await onboard(1);const id=randomUUID();const a=await call('bemo_save_address',[id,'Home',deliveryFixture,0]);assert.equal(a.version,1);
+ assert.equal((await call('bemo_save_address',[id,'Home',deliveryFixture,0])).version,1);assert.equal((await call('bemo_list_addresses')).length,1);assert.equal((await call('bemo_list_addresses',[],1)).length,0);
+ await assert.rejects(()=>call('bemo_save_address',[id,'Other',deliveryFixture,1],1),/ADDRESS_UNAVAILABLE/);
+ await assert.rejects(()=>call('bemo_delete_address',[id,1],1),/ADDRESS_UNAVAILABLE/);
+ const updated=await call('bemo_save_address',[id,'Work',deliveryFixture,1]);assert.equal(updated.version,2);
+ await assert.rejects(()=>call('bemo_delete_address',[id,1]),/VERSION_CONFLICT/);
+ await assert.rejects(()=>call('bemo_save_address',[randomUUID(),'Bad',{...deliveryFixture,owner_id:users[1]},0]),/ADDRESS_INVALID/);
+ await assert.rejects(()=>call('bemo_save_address',[randomUUID(),'Bad',{...deliveryFixture,recipient:null},0]),/ADDRESS_INVALID/);
+ await expectDenied(()=>asRole('anon',{},'select public.bemo_list_addresses()'));
+ await expectDenied(()=>asRole('authenticated',claims(),'select * from bemo_private.saved_addresses'));
+ await call('bemo_delete_address',[id,2]);assert.equal((await call('bemo_list_addresses')).length,0);
+ for(let i=0;i<10;i++)await call('bemo_save_address',[randomUUID(),'Home '+i,deliveryFixture,0]);
+ await assert.rejects(()=>call('bemo_save_address',[randomUUID(),'Overflow',deliveryFixture,0]),/ADDRESS_LIMIT/);
+});
 test('product detail matches public listing, exposes no owner contact and hides drafts',async()=>{
  const {p}=await merchant();assert.equal(await publicProduct(p.id),null);assert.equal(await publicProduct(randomUUID()),null);
  await mediaFor(p);await call('bemo_product_status',[p.id,'ACTIVE',1]);

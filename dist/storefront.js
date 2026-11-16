@@ -71,7 +71,7 @@
 
   function searchUrl(filters = {}) {
     const values = {...filters};
-    return `market.html?${new URLSearchParams({lang,...values})}`;
+    return `${values.store&&!values.q&&!values.category?'store':'market'}.html?${new URLSearchParams({lang,...values})}`;
   }
 
   function card(product) {

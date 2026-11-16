@@ -39,7 +39,7 @@
     for (const store of data.stores) {
       const card = document.createElement('article'); card.className = 'directory-store';
       const mark = document.createElement('span'); mark.className = 'store-mark'; mark.setAttribute('aria-hidden','true'); mark.textContent = [...store.title][0];
-      const title = document.createElement('h2'); const link=document.createElement('a'); link.textContent=store.title; link.href='market.html?'+new URLSearchParams({lang,store:store.slug}); title.append(link);
+      const title = document.createElement('h2'); const link=document.createElement('a'); link.textContent=store.title; link.href='store.html?'+new URLSearchParams({lang,store:store.slug}); title.append(link);
       const slug = document.createElement('span'); slug.className = 'store-slug'; slug.textContent = store.slug;
       const description = document.createElement('p'); description.className = 'store-description' + (store.description ? '' : ' no-description'); description.textContent = store.description || text('noDescription');
       card.append(mark,title,slug,description); $('directoryResults').append(card);
