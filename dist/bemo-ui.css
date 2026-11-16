@@ -21,6 +21,11 @@ html[data-theme=dark] :is(button,input,select,textarea){color:var(--ink)}html[da
 @media(max-width:480px){.brand,.preview-logo{font-size:25px}.brand:before,.preview-logo:before{width:36px;height:36px;border-radius:11px;font-size:22px}.header-row{min-height:74px;gap:8px}.header-row nav{gap:7px}.language-button{padding-inline:9px}.theme-button{min-width:38px;min-height:38px}.header-row nav>a{font-size:11px}.main-campaign{min-height:295px}.campaign-copy{max-width:95%;padding:27px}.campaign-copy h1{font-size:29px}.campaign-copy>p{font-size:12px;max-width:85%}.side-campaigns{display:none}.module-heading h2{font-size:21px}.fast-category-img{width:56px;height:56px}.fast-category strong{font-size:11px}.fast-categories{gap:16px 10px;border-radius:22px}.store-grid{grid-template-columns:minmax(0,1fr)}.buyer-layout #deliveryForm{padding:20px}.market-view-nav{gap:4px}.market-view-nav a{max-width:100px}.gallery img{width:90px;height:90px}.product-info{padding:10px}.seller-layout .merchant-heading{flex-direction:column;align-items:start}.merchant-heading h1{font-size:27px}.account-card h2{font-size:22px}}
 
 /* Homepage density pass: match the reference marketplace rhythm. */
+.nav-shell{background:#101f3c;color:#fff;border-color:#263653}
+.category-nav .merchant-link,.category-nav .nav-offer{color:#ffb35f}
+.category-nav summary{background:#ff6a00;color:#fff;border-radius:9px;padding-inline:14px}
+.category-nav #categoryFlyout{color:var(--ink);background:var(--surface)}
+.module-heading h2{border-inline-start:4px solid #ff6a00;padding-inline-start:10px}
 .review-strip,.module-note,.campaign-copy .sample-pill,.mini-campaign .sample-pill,.photo-note{display:none}
 .utility-inner{min-height:30px}
 .header-inner{min-height:78px;gap:20px}
@@ -59,6 +64,7 @@ html[data-theme=dark] :is(button,input,select,textarea){color:var(--ink)}html[da
 @media(max-width:1150px){.campaigns{grid-template-columns:170px minmax(0,2fr) minmax(190px,1fr)}.product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:800px){.campaigns{grid-template-columns:minmax(0,1fr);gap:10px}.main-campaign{min-height:285px}.campaign-copy{padding:24px;max-width:85%}.side-campaigns{display:grid}.fast-categories{margin-block:10px 14px}.product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.store-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.module{padding:13px}.editorial{min-height:130px}}
 @media(max-width:480px){.side-campaigns{display:none}.main-campaign{min-height:260px}.campaign-copy{padding:22px;max-width:100%}.campaign-copy h1{font-size:27px}.campaign-copy>p{font-size:11px}.fast-categories{margin-inline:-8px;border-radius:0;border-inline:0;grid-template-columns:repeat(3,minmax(0,1fr));display:grid;overflow:visible;padding:10px 8px}.fast-category{min-width:0;flex-direction:column;gap:4px;text-align:center}.fast-category-img{width:44px;height:44px}.fast-category small{display:none}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.module{margin-bottom:12px}.module-heading h2{font-size:19px}.store-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.editorial-grid{grid-template-columns:1fr 1fr}.editorial{min-height:115px}}
+@media(min-width:1200px){.product-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 .workspace-nav svg,.workspace-mobile svg,.seller-sidebar svg,.category-rail svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .workspace-mobile a[aria-current=page]{color:var(--orange);font-weight:800}.workspace-mobile a:not([aria-current=page]){color:var(--muted)}
 .header-actions .theme-button{display:inline-grid;flex-shrink:0}.header-actions{flex-wrap:wrap}

@@ -131,12 +131,12 @@
     $('#fashionImage').src = window.BEMO_ILLUSTRATIONS[4];
     $('#homeEditImage').src = window.BEMO_ILLUSTRATIONS[1];
     $('#beautyEditImage').src = window.BEMO_ILLUSTRATIONS[7];
-    $('#dealsGrid').innerHTML = products.slice(0,4).map(card).join('');
+    $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
     $('#storesGrid').innerHTML = Object.keys(window.BEMO_STORES).map(store => {
       const rows = products.filter(product => product.store === store);
       return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.charAt(0))}</div><div><h3>${escape(store)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${escape(searchUrl({store:window.BEMO_STORES[store].slug}))}">${t('visitStore')}</a></div></article>`;
     }).join('');
-    for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl({offer:'1'});
+    for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl();
     $('#allStores').href = 'stores.html?lang=' + lang;
     for (const id of ['heroLink','browseMore']) $('#' + id).href = searchUrl();
     $('#mobileNav').innerHTML = `<a href="#" class="active">${icon('home')}<span>${t('homeNav')}</span></a><a href="#fastCategories">${icon('grid')}<span>${t('categories')}</span></a><a href="#deals">${icon('deals')}<span>${t('deals')}</span></a><button type="button" data-home-action="cart">${icon('bag')}<span>${t('cart')}</span><span class="cart-count" aria-hidden="true">0</span></button><button type="button" data-home-action="account">${icon('user')}<span>${t('account')}</span></button>`;
