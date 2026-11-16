@@ -16,9 +16,9 @@
     placeholder: ['ابحث عن منتج، متجر أو اكتشاف جديد', 'Search products, stores or your next good find'],
     account: ['الحساب', 'Account'], saved: ['المفضلة', 'Saved'], orders: ['الطلبات', 'Orders'], cart: ['السلة', 'Cart'],
     allCategories: ['كل التصنيفات', 'All categories'], deals: ['الجديد', 'New arrivals'], merchant: ['بِع على BEMO', 'Sell on BEMO'],
-    campaignSample: ['مختارات لحياتك اليومية', 'FINDS FOR YOUR EVERYDAY'], layoutSample: ['اكتشف المجموعة', 'EXPLORE THE COLLECTION'],
+    campaignSample: ['تسوق الآن', 'SHOP NOW'], layoutSample: ['اكتشف المجموعة', 'EXPLORE THE COLLECTION'],
     hero: ['اكتشافات كثيرة.<br>مكان واحد يجمعها.', 'So much to discover.<br>One place to find it.'],
-    heroCopy: ['من تفاصيل المنزل إلى احتياجاتك اليومية. اكتشف مختارات من متاجر مختلفة.', 'From home details to everyday essentials. Explore finds from different stores.'],
+    heroCopy: ['تسوق منتجات متنوعة من متاجر مختلفة في مكان واحد.', 'Shop products from multiple stores in one place.'],
     explore: ['استكشف المنتجات', 'Explore products'], illustrative: ['صورة توضيحية', 'Illustrative photo'],
     techTitle: ['تقنية ترافق يومك', 'Tech for every day'], fashionTitle: ['تفاصيل على ذوقك', 'Everyday, your way'],
     seeCollection: ['استكشف المجموعة ←', 'Explore collection →'], home: ['المنزل والمعيشة', 'Home & living'],
@@ -30,10 +30,10 @@
     storesTitle: ['متاجر مختلفة. اهتمامات كثيرة.', 'Different stores. More to explore.'], viewStores: ['استكشف المتاجر ←', 'Explore stores →'],
     sampleStore: ['متجر مسجّل', 'Registered store'], storeCount: ['منتجات معروضة هنا', 'products shown here'], visitStore: ['عرض المتجر ←', 'View store →'],
     noStores:['لا توجد متاجر متاحة حالياً.','No stores are available yet.'], storesError:['تعذّر تحميل المتاجر. افتح دليل المتاجر لإعادة المحاولة.','Stores could not load. Open the store directory to try again.'], storesLoading:['جارٍ تحميل المتاجر…','Loading stores…'],
-    editorialSample: ['مختارات BEMO', 'THE BEMO EDIT'], homeEditorial: ['مساحتك، بطريقتك.', 'Your space. Your style.'],
-    homeCollection: ['اكتشف مختارات المنزل ←', 'Explore the home collection →'], beautyEditorial: ['تفاصيل صغيرة ليومك.', 'A little care, every day.'],
-    beautyCollection: ['اكتشف مجموعة العناية ←', 'Explore the care collection →'], discoverEyebrow: ['تصفّح على ذوقك', 'A COLLECTION TO EXPLORE'],
-    discoverTitle: ['اكتشف ما يناسبك', 'Find something for you'], sort: ['ترتيب حسب', 'Sort by'], featured: ['مختارة', 'Featured'],
+    discoverEyebrow: ['تصفّح حسب التصنيف', 'BROWSE BY CATEGORY'],
+    discoverTitle: ['تصفح المنتجات', 'Browse products'], sort: ['ترتيب حسب', 'Sort by'], featured: ['الترتيب الافتراضي', 'Default order'],
+    discountHeading:['الخصومات','Discounts'],discountEmpty:['ستظهر الخصومات عند إضافتها من المتاجر.','Discounts appear when sellers add them.'],brandsHeading:['الماركات','Brands'],brandsEmpty:['ستظهر الماركات عندما تصبح متاحة.','Brands will appear when available.'],verifiedHeading:['المتاجر الموثوقة','Verified stores'],verifiedEmpty:['ستظهر المتاجر بعد اعتماد توثيقها.','Stores appear once verified.'],
+    bags:['حقائب','Bags'],watches:['ساعات','Watches'],perfume:['عطور','Perfume'],shoes:['أحذية','Shoes'],phones:['هواتف','Phones'],toys:['ألعاب','Toys'],
     low: ['العملة ثم السعر: الأقل', 'Currency, then price: low'], high: ['العملة ثم السعر: الأعلى', 'Currency, then price: high'], results: ['منتجات', 'products'],
     advancedSearch: ['استكشف البحث والفلاتر', 'Explore search and filters'],
     reviewTitle: ['سلة واحدة. طلب مستقل لكل متجر.', 'One bag. Independent store orders.'],
@@ -130,8 +130,9 @@
     $('#fastCategories').innerHTML = categories.map(value => `<a class="fast-category" href="${searchUrl({category:value})}"><span class="fast-category-img"><img src="${window.BEMO_ILLUSTRATIONS[categoryProducts[value]]}" alt="" loading="lazy" width="62" height="62"></span><span><strong>${t(value)}</strong><small>${t('sampleItems')}</small></span></a>`).join('') + `<a class="fast-category fast-category-all" href="${searchUrl()}"><span class="fast-category-img">${icon('grid')}</span><span><strong>${t('moreCategories')}</strong><small>${t('sampleItems')}</small></span></a>`;
     $('#techImage').src = window.BEMO_ILLUSTRATIONS[2];
     $('#fashionImage').src = window.BEMO_ILLUSTRATIONS[4];
-    $('#homeEditImage').src = window.BEMO_ILLUSTRATIONS[1];
-    $('#beautyEditImage').src = window.BEMO_ILLUSTRATIONS[7];
+    $('#marketShortcuts').innerHTML = ['bags','watches','perfume','shoes','phones','toys'].map(key => `<a href="${searchUrl({q:t(key)})}">${t(key)} <span aria-hidden="true">↗</span></a>`).join('');
+    $('#marketShortcuts').setAttribute('aria-label',t('categories'));
+    $('#discountBrowse').href=searchUrl(); $('#brandsBrowse').href=searchUrl(); $('#verifiedBrowse').href='stores.html?lang='+lang;
     $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
     $('#storesGrid').innerHTML = window.BEMO_STORES.length ? window.BEMO_STORES.map(store => {
       const rows = products.filter(product => product.store_slug === store.slug);
