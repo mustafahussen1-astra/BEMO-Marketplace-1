@@ -49,7 +49,7 @@
     loading: ['جارٍ تحميل المنتجات…', 'Loading products…'], loadError: ['تعذّر تحميل المنتجات. افتح صفحة المنتجات لإعادة المحاولة.', 'Products could not load. Open the product page to try again.'],
     save: ['حفظ المنتج', 'Save product'], unsave: ['إزالة من المفضلة', 'Remove from saved'],
     savedTitle: ['منتجاتك المفضلة', 'Your saved finds'], emptySaved: ['لم تحفظ منتجات بعد. استخدم رمز القلب على أي بطاقة.', 'No saved products yet. Use the heart on any product card.'],
-    browseAll: ['استكشف كل المنتجات', 'Explore all products'], add: ['أضف إلى السلة', 'Add to bag'], homeNav: ['الرئيسية', 'Home']
+    browseAll: ['استكشف كل المنتجات', 'Explore all products'], add: ['أضف إلى السلة', 'Add to bag'], added:['أضيف المنتج إلى السلة','Added to your cart'], stockError:['الكمية المطلوبة غير متوفرة حالياً','The requested quantity is unavailable'], homeNav: ['الرئيسية', 'Home']
   };
   const t = key => copy[key]?.[lang === 'ar' ? 0 : 1] || key;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -80,7 +80,7 @@
   function card(product) {
     const saved = state.saved.includes(product.id);
     const discount = product.oldPrice > product.price ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
-    return `<article class="product-card"><div class="product-photo"><button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">${product.image?`<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="320" height="320">`:''}</button><button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">${icon('heart')}</button></div><div class="product-info"><button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button><p class="product-price"><span>${money(product.price,product.currency)}</span></p><div class="product-buy"><a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">${escape(product.store)}</a><button type="button" class="product-add" data-home-add="${product.id}" aria-label="${t('add')}: ${escape(name(product))}">+</button></div><p class="product-example">${t('sampleLabel')}</p></div></article>`;
+    return `<article class="product-card"><div class="product-photo"><button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">${product.image?`<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="320" height="320">`:''}</button><button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">${icon('heart')}</button></div><div class="product-info"><button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button><p class="product-price"><span>${window.BemoLive.money(product.priceMinor,product.currency,lang)}</span></p><div class="product-buy"><a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">${escape(product.store)}</a><button type="button" class="product-add" data-home-add="${product.id}" aria-label="${t('add')}: ${escape(name(product))}">+</button></div></div></article>`;
   }
 
   function updateCartCount() {
@@ -214,6 +214,8 @@
   $('#homeSort').addEventListener('change', renderDiscovery);
   window.addEventListener('bemo:state', syncState);
   window.addEventListener('bemo:catalog',render);
+  window.addEventListener('bemo:added',()=>{ $('#toast').textContent=t('added'); $('#toast').classList.add('show'); setTimeout(()=>$('#toast').classList.remove('show'),2500); });
+  window.addEventListener('bemo:stock-error',()=>{ $('#toast').textContent=t('stockError'); $('#toast').classList.add('show'); setTimeout(()=>$('#toast').classList.remove('show'),2500); });
   window.addEventListener('bemo:saved', showSaved);
   window.addEventListener('bemo:browse', event => browse(event.detail?.category));
   render();
