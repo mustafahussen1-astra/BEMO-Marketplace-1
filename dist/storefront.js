@@ -54,7 +54,6 @@
   const t = key => copy[key]?.[lang === 'ar' ? 0 : 1] || key;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const name = product => lang === 'ar' ? product.ar : product.name;
-  const money = (amount,currency) => new Intl.NumberFormat(lang === 'ar' ? 'ar-IQ' : 'en-US', {style:'currency',currency}).format(amount);
   const paths = {
     search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
     user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
@@ -69,17 +68,14 @@
   const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[key] || paths.bag}</svg>`;
   const categories = ['home','fashion','electronics','beauty','sports','other'];
   const categoryProducts = {home:1,fashion:4,electronics:2,beauty:7,sports:8};
-  const storeIds = {'Form & Field':'form-field','Everyday Studio':'everyday','Northline':'northline'};
 
   function searchUrl(filters = {}) {
     const values = {...filters};
-    if (values.store) values.store = storeIds[values.store] || values.store;
     return `market.html?${new URLSearchParams({lang,...values})}`;
   }
 
   function card(product) {
     const saved = state.saved.includes(product.id);
-    const discount = product.oldPrice > product.price ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
     return `<article class="product-card"><div class="product-photo"><button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">${product.image?`<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="320" height="320">`:''}</button><button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">${icon('heart')}</button></div><div class="product-info"><button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button><p class="product-price"><span>${window.BemoLive.money(product.priceMinor,product.currency,lang)}</span></p><div class="product-buy"><a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">${escape(product.store)}</a><button type="button" class="product-add" data-home-add="${product.id}" aria-label="${t('add')}: ${escape(name(product))}">+</button></div></div></article>`;
   }
 
@@ -136,7 +132,7 @@
     $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
     $('#storesGrid').innerHTML = window.BEMO_STORES.length ? window.BEMO_STORES.map(store => {
       const rows = products.filter(product => product.store_slug === store.slug);
-      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.title.charAt(0))}</div><div><h3>${escape(store.title)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${escape(searchUrl({store:store.slug}))}">${t('visitStore')}</a></div></article>`;
+      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.title.charAt(0))}</div><div><h3>${escape(store.title)}</h3><small>@${escape(store.slug)}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${t('sampleStore')}</span><a href="${escape(searchUrl({store:store.slug}))}">${t('visitStore')}</a></div></article>`;
     }).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_STORES_STATUS==='loading'?'storesLoading':window.BEMO_STORES_STATUS==='error'?'storesError':'noStores')}</p><a href="stores.html?lang=${lang}">${t('viewStores')}</a></div>`;
     for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl();
     $('#allStores').href = 'stores.html?lang=' + lang;
