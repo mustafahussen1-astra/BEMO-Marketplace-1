@@ -22,7 +22,7 @@
     explore: ['استكشف المنتجات', 'Explore products'], illustrative: ['صورة توضيحية', 'Illustrative photo'],
     techTitle: ['تقنية ترافق يومك', 'Tech for every day'], fashionTitle: ['تفاصيل على ذوقك', 'Everyday, your way'],
     seeCollection: ['استكشف المجموعة ←', 'Explore collection →'], home: ['المنزل والمعيشة', 'Home & living'],
-    fashion: ['الأزياء', 'Fashion'], electronics: ['الإلكترونيات', 'Electronics'], beauty: ['الجمال', 'Beauty'], sports: ['الرياضة والأنشطة', 'Sports & outdoors'],
+    fashion: ['الأزياء', 'Fashion'], electronics: ['الإلكترونيات', 'Electronics'], beauty: ['الجمال', 'Beauty'], sports: ['الرياضة والأنشطة', 'Sports & outdoors'], other:['أخرى','Other'],
     all: ['الكل', 'All'], moreCategories: ['كل المنتجات', 'All products'], sampleItems: ['اكتشف التصنيف', 'Explore category'],
     dealsEyebrow: ['الجديد من المتاجر', 'NEW FROM THE STORES'], dealsTitle: ['اكتشافات جديدة', 'Fresh finds'],
     viewOffers: ['كل المنتجات ←', 'All products →'], priceNote: ['الأسعار بعملة كل متجر · رسوم التوصيل تظهر قبل إنشاء الطلب', 'Prices use each store’s currency · Review delivery fees before ordering'],
@@ -34,7 +34,7 @@
     discoverTitle: ['تصفح المنتجات', 'Browse products'], sort: ['ترتيب حسب', 'Sort by'], featured: ['الترتيب الافتراضي', 'Default order'],
     discountHeading:['الخصومات','Discounts'],discountEmpty:['ستظهر الخصومات عند إضافتها من المتاجر.','Discounts appear when sellers add them.'],brandsHeading:['الماركات','Brands'],brandsEmpty:['ستظهر الماركات عندما تصبح متاحة.','Brands will appear when available.'],verifiedHeading:['المتاجر الموثوقة','Verified stores'],verifiedEmpty:['ستظهر المتاجر بعد اعتماد توثيقها.','Stores appear once verified.'],
     bags:['حقائب','Bags'],watches:['ساعات','Watches'],perfume:['عطور','Perfume'],shoes:['أحذية','Shoes'],phones:['هواتف','Phones'],toys:['ألعاب','Toys'],
-    low: ['العملة ثم السعر: الأقل', 'Currency, then price: low'], high: ['العملة ثم السعر: الأعلى', 'Currency, then price: high'], results: ['منتجات', 'products'],
+    low: ['العملة ثم السعر: الأقل', 'Currency, then price: low'], high: ['العملة ثم السعر: الأعلى', 'Currency, then price: high'], results: ['منتجات معروضة', 'products shown'], noCategory:['لا توجد منتجات معروضة في هذا التصنيف حالياً.','No products from this category are shown here yet.'],
     advancedSearch: ['استكشف البحث والفلاتر', 'Explore search and filters'],
     reviewTitle: ['سلة واحدة. طلب مستقل لكل متجر.', 'One bag. Independent store orders.'],
     reviewCopy: ['راجع قيمة المنتجات والتوصيل لكل متجر قبل إنشاء الطلب. يقبل كل تاجر طلبه بشكل مستقل، والدفع له أو لمندوبه عند الاستلام. إضافة المنتج للسلة لا تحجز مخزونه.', 'Review each store’s products and delivery fee before ordering. Sellers accept independently, and you pay each seller or courier on delivery. Adding to your bag does not reserve stock.'],
@@ -67,7 +67,7 @@
     deals:'<path d="m13 3 8 8-10 10-8-8V3h10Z"/><circle cx="7.5" cy="7.5" r="1"/>'
   };
   const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[key] || paths.bag}</svg>`;
-  const categories = ['home','fashion','electronics','beauty','sports'];
+  const categories = ['home','fashion','electronics','beauty','sports','other'];
   const categoryProducts = {home:1,fashion:4,electronics:2,beauty:7,sports:8};
   const storeIds = {'Form & Field':'form-field','Everyday Studio':'everyday','Northline':'northline'};
 
@@ -96,7 +96,7 @@
     let rows = products.filter(product => (category === 'all' || product.category === category) && (!savedOnly || state.saved.includes(product.id)));
     if ($('#homeSort').value === 'low') rows.sort((a,b) => a.currency.localeCompare(b.currency)||a.price - b.price);
     if ($('#homeSort').value === 'high') rows.sort((a,b) => a.currency.localeCompare(b.currency)||b.price - a.price);
-    $('#discoveryGrid').innerHTML = rows.length ? rows.map(card).join('') : `<div class="empty-saved"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':savedOnly?'emptySaved':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
+    $('#discoveryGrid').innerHTML = rows.length ? rows.map(card).join('') : `<div class="empty-saved"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':savedOnly?'emptySaved':category!=='all'?'noCategory':'emptyCatalog')}</p><a class="button primary" href="${searchUrl(category!=='all'?{category}:{})}">${t('browseAll')}</a></div>`;
     $('#productCount').textContent = `${rows.length} ${t('results')}`;
     $('#discoveryFilters').innerHTML = ['all',...categories].map(value => `<button type="button" data-home-filter="${value}" class="${category === value ? 'active' : ''}" aria-pressed="${category === value}">${t(value)}</button>`).join('');
     document.querySelector('[data-t="discoverTitle"]').textContent = t(savedOnly ? 'savedTitle' : 'discoverTitle');
@@ -127,7 +127,7 @@
     $('#categoryFlyout').innerHTML = $('#topCategories').innerHTML;
     document.querySelectorAll('[data-category]').forEach(element => {element.href = searchUrl({category:element.dataset.category});});
     $('#fastCategories').setAttribute('aria-label', t('categories'));
-    $('#fastCategories').innerHTML = categories.map(value => `<a class="fast-category" href="${searchUrl({category:value})}"><span class="fast-category-img"><img src="${window.BEMO_ILLUSTRATIONS[categoryProducts[value]]}" alt="" loading="lazy" width="62" height="62"></span><span><strong>${t(value)}</strong><small>${t('sampleItems')}</small></span></a>`).join('') + `<a class="fast-category fast-category-all" href="${searchUrl()}"><span class="fast-category-img">${icon('grid')}</span><span><strong>${t('moreCategories')}</strong><small>${t('sampleItems')}</small></span></a>`;
+    $('#fastCategories').innerHTML = categories.map(value => `<a class="fast-category" href="${searchUrl({category:value})}"><span class="fast-category-img">${categoryProducts[value]?`<img src="${window.BEMO_ILLUSTRATIONS[categoryProducts[value]]}" alt="" loading="lazy" width="62" height="62">`:icon('grid')}</span><span><strong>${t(value)}</strong><small>${t('sampleItems')}</small></span></a>`).join('');
     $('#techImage').src = window.BEMO_ILLUSTRATIONS[2];
     $('#fashionImage').src = window.BEMO_ILLUSTRATIONS[4];
     $('#marketShortcuts').innerHTML = ['bags','watches','perfume','shoes','phones','toys'].map(key => `<a href="${searchUrl({q:t(key)})}">${t(key)} <span aria-hidden="true">↗</span></a>`).join('');
