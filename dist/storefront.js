@@ -29,6 +29,7 @@
     storesEyebrow: ['تعرّف إلى مصادر الاكتشاف', 'DISCOVER THE STORES BEHIND THE FINDS'],
     storesTitle: ['متاجر مختلفة. اهتمامات كثيرة.', 'Different stores. More to explore.'], viewStores: ['استكشف المتاجر ←', 'Explore stores →'],
     sampleStore: ['متجر مسجّل', 'Registered store'], storeCount: ['منتجات معروضة هنا', 'products shown here'], visitStore: ['عرض المتجر ←', 'View store →'],
+    noStores:['لا توجد متاجر متاحة حالياً.','No stores are available yet.'], storesError:['تعذّر تحميل المتاجر. افتح دليل المتاجر لإعادة المحاولة.','Stores could not load. Open the store directory to try again.'], storesLoading:['جارٍ تحميل المتاجر…','Loading stores…'],
     editorialSample: ['مختارات BEMO', 'THE BEMO EDIT'], homeEditorial: ['مساحتك، بطريقتك.', 'Your space. Your style.'],
     homeCollection: ['اكتشف مختارات المنزل ←', 'Explore the home collection →'], beautyEditorial: ['تفاصيل صغيرة ليومك.', 'A little care, every day.'],
     beautyCollection: ['اكتشف مجموعة العناية ←', 'Explore the care collection →'], discoverEyebrow: ['تصفّح على ذوقك', 'A COLLECTION TO EXPLORE'],
@@ -132,10 +133,10 @@
     $('#homeEditImage').src = window.BEMO_ILLUSTRATIONS[1];
     $('#beautyEditImage').src = window.BEMO_ILLUSTRATIONS[7];
     $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
-    $('#storesGrid').innerHTML = Object.keys(window.BEMO_STORES).map(store => {
-      const rows = products.filter(product => product.store === store);
-      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.charAt(0))}</div><div><h3>${escape(store)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${escape(searchUrl({store:window.BEMO_STORES[store].slug}))}">${t('visitStore')}</a></div></article>`;
-    }).join('');
+    $('#storesGrid').innerHTML = window.BEMO_STORES.length ? window.BEMO_STORES.map(store => {
+      const rows = products.filter(product => product.store_slug === store.slug);
+      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.title.charAt(0))}</div><div><h3>${escape(store.title)}</h3><small>${t('sampleStore')}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${rows.length} ${t('storeCount')}</span><a href="${escape(searchUrl({store:store.slug}))}">${t('visitStore')}</a></div></article>`;
+    }).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_STORES_STATUS==='loading'?'storesLoading':window.BEMO_STORES_STATUS==='error'?'storesError':'noStores')}</p><a href="stores.html?lang=${lang}">${t('viewStores')}</a></div>`;
     for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl();
     $('#allStores').href = 'stores.html?lang=' + lang;
     for (const id of ['heroLink','browseMore']) $('#' + id).href = searchUrl();
