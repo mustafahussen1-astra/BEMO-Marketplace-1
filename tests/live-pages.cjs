@@ -23,3 +23,22 @@ test('market: changed quote requires a new explicit quote and clears old contact
 test('orders: guest cannot read orders',async()=>{const b=boot('orders',{phase:'guest'});await settle();assert.equal(b.calls.length,0);assert.equal(b.get('workspace').hidden,true);});
 test('orders: late delivery response is discarded after logout',async()=>{const b=boot('orders');await settle();let resolve;b.hooks.request=name=>name==='bemo_get_order'?new Promise(r=>resolve=r):undefined;const button=b.get('rows').children[0].children[1];button.emit('click');await settle();b.emit({phase:'guest'});resolve({data:{...order(),delivery:{recipient:'Private Buyer',phone:'0000000',address:'Private address'}}});await settle();assert.equal(b.get('detail').hidden,true);assert.equal(b.get('detailContent').children.length,0);});
 test('orders: forged support entry returns a permission message without case data',async()=>{const b=boot('orders');await settle();b.hooks.request=name=>name==='bemo_support_queue'?{error:{code:'SUPPORT_REQUIRED'}}:undefined;b.modes.find(n=>n.dataset.mode==='support').emit('click');await settle();assert.equal(b.get('error').hidden,false);assert.equal(b.get('detail').hidden,true);});
+
+test('seller sees recorded delivery stages and action-specific fields',async()=>{
+ const b=boot('orders');
+ await settle();
+ b.modes.find(n=>n.dataset.mode==='seller').emit('click');
+ await settle();
+ b.hooks.request=name=>name==='bemo_get_order'?{data:{...order(),state:'SHIPPED',accepted_at:'2026-11-01',events:[]}}:undefined;
+ b.get('rows').children[0].children[1].emit('click');
+ await settle();
+ const progress=b.get('detailContent').children.find(n=>n.className==='delivery-progress');
+ assert.deepEqual(Array.from(progress.children,n=>n.className),['recorded','recorded','unrecorded','recorded','unrecorded','unrecorded']);
+ assert.equal(b.get('reason').hidden,true);
+ b.get('action').value='FAIL_DELIVERY';
+ b.get('action').emit('change');
+ assert.equal(b.get('reason').required,true);
+ assert.equal(b.get('reason').hidden,false);
+ assert.equal(b.get('receiptLabel').hidden,true);
+ assert.equal(b.get('refundNote').hidden,true);
+});
