@@ -42,3 +42,18 @@ test('seller sees recorded delivery stages and action-specific fields',async()=>
  assert.equal(b.get('receiptLabel').hidden,true);
  assert.equal(b.get('refundNote').hidden,true);
 });
+
+test('regional quote sends the destination, fills the delivery address and prevents confirming another region',async()=>{
+ const b=boot('market');await settle();
+ b.get('quoteCountry').value='iq';b.get('quoteRegion').value='Baghdad';
+ const q=quote();q.snapshot.destination={country:'IQ',region:'baghdad'};
+ b.hooks.request=name=>name==='bemo_quote_cart'?{data:q}:undefined;
+ await b.get('quoteButton').emit('click');
+ const call=b.calls.find(c=>c.name==='bemo_quote_cart');
+ assert.equal(call.args.cart[0].country,'IQ');
+ assert.equal(b.get('region').value,'Baghdad');
+ b.fill();b.get('country').value='IQ';b.get('region').value='Basra';
+ await b.get('deliveryForm').emit('submit');
+ assert.equal(b.calls.some(c=>c.name==='bemo_place_order'),false);
+ assert.equal(b.get('quoteRegion').value,'Basra');
+});

@@ -1,4 +1,3 @@
--- Draft region configuration. Checkout activation is a separate migration.
 begin;
 create table bemo_private.delivery_configs (
  store_id uuid primary key references bemo_private.stores(id),
@@ -14,7 +13,7 @@ language plpgsql security definer set search_path='' as $$
 declare shop bemo_private.stores; result jsonb;
 begin
  shop:=bemo_private.merchant_store();
- select jsonb_build_object('version',coalesce(c.version,0),'currency',s.currency,'rules',coalesce(c.rules,'[]'::jsonb),'configured_currency',c.currency,'checkout_active',false)
+ select jsonb_build_object('version',coalesce(c.version,0),'currency',s.currency,'rules',coalesce(c.rules,'[]'::jsonb),'configured_currency',c.currency,'minor_digits',(select minor_digits from bemo_private.currencies where code=s.currency),'checkout_active',coalesce(jsonb_array_length(c.rules)>0,false))
  into result from bemo_private.store_settings s left join bemo_private.delivery_configs c on c.store_id=s.store_id where s.store_id=shop.id;
  if result is null then raise exception 'BEMO_SETTINGS_REQUIRED'; end if;
  return result;
@@ -49,7 +48,7 @@ begin
  end loop;
  insert into bemo_private.delivery_configs(store_id,currency,rules) values(shop.id,code,normalized)
  on conflict(store_id) do update set currency=excluded.currency,rules=excluded.rules,version=bemo_private.delivery_configs.version+1,updated_at=now();
- insert into bemo_private.merchant_events(actor_user_id,store_id,action,object_id) values(shop.owner_user_id,shop.id,'DELIVERY_REGIONS_DRAFT_UPDATED',shop.id);
+ insert into bemo_private.merchant_events(actor_user_id,store_id,action,object_id) values(shop.owner_user_id,shop.id,'DELIVERY_REGIONS_UPDATED',shop.id);
  return bemo_private.delivery_workspace();
 end; $$;
 
@@ -70,4 +69,45 @@ create function public.bemo_delivery_workspace() returns jsonb language sql secu
 create function public.bemo_save_delivery_regions(rules jsonb,expected_version int) returns jsonb language sql security invoker set search_path='' as $$select bemo_private.save_delivery_regions($1,$2)$$;
 revoke all on function bemo_private.delivery_workspace(),bemo_private.save_delivery_regions(jsonb,int),bemo_private.resolve_delivery_region(uuid,text,text,text),public.bemo_delivery_workspace(),public.bemo_save_delivery_regions(jsonb,int) from public,anon,authenticated,service_role;
 grant execute on function bemo_private.delivery_workspace(),bemo_private.save_delivery_regions(jsonb,int),public.bemo_delivery_workspace(),public.bemo_save_delivery_regions(jsonb,int) to authenticated;
+
+alter function bemo_private.quote_snapshot(jsonb,uuid) rename to base_cart_snapshot;
+
+create function bemo_private.quote_snapshot(cart jsonb,buyer uuid) returns jsonb
+language plpgsql security definer set search_path='' as $$
+declare snapshot jsonb; shop jsonb; area jsonb; stores jsonb:='[]'; regional boolean:=false;
+ country_code text:=upper(btrim(cart->0->>'country')); region_code text:=lower(btrim(cart->0->>'region'));
+ total bigint:=0;
+begin
+ snapshot:=bemo_private.base_cart_snapshot(cart,buyer);
+ for shop in select value from jsonb_array_elements(snapshot->'stores') loop
+  if exists(select 1 from bemo_private.delivery_configs where store_id=(shop->>'store_id')::uuid and jsonb_array_length(rules)>0) then
+   if country_code is null or country_code !~ '^[A-Z]{2}$' or coalesce(length(region_code),0) not between 1 and 120 or region_code='*' then
+    raise exception 'BEMO_DESTINATION_REQUIRED';
+   end if;
+   area:=bemo_private.resolve_delivery_region((shop->>'store_id')::uuid,country_code,region_code,snapshot->>'currency');
+   regional:=true;
+   shop:=shop||jsonb_build_object('delivery_fee_minor',(area->>'fee_minor')::bigint,'min_days',area->'min_days','max_days',area->'max_days','delivery_label',area->'label');
+  end if;
+  total:=total+(shop->>'items_minor')::bigint+(shop->>'delivery_fee_minor')::bigint;
+  stores:=stores||jsonb_build_array(shop);
+ end loop;
+ if total>9000000000000000 then raise exception 'BEMO_TOTAL_TOO_LARGE'; end if;
+ if regional then snapshot:=snapshot||jsonb_build_object('destination',jsonb_build_object('country',country_code,'region',region_code)); end if;
+ return snapshot||jsonb_build_object('stores',stores,'total_minor',total);
+end; $$;
+revoke all on function bemo_private.quote_snapshot(jsonb,uuid) from public,anon,authenticated,service_role;
+
+create function bemo_private.check_delivery_destination() returns trigger
+language plpgsql security definer set search_path='' as $$
+declare destination jsonb;
+begin
+ select q.snapshot->'destination' into destination from bemo_private.parent_orders o
+ join bemo_private.checkout_quotes q on q.id=o.quote_id where o.id=new.parent_id;
+ if destination is not null and (destination->>'country' is distinct from upper(btrim(new.country))
+  or destination->>'region' is distinct from lower(btrim(new.region))) then raise exception 'BEMO_DESTINATION_CHANGED'; end if;
+ return new;
+end; $$;
+revoke all on function bemo_private.check_delivery_destination() from public,anon,authenticated,service_role;
+create trigger validate_delivery_destination before insert on bemo_private.order_delivery
+ for each row execute function bemo_private.check_delivery_destination();
 commit;

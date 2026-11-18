@@ -129,7 +129,7 @@ test('homepage discovery: staff-only editing, visible targets and withdrawal',as
 test('delivery drafts: owner isolation, versions, duplicates and bounded validation',async()=>{
  await merchant();await merchant(1);
  const rule={country:'iq',region:' Baghdad ',label:'Baghdad',fee_minor:5000000,min_days:1,max_days:3};
- const saved=await call('bemo_save_delivery_regions',[[rule],0]);assert.equal(saved.version,1);assert.equal(saved.checkout_active,false);assert.equal(saved.rules[0].region,'baghdad');
+ const saved=await call('bemo_save_delivery_regions',[[rule],0]);assert.equal(saved.version,1);assert.equal(saved.checkout_active,true);assert.equal(saved.rules[0].region,'baghdad');
  assert.equal((await call('bemo_delivery_workspace',[],1)).rules.length,0);
  await assert.rejects(()=>call('bemo_save_delivery_regions',[[rule],0]),/VERSION_CONFLICT/);
  await assert.rejects(()=>call('bemo_save_delivery_regions',[[rule,rule],1]),/DELIVERY_DUPLICATE/);
@@ -713,4 +713,28 @@ test('commission: assigned support decides release independently from stock, ret
 });
 test('commission: rule changes require admin and version, snapshot protects existing orders and product override wins',async()=>{
  const {v}=await stockedMerchant();await onboard(1);await onboard(2);const args=[null,700,0,null,1,'Approved test global rate change'];await expectDenied(()=>call('bemo_save_commission_rule',args));await db.query("insert into bemo_private.user_roles(user_id,role) select id,'superadmin' from bemo_private.app_users where auth_subject=$1",[users[2]]);let o=(await ordered(v)).suborders[0];await call('bemo_save_commission_rule',args,2);await assert.rejects(()=>call('bemo_save_commission_rule',args,2),/VERSION_CONFLICT/);assert.equal((await db.query('select sum(amount_minor)::int n from bemo_private.order_commission_quotes')).rows[0].n,15000);const product=o.items[0].product_id;await call('bemo_save_commission_rule',[product,0,200,'IQD',0,'Free promotional fee override test'],2);const next=(await ordered(v)).suborders[0];assert.equal((await db.query('select sum(q.amount_minor)::int n from bemo_private.order_commission_quotes q join bemo_private.order_lines l on l.id=q.line_id where l.suborder_id=$1',[next.id])).rows[0].n,400);await creditFixture(o.store_id);assert.equal((await call('bemo_balance_workspace',[],1).catch(()=>({transactions:[]}))).transactions.length,0);await assert.rejects(()=>db.exec("update bemo_private.balance_ledger set reason='tamper'"),/LEDGER_IMMUTABLE/);
+});
+
+
+test('checkout charges each destination once, binds the address, and rechecks fee changes',async()=>{
+ const a=await stockedMerchant(0),b=await stockedMerchant(1);
+ await onboard(2);
+ const rule={country:'IQ',region:'baghdad',label:'Baghdad',fee_minor:450,min_days:1,max_days:2};
+ await call('bemo_save_delivery_regions',[[rule],0]);
+ const cart=[{variant_id:a.v.id,quantity:2},{variant_id:b.v.id,quantity:1}];
+ const quote=()=>call('bemo_quote_cart',[cart],2);
+ await assert.rejects(quote,/DESTINATION_REQUIRED/);
+ Object.assign(cart[0],{country:'IQ',region:'Basra'});
+ await assert.rejects(quote,/DELIVERY_UNAVAILABLE/);
+ cart[0].region='Baghdad';
+ const q=await quote(),shop=q.snapshot.stores.find(s=>s.store_id===a.p.store_id);
+ assert.equal(shop.delivery_fee_minor,450);
+ assert.equal(shop.max_days,2);
+ const place=(id,region)=>call('bemo_place_order',[id,{...deliveryFixture,country:'IQ',region},randomUUID()],2);
+ await assert.rejects(()=>place(q.id,'Basra'),/DESTINATION_CHANGED/);
+ await call('bemo_save_delivery_regions',[[{...rule,fee_minor:650}],1]);
+ await assert.rejects(()=>place(q.id,'Baghdad'),/QUOTE_CHANGED/);
+ const fresh=await quote(),order=await place(fresh.id,'Baghdad');
+ assert.equal(order.total_minor,fresh.snapshot.total_minor);
+ assert.equal(order.suborders.find(s=>s.store_id===a.p.store_id).delivery_fee_minor,650);
 });

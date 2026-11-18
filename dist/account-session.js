@@ -371,10 +371,10 @@
     }
   }
   const merchantMethods = new Set(['bemo_topups','bemo_merchant_catalog','bemo_save_store_settings','bemo_save_product','bemo_save_variant','bemo_adjust_stock','bemo_prepare_media','bemo_finish_media','bemo_product_status','bemo_merchant_media']);
-  for(const method of ['bemo_store_workspace','bemo_save_store_profile','bemo_seller_dashboard','bemo_list_addresses','bemo_save_address','bemo_delete_address']) merchantMethods.add(method);
+  for(const method of ['bemo_delivery_workspace','bemo_save_delivery_regions','bemo_store_workspace','bemo_save_store_profile','bemo_seller_dashboard','bemo_list_addresses','bemo_save_address','bemo_delete_address']) merchantMethods.add(method);
   for (const method of ['bemo_set_discovery_entry','bemo_support_decision_with_hold','bemo_finance_admin_action','bemo_finance_admin_workspace','bemo_workspace_access','bemo_balance_workspace','bemo_save_commission_rule','bemo_resolve_commission_hold','bemo_quote_cart','bemo_place_order','bemo_list_orders','bemo_get_order','bemo_order_action','bemo_support_queue','bemo_support_case','bemo_support_decision','bemo_notifications']) merchantMethods.add(method);
   const merchantErrors = new Set(['STORE_UNAVAILABLE','SETTINGS_INVALID','SETTINGS_REQUIRED','VERSION_CONFLICT','CURRENCY_LOCKED','PRODUCT_INVALID','PRODUCT_UNAVAILABLE','VARIANT_INVALID','VARIANT_UNAVAILABLE','VARIANT_LIMIT','STOCK_INVALID','INSUFFICIENT_STOCK','IDEMPOTENCY_CONFLICT','MEDIA_INVALID','MEDIA_LIMIT','MEDIA_UNAVAILABLE','MEDIA_UPLOAD_REQUIRED','PRODUCT_IMAGE_REQUIRED','VARIANT_REQUIRED','QUERY_INVALID']);
-  for(const code of ['STORE_PROFILE_INVALID','TITLE_TAKEN','ADDRESS_INVALID','ADDRESS_LIMIT','ADDRESS_UNAVAILABLE']) merchantErrors.add(code);
+  for(const code of ['DESTINATION_CHANGED','DESTINATION_REQUIRED','DELIVERY_UNAVAILABLE','DELIVERY_DUPLICATE','DELIVERY_INVALID','STORE_PROFILE_INVALID','TITLE_TAKEN','ADDRESS_INVALID','ADDRESS_LIMIT','ADDRESS_UNAVAILABLE']) merchantErrors.add(code);
   for (const code of ['CART_INVALID','ITEM_UNAVAILABLE','STOCK_INSUFFICIENT','MIXED_CURRENCY','TOTAL_TOO_LARGE','RATE_LIMIT','CHECKOUT_INVALID','REQUEST_CONFLICT','QUOTE_EXPIRED','QUOTE_CHANGED','ORDER_UNAVAILABLE','ACTION_INVALID','TRANSITION_INVALID','REASON_REQUIRED','SUPPORT_REQUIRED','CASE_UNAVAILABLE','CASE_NOT_ASSIGNED','CASE_CONFLICT_OF_INTEREST','CASE_RESOLVED','RESTOCK_INVALID']) merchantErrors.add(code);
   async function merchantRequest(name, args) {
     if (!merchantMethods.has(name) || state.phase !== 'ready' || !actorId) return {data:null,error:failure('AUTH_REQUIRED')};
