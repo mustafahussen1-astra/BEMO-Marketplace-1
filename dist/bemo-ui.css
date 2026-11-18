@@ -113,3 +113,21 @@ html[data-theme=dark] .feature-panel :is(h2,p,a){color:var(--ink)}
 @media(max-width:800px){.seller-sidebar{display:none}.seller-layout{grid-template-columns:minmax(0,1fr)}}
 
 .account-header [hidden]{display:none!important}.order-line-summary{font-weight:600}
+.market-features.discovery-strips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.discovery-strips > .feature-panel {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+}
+.discovery-strips .feature-panel :is(h2,p) { margin: 0; }
+@media (max-width: 540px) {
+  .discovery-strips > .feature-panel { grid-template-columns: 1fr auto; gap: 0 6px; }
+  .discovery-strips .feature-panel p { grid-column: 1; }
+  .discovery-strips .feature-panel a { grid-column: 2; grid-row: 1 / 3; }
+}
