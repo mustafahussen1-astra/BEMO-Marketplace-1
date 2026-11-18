@@ -27,7 +27,8 @@
  function add(v,title){const old=cart.find(x=>x.variant_id===v.id);const quantity=(old?.quantity||0)+1;if(quantity>Math.min(100,v.stock_on_hand))throw Error('STOCK_INSUFFICIENT');set(v.id,quantity,title);}
  async function store(slug,signal){query({store:slug});if(!slug)throw Error('QUERY_INVALID');const s=await request('/rest/v1/rpc/bemo_get_store',{store_slug:slug},signal);if(s===null)return null;
   if(!s||!UUID.test(s.id)||s.slug!==slug||typeof s.title!=='string'||typeof s.description!=='string'||typeof s.headline!=='string'||typeof s.location_label!=='string'||!Number.isSafeInteger(s.product_count)||s.product_count<0||!Array.isArray(s.categories)||s.categories.some(c=>!categories.includes(c))||(s.currency!==null&&!/^[A-Z]{3}$/.test(s.currency))||(s.delivery_fee_minor!==null&&(!Number.isSafeInteger(s.delivery_fee_minor)||s.delivery_fee_minor<0)))throw Error('RESPONSE_INVALID');
-  return {id:s.id,slug:s.slug,title:s.title,description:s.description,headline:s.headline,location_label:s.location_label,product_count:s.product_count,categories:s.categories,currency:s.currency,delivery_fee_minor:s.delivery_fee_minor};
+  const asset=path=>typeof path==='string'&&/^[0-9a-f]{64}\/[0-9a-f-]{36}\.(jpg|png)$/.test(path)?config().url+'/storage/v1/object/public/bemo-store-images/'+path:null;
+  return {logo:asset(s.logo_path),cover:asset(s.cover_path),id:s.id,slug:s.slug,title:s.title,description:s.description,headline:s.headline,location_label:s.location_label,product_count:s.product_count,categories:s.categories,currency:s.currency,delivery_fee_minor:s.delivery_fee_minor};
  }
  async function discoveryFeed(signal) {
    const rows = await request('/rest/v1/rpc/bemo_discovery_feed', {}, signal);

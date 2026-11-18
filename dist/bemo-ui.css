@@ -134,3 +134,13 @@ html[data-theme=dark] .feature-panel :is(h2,p,a){color:var(--ink)}
 .discovery-strips .strip-items { grid-column: 1 / -1; display: flex; gap: 8px; overflow-x: auto; min-width: 0; }
 .discovery-strips .strip-items[hidden] { display: none; }
 .discovery-strips .strip-items a { flex: none; gap: 6px; border: 1px solid var(--border); background: var(--surface); padding-inline: 12px; border-radius: 8px; }
+.cart-line .cart-quantity { display:inline-flex; align-items:center; gap:3px; margin-inline:8px; }
+.cart-line .cart-quantity button { min-width:36px; min-height:38px; padding:0 8px; font-size:18px; }
+.cart-line .cart-quantity input { width:4em; text-align:center; margin:0; }
+.order-timeline { list-style:none; padding-inline-start:1.1rem; margin-inline-start:.55rem; border-inline-start:2px solid var(--border); }
+.order-timeline li { position:relative; padding-block:6px; }
+.order-timeline li::before { content:""; position:absolute; inset-inline-start:-1.42rem; top:1em; width:8px; height:8px; border-radius:50%; background:var(--green); }
+.order-timeline li:last-child { font-weight:700; }
+#storeForm fieldset { display:grid; gap:8px; min-width:0; border:1px solid var(--border); border-radius:10px; padding:14px; }
+#storeForm legend { font-weight:700; padding-inline:5px; }
+#storeForm input[type=file] { width:100%; max-width:100%; }

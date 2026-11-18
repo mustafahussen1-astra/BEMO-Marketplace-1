@@ -303,7 +303,35 @@
         const who = await context(ticket, expected);
         if (stale(ticket)) return superseded();
         if (!who) return stopWith(failure('AUTH_REQUIRED'), ticket);
-        const result = await who.api.rpc('bemo_create_store', { title, slug, description });
+        let result;
+        if (input.registration) {
+          const availability=await who.api.rpc('bemo_slug_available',{candidate:slug});
+          if(availability.error)throw availability.error;
+          if(availability.data!==true)throw {message:'BEMO_SLUG_TAKEN'};
+          const {legal_name,phone,address,document:file,accepted} = input.registration;
+          const ext = {'image/jpeg':'jpg','image/png':'png','application/pdf':'pdf'}[file?.type];
+          if (!ext || !accepted || !file.size || file.size>5242880) throw {message:'BEMO_STORE_INVALID'};
+          const path=who.id+'/'+crypto.randomUUID()+'.'+ext;
+          const uploaded=await who.api.storage.from('bemo-seller-identity').upload(path,file,{upsert:false,contentType:file.type});
+          if(uploaded.error)throw uploaded.error;
+          if(stale(ticket))return superseded();
+          const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(who.id));
+          const prefix=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+          async function storeImage(image) {
+            if(!image)return null;
+            const suffix={'image/jpeg':'jpg','image/png':'png'}[image.type];
+            if(!suffix||!image.size||image.size>5242880)throw {message:'BEMO_STORE_INVALID'};
+            const key=prefix+'/'+crypto.randomUUID()+'.'+suffix;
+            const response=await who.api.storage.from('bemo-store-images').upload(key,image,{contentType:image.type,upsert:false});
+            if(response.error)throw response.error;
+            return key;
+          }
+          const [logo_path,cover_path]=await Promise.all([storeImage(input.registration.logo),storeImage(input.registration.cover)]);
+          if(stale(ticket))return superseded();
+          result=await who.api.rpc('bemo_register_seller',{title,slug,description,registration:{
+            legal_name,phone,address,identity_path:path,logo_path,cover_path,terms_version:'seller-2026-11'
+          }});
+        } else result=await who.api.rpc('bemo_create_store',{title,slug,description});
         if (stale(ticket)) return superseded();
         if (result.error) throw result.error;
         return publish({ phase: 'ready', busy: false, store: storeData(result.data), error: null });
@@ -342,7 +370,7 @@
       }
     }
   }
-  const merchantMethods = new Set(['bemo_merchant_catalog','bemo_save_store_settings','bemo_save_product','bemo_save_variant','bemo_adjust_stock','bemo_prepare_media','bemo_finish_media','bemo_product_status','bemo_merchant_media']);
+  const merchantMethods = new Set(['bemo_topups','bemo_merchant_catalog','bemo_save_store_settings','bemo_save_product','bemo_save_variant','bemo_adjust_stock','bemo_prepare_media','bemo_finish_media','bemo_product_status','bemo_merchant_media']);
   for(const method of ['bemo_store_workspace','bemo_save_store_profile','bemo_seller_dashboard','bemo_list_addresses','bemo_save_address','bemo_delete_address']) merchantMethods.add(method);
   for (const method of ['bemo_set_discovery_entry','bemo_support_decision_with_hold','bemo_finance_admin_action','bemo_finance_admin_workspace','bemo_workspace_access','bemo_balance_workspace','bemo_save_commission_rule','bemo_resolve_commission_hold','bemo_quote_cart','bemo_place_order','bemo_list_orders','bemo_get_order','bemo_order_action','bemo_support_queue','bemo_support_case','bemo_support_decision','bemo_notifications']) merchantMethods.add(method);
   const merchantErrors = new Set(['STORE_UNAVAILABLE','SETTINGS_INVALID','SETTINGS_REQUIRED','VERSION_CONFLICT','CURRENCY_LOCKED','PRODUCT_INVALID','PRODUCT_UNAVAILABLE','VARIANT_INVALID','VARIANT_UNAVAILABLE','VARIANT_LIMIT','STOCK_INVALID','INSUFFICIENT_STOCK','IDEMPOTENCY_CONFLICT','MEDIA_INVALID','MEDIA_LIMIT','MEDIA_UNAVAILABLE','MEDIA_UPLOAD_REQUIRED','PRODUCT_IMAGE_REQUIRED','VARIANT_REQUIRED','QUERY_INVALID']);
@@ -391,6 +419,26 @@
     return Object.freeze({request:(name,args)=>valid()?merchantRequest(name,args):changed(),media:(action,path,file)=>valid()?merchantMedia(action,path,file):changed()});
   }
   window.BemoAccount = Object.freeze({
+    async transferProof(fileOrPath) {
+      const ticket=epoch,expected=actorId;
+      if(!expected || state.phase!=='ready')throw new Error('AUTH_REQUIRED');
+      const who=await context(ticket,expected);
+      if(!who||stale(ticket))throw new Error('SESSION_CHANGED');
+      const bucket=who.api.storage.from('bemo-transfer-proofs');
+      if(typeof fileOrPath==='string') {
+        const result=await bucket.createSignedUrl(fileOrPath,60);
+        if(result.error||stale(ticket))throw new Error('MEDIA_INVALID');
+        const url=new URL(result.data.signedUrl);
+        if(url.origin!==config.url)throw new Error('MEDIA_INVALID');
+        return url.href;
+      }
+      const ext={'image/jpeg':'jpg','image/png':'png','application/pdf':'pdf'}[fileOrPath?.type];
+      if(!ext||!fileOrPath.size||fileOrPath.size>5242880)throw new Error('MEDIA_INVALID');
+      const path=who.id+'/'+crypto.randomUUID()+'.'+ext;
+      const result=await bucket.upload(path,fileOrPath,{upsert:false,contentType:fileOrPath.type});
+      if(result.error||stale(ticket))throw new Error('MEDIA_INVALID');
+      return path;
+    },
     initialize, getState: snapshot, subscribe(listener) { if (typeof listener !== 'function') return () => {}; listeners.add(listener); try { listener(snapshot()); } catch (_) { /* Isolate view failures. */ } return () => listeners.delete(listener); },
     signIn, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope,
     orderRequest: merchantRequest, orderScope: merchantScope

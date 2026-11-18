@@ -27,7 +27,11 @@ const call = async (name, args=[], i=0, extra={}) => {
   return rows[0].value;
 };
 const onboard=(i=0, extra={})=>call('bemo_onboard',['Buyer '+i,'ar'],i,extra);
-const createStore=(i=0,title='متجر جميل',slug='good-finds')=>call('bemo_create_store',[title,slug,'Physical goods'],i);
+const createStore=async(i=0,title='متجر جميل',slug='good-finds')=>{
+ const path=users[i]+'/'+randomUUID()+'.pdf';
+ await asRole('authenticated',claims(i),'insert into storage.objects(bucket_id,name) values($1,$2)',['bemo-seller-identity',path]);
+ return call('bemo_register_seller',[title,slug,'Physical goods',{legal_name:'Test Seller',phone:'+9647000000000',address:'Test address',identity_path:path,terms_version:'seller-2026-11'}],i);
+};
 const directory=()=>asRole('anon',{},'select * from public.bemo_list_stores()');
 const expectDenied=async action=>{ await assert.rejects(action); };
 
@@ -87,6 +91,24 @@ async function mediaFor(p,i=0){
  await call('bemo_finish_media',[m.id,false],i);return m;
 }
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
+
+test('manual topups require staff approval, isolate stores and credit exactly once',async()=>{
+ await merchant();await merchant(1);await adminFixture();
+ const input={amount_minor:25000,currency:'IQD',reference:'Bank-001',note:'test'};
+ await call('bemo_topups',['BANK',{bank:'Test bank',beneficiary:'BEMO Test',account_number:'TEST12345',currency:'IQD',enabled:true}],2);
+ const bank=(await call('bemo_topups',['MINE',{}])).banks[0];input.bank_id=bank.id;
+ await assert.rejects(()=>call('bemo_topups',['SUBMIT',{...input,bank_id:null}]),/FINANCE_INVALID/);
+ const submit=()=>call('bemo_topups',['SUBMIT',input]);
+ const request=await submit();assert.equal((await submit()).id,request.id);
+ assert.equal((await call('bemo_topups',['MINE',{}],1)).rows.length,0);
+ await assert.rejects(()=>call('bemo_topups',['QUEUE',{}]),/ADMIN_REQUIRED/);
+ const decision={id:request.id,reason:'Verified bank transfer in account statement'};
+ await assert.rejects(()=>call('bemo_topups',['APPROVE',decision]),/ADMIN_REQUIRED/);
+ assert.equal((await db.query('select * from bemo_private.balance_ledger')).rows.length,0);
+ for(let i=0;i<2;i++)assert.equal((await call('bemo_topups',['APPROVE',decision],2)).state,'APPROVED');
+ assert.equal((await db.query('select * from bemo_private.balance_ledger')).rows.length,1);
+ await assert.rejects(()=>call('bemo_topups',['REJECT',decision],2),/REQUEST_CONFLICT/);
+});
 
 test('homepage discovery: staff-only editing, visible targets and withdrawal',async()=>{
  const {v}=await stockedMerchant();
@@ -230,6 +252,23 @@ async function ordered(v,qty=2,buyer=1){
  const q=await quoted(v,qty,buyer);return call('bemo_place_order',[q.id,deliveryFixture,randomUUID()],buyer);
 }
 const action=(o,a,i=0,reason='',key=randomUUID())=>call('bemo_order_action',[o.id,a,reason,o.version,key],i);
+
+test('buyer tracks manual driver arrival and final delivery',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);let order=(await ordered(v)).suborders[0];
+ for(const [step,note] of [['ACCEPT',''],['PACK',''],['SHIP',''],['ATTEMPT_DELIVERY','DRIVER_ARRIVED'],['DELIVER','']])
+   order=await action(order,step,0,note);
+ const buyer=await call('bemo_get_order',[order.id],1);
+ assert.equal(buyer.state,'DELIVERED');assert.ok(buyer.events.some(e=>e.action==='DRIVER_ARRIVED'));
+});
+
+test('seller registration keeps documents private and username permanent',async()=>{
+ await onboard(); const store=await createStore();
+ assert.equal(await call('bemo_slug_available',['good-finds']),false);
+ assert.equal(await call('bemo_slug_available',['another-store']),true);
+ await assert.rejects(()=>db.query("update bemo_private.stores set slug='renamed' where id=$1",[store.id]),/SLUG_PERMANENT/);
+ assert.equal((await asRole('anon',{},"select * from storage.objects where bucket_id='bemo-seller-identity'")).length,0);
+ await assert.rejects(()=>call('bemo_create_store',['Legacy','legacy-store','']),/permission denied/);
+});
 const stockOf=async v=>(await db.query('select stock_on_hand from bemo_private.stock_positions where variant_id=$1',[v.id])).rows[0].stock_on_hand;
 
 async function support(i=2){await onboard(i);await db.query("insert into bemo_private.user_roles(user_id,role) select id,'support' from bemo_private.app_users where auth_subject=$1 on conflict do nothing",[users[i]]);}
@@ -434,7 +473,7 @@ test('image removal is soft and cannot remove last published image',async()=>{
  await assert.rejects(()=>call('bemo_finish_media',[m.id,true]),/BEMO_PRODUCT_IMAGE_REQUIRED/);
  await call('bemo_product_status',[p.id,'HIDDEN_BY_OWNER',active.version]);await call('bemo_finish_media',[m.id,true]);
  assert.deepEqual(await call('bemo_merchant_media',[p.id]),[]);
- assert.equal((await db.query('select count(*)::int n from storage.objects')).rows[0].n,1);
+ assert.equal((await db.query("select count(*)::int n from storage.objects where bucket_id='bemo-products'")).rows[0].n,1);
 });
 test('merchant catalog starts empty and delivery fee is owner-editable',async()=>{
  await onboard();await createStore();let c=await call('bemo_merchant_catalog');assert.deepEqual(c.products,[]);assert.equal(c.settings,null);
