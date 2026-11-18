@@ -88,6 +88,61 @@ async function mediaFor(p,i=0){
 }
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
 
+test('delivery drafts: owner isolation, versions, duplicates and bounded validation',async()=>{
+ await merchant();await merchant(1);
+ const rule={country:'iq',region:' Baghdad ',label:'Baghdad',fee_minor:5000000,min_days:1,max_days:3};
+ const saved=await call('bemo_save_delivery_regions',[[rule],0]);assert.equal(saved.version,1);assert.equal(saved.checkout_active,false);assert.equal(saved.rules[0].region,'baghdad');
+ assert.equal((await call('bemo_delivery_workspace',[],1)).rules.length,0);
+ await assert.rejects(()=>call('bemo_save_delivery_regions',[[rule],0]),/VERSION_CONFLICT/);
+ await assert.rejects(()=>call('bemo_save_delivery_regions',[[rule,rule],1]),/DELIVERY_DUPLICATE/);
+ for(const changed of [{fee_minor:-1},{min_days:4,max_days:2},{max_days:366},{country:''},{region:''}])await assert.rejects(()=>call('bemo_save_delivery_regions',[[{...rule,...changed}],1]),/DELIVERY_INVALID/);
+ await expectDenied(()=>asRole('anon',{},'select public.bemo_delivery_workspace()'));
+ await expectDenied(()=>asRole('authenticated',claims(),'select * from bemo_private.delivery_configs'));
+ assert.equal((await call('bemo_delivery_workspace')).version,1);
+});
+test('delivery resolution: exact region overrides national coverage; no implicit cross-currency or uncovered delivery',async()=>{
+ const {p}=await merchant();const national={country:'IQ',region:'*',label:'Iraq',fee_minor:8000000,min_days:3,max_days:7};const local={...national,region:'baghdad',label:'Baghdad',fee_minor:5000000,min_days:1,max_days:2};
+ await call('bemo_save_delivery_regions',[[national,local],0]);
+ const resolve=(country,region,currency='IQD')=>db.query('select bemo_private.resolve_delivery_region($1,$2,$3,$4) as value',[p.store_id,country,region,currency]).then(r=>r.rows[0].value);
+ assert.equal((await resolve('iq',' Baghdad ')).fee_minor,5000000);assert.equal((await resolve('IQ','basra')).fee_minor,8000000);
+ await assert.rejects(()=>resolve('SA','riyadh'),/DELIVERY_UNAVAILABLE/);await assert.rejects(()=>resolve('IQ','baghdad','USD'),/DELIVERY_UNAVAILABLE/);
+ await expectDenied(()=>asRole('authenticated',claims(),'select bemo_private.resolve_delivery_region($1,$2,$3,$4)',[p.store_id,'IQ','baghdad','IQD']));
+ await call('bemo_save_delivery_regions',[[],1]);await assert.rejects(()=>resolve('IQ','baghdad'),/DELIVERY_UNAVAILABLE/);
+});
+
+const searchProducts=(filter={})=>asRole('anon',{},'select public.bemo_search_products($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) as value',[filter.search||'',filter.store||'',filter.category||'',filter.currency||'',filter.min??null,filter.max??null,filter.stock??false,filter.sort||'newest',filter.limit??24,filter.offset??0]).then(r=>r[0].value);
+test('search: currency, inclusive range and stock must match the same active variant',async()=>{
+ const {p,v}=await stockedMerchant(0,1);await call('bemo_adjust_stock',[v.id,-1,'Test stock depleted',randomUUID(),2]);
+ const expensive=await call('bemo_save_variant',[p.id,null,'SKU-2','Available expensive',300000,true,0]);
+ await call('bemo_adjust_stock',[expensive.id,3,'Test stock',randomUUID(),1]);
+ assert.equal((await searchProducts({currency:'IQD',max:150000})).length,1);
+ assert.equal((await searchProducts({currency:'IQD',max:150000,stock:true})).length,0);
+ const r=await searchProducts({currency:'IQD',min:300000,max:300000,stock:true});assert.equal(r.length,1);assert.equal(r[0].variants.length,1);assert.equal(r[0].variants[0].id,expensive.id);assert.equal(r[0].variants[0].sku,undefined);assert.equal(r[0].owner_user_id,undefined);
+ assert.equal((await searchProducts({currency:'USD'})).length,0);assert.equal((await searchProducts({category:'fashion'})).length,0);
+ await db.query('update bemo_private.product_variants set active=false where id=$1',[expensive.id]);assert.equal((await searchProducts({stock:true})).length,0);
+});
+test('search: global price ordering and deterministic pagination happen before limiting',async()=>{
+ const a=await stockedMerchant(0),b=await stockedMerchant(1);
+ await db.query('update bemo_private.product_variants set price_minor=100000 where id=$1',[b.v.id]);
+ const low=await searchProducts({currency:'IQD',sort:'price_asc',limit:1});const next=await searchProducts({currency:'IQD',sort:'price_asc',limit:1,offset:1});assert.equal(low[0].id,b.p.id);assert.equal(next[0].id,a.p.id);
+ assert.equal((await searchProducts({currency:'IQD',sort:'price_desc',limit:1}))[0].id,a.p.id);
+ assert.equal((await searchProducts({store:'merchant-0'}))[0].id,a.p.id);
+ assert.equal((await searchProducts({search:'%'})).length,0);
+ await db.query('update bemo_private.product_variants set price_minor=150000 where id=$1',[b.v.id]);
+ const all=await searchProducts({currency:'IQD',sort:'price_asc'});const pages=[...(await searchProducts({currency:'IQD',sort:'price_asc',limit:1})),...(await searchProducts({currency:'IQD',sort:'price_asc',limit:1,offset:1}))];assert.deepEqual(pages.map(p=>p.id),all.map(p=>p.id));
+});
+test('search: no cross-currency price comparison and malformed queries are rejected',async()=>{
+ for(const f of [{min:1},{sort:'price_asc'},{currency:'BAD'},{currency:'IQD',min:10,max:1},{currency:'IQD',min:-1},{currency:'IQD',max:9000000000000001},{sort:'injected'},{limit:101},{offset:10001}])await assert.rejects(()=>searchProducts(f),/QUERY_INVALID/);
+});
+test('search: suspended, deleted and banned sellers plus archived products stay hidden',async()=>{
+ const {p}=await stockedMerchant();assert.equal((await searchProducts()).length,1);
+ await db.query("update bemo_private.products set status='ARCHIVED' where id=$1",[p.id]);assert.equal((await searchProducts()).length,0);
+ await db.query("update bemo_private.products set status='ACTIVE' where id=$1",[p.id]);
+ await db.query("update auth.users set banned_until=now()+interval '1 day' where id=$1",[users[0]]);assert.equal((await searchProducts()).length,0);
+ await db.query('update auth.users set banned_until=null,deleted_at=now() where id=$1',[users[0]]);assert.equal((await searchProducts()).length,0);
+ await db.query('update auth.users set deleted_at=null where id=$1',[users[0]]);await db.exec("update bemo_private.stores set status='SUSPENDED'");assert.equal((await searchProducts()).length,0);
+});
+
 const publicProduct=id=>asRole('anon',{},'select public.bemo_get_product($1) as value',[id]).then(r=>r[0].value);
 const publicStore=slug=>asRole('anon',{},'select public.bemo_get_store($1) as value',[slug]).then(r=>r[0].value);
 test('store profile: public empty store, safe projection, real product counts, suspension hiding',async()=>{
@@ -224,7 +279,7 @@ test('orders: checkout creates immutable quote and does not reserve stock',async
  assert.equal(order.suborders.length,1);assert.equal(order.total_minor,302500);assert.equal(await stockOf(v),10);
  assert.equal(order.suborders[0].state,'PENDING_SELLER');assert.equal(order.suborders[0].delivery.recipient,'Test Buyer');
  const seller=await call('bemo_get_order',[order.suborders[0].id]);
- assert.equal(seller.delivery,null);assert.equal(seller.region,'Test Region');assert.equal(seller.buyer_id,undefined);
+ assert.equal(seller.delivery,null);assert.equal(seller.region,null);assert.equal(seller.country,null);assert.equal(seller.buyer_id,undefined);
  assert.ok(!JSON.stringify(seller).includes('7000000000'));assert.ok(!JSON.stringify(seller).includes('Test Buyer'));
 });
 test('orders: acceptance debits exactly once and releases delivery only to that merchant',async()=>{
@@ -560,4 +615,47 @@ test('auth bans and deletion remove public stores without a frontend cache decis
 test('authenticated callers cannot invoke internal guard helpers or audit utilities directly',async()=>{
   await onboard(); for(const sql of ['select * from bemo_private.trusted_identity()','select bemo_private.require_actor()']) await expectDenied(()=>asRole('authenticated',claims(),sql));
   await expectDenied(()=>asRole('authenticated',claims(),"delete from bemo_private.audit_events"));
+});
+
+async function enableCommission(){await db.exec("insert into bemo_private.commission_settings(singleton,enabled) values(true,true) on conflict(singleton) do update set enabled=true");}
+async function adminFixture(){await onboard(2);await db.query("insert into bemo_private.user_roles(user_id,role) select id,'superadmin' from bemo_private.app_users where auth_subject=$1 on conflict do nothing",[users[2]]);}
+test('seller cancellation: post-acceptance goes to support; combined balance decision is atomic',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();await enableCommission();let o=(await ordered(v)).suborders[0];await creditFixture(o.store_id);o=await action(o,'ACCEPT');await assert.rejects(()=>action(o,'REJECT',0,'Seller changed mind after acceptance'),/TRANSITION_INVALID/);o=await action(o,'REQUEST_CANCEL',0,'Seller requests cancellation for review');const c=(await cases())[0];const work=await call('bemo_support_case',[c.id,true],2);assert.equal(work.commission_hold.state,'HELD');const args=[c.id,'APPROVE_CANCEL','Support approved cancellation and release',false,o.version,true];await call('bemo_support_decision_with_hold',args,2);await call('bemo_support_decision_with_hold',args,2);assert.equal((await call('bemo_balance_workspace')).balances[0].available_minor,100000);assert.equal(await stockOf(v),8);
+});
+test('finance admin: credit/decrease are audited, idempotent, isolated and cannot spend reserved funds',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await adminFixture();const o=(await ordered(v)).suborders[0],sid=o.store_id;
+ const credit=[sid,'CREDIT',{amount_minor:20000,currency:'IQD',reference:'bank-fixture-1'},'Manually reconciled synthetic bank transfer',randomUUID()];
+ await expectDenied(()=>call('bemo_finance_admin_action',credit));await call('bemo_finance_admin_action',credit,2);await call('bemo_finance_admin_action',credit,2);assert.equal((await call('bemo_balance_workspace')).balances[0].available_minor,20000);
+ await assert.rejects(()=>call('bemo_finance_admin_action',[sid,'ADJUST_DOWN',{amount_minor:30000,currency:'IQD',reference:'adjust-1'},credit[3],randomUUID()],2),/BALANCE_INSUFFICIENT/);
+ await call('bemo_finance_admin_action',[sid,'ADJUST_DOWN',{amount_minor:1000,currency:'IQD',reference:'adjust-2'},credit[3],randomUUID()],2);assert.equal((await call('bemo_finance_admin_workspace',[sid],2)).balances[0].available_minor,19000);
+ await expectDenied(()=>call('bemo_finance_admin_workspace',[sid],1));assert.equal((await db.query('select count(*)::int n from bemo_private.balance_admin_log')).rows[0].n,2);
+});
+test('finance admin: frozen balance blocks new holds, bank data is versioned and card secrets rejected',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await adminFixture();await enableCommission();let o=(await ordered(v)).suborders[0];await creditFixture(o.store_id);const act=(action,payload={})=>call('bemo_finance_admin_action',[o.store_id,action,payload,'Administrative fixture reason for testing',randomUUID()],2);
+ await act('FREEZE');await assert.rejects(()=>action(o,'ACCEPT'),/BALANCE_FROZEN/);assert.equal(await stockOf(v),10);await act('UNFREEZE');
+ const account=(await call('bemo_finance_admin_workspace',[o.store_id],2)).account;
+ await act('BANK',{bank_name:'Test bank',beneficiary:'Synthetic merchant',account_number:'TEST123',iban:'',card_last4:'1234',notes:'Local fixture only',version:account.version});
+ assert.equal((await call('bemo_balance_workspace')).bank.card_last4,'1234');await assert.rejects(()=>act('BANK',{version:account.version,cvv:'123'}),/FINANCE_INVALID/);
+ o=await action(o,'ACCEPT');await act('PAUSE');assert.equal((await call('bemo_balance_workspace')).enabled,false);assert.equal((await call('bemo_balance_workspace')).balances[0].reserved_minor,15000);
+});
+async function creditFixture(store,amount=100000){await db.query("insert into bemo_private.balance_ledger(store_id,currency,kind,available_delta,reserved_delta,reference,reason) values($1,'IQD','CREDIT',$2,0,$3,'Synthetic approved credit')",[store,amount,randomUUID()]);}
+test('privacy: list, rejection and failed acceptance never disclose any delivery field',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);let o=(await ordered(v)).suborders[0];
+ for(const value of [await call('bemo_get_order',[o.id]),...(await call('bemo_list_orders',['seller']))])for(const secret of Object.values(deliveryFixture))if(secret)assert.ok(!JSON.stringify(value).includes(secret));
+ o=await action(o,'REJECT',0,'Seller cannot fulfil this order');const rejected=await call('bemo_get_order',[o.id]);assert.equal(rejected.delivery,null);assert.equal(rejected.country,null);
+});
+test('commission: disabled default allows acceptance with no funds or ledger changes',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);const o=(await ordered(v)).suborders[0];await action(o,'ACCEPT');const b=await call('bemo_balance_workspace');assert.equal(b.enabled,false);assert.equal(b.basis_points,500);assert.equal(b.transactions.length,0);
+});
+test('commission: insufficient funds rolls back stock, state and disclosure atomically',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await enableCommission();const o=(await ordered(v)).suborders[0];await assert.rejects(()=>action(o,'ACCEPT'),/BALANCE_INSUFFICIENT/);assert.equal(await stockOf(v),10);const read=await call('bemo_get_order',[o.id]);assert.equal(read.state,'PENDING_SELLER');assert.equal(read.delivery,null);assert.equal((await call('bemo_balance_workspace')).transactions.length,0);
+});
+test('commission: reserve excludes delivery, is once-only, and captures on delivery even when disabled later',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await enableCommission();let o=(await ordered(v)).suborders[0];await creditFixture(o.store_id);const key=randomUUID();let accepted=await call('bemo_order_action',[o.id,'ACCEPT','',o.version,key]);await call('bemo_order_action',[o.id,'ACCEPT','',o.version,key]);let b=await call('bemo_balance_workspace');assert.equal(b.balances[0].available_minor,85000);assert.equal(b.balances[0].reserved_minor,15000);assert.equal(b.transactions.filter(x=>x.kind==='RESERVE').length,1);await db.exec('update bemo_private.commission_settings set enabled=false');accepted=await action(accepted,'SHIP');await action(accepted,'DELIVER');b=await call('bemo_balance_workspace');assert.equal(b.balances[0].reserved_minor,0);assert.equal(b.balances[0].available_minor,85000);
+});
+test('commission: assigned support decides release independently from stock, retries cannot reverse decision',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await support();await enableCommission();let o=(await ordered(v)).suborders[0];await creditFixture(o.store_id);o=await action(o,'ACCEPT');o=await action(o,'REQUEST_CANCEL',1,'Please review cancellation after acceptance');const c=(await cases())[0];await call('bemo_support_case',[c.id,true],2);await decide(c,o,'APPROVE_CANCEL',false);assert.equal((await call('bemo_balance_workspace')).balances[0].reserved_minor,15000);const args=[c.id,true,'Support approves commission release independently'];await expectDenied(()=>call('bemo_resolve_commission_hold',args,1));await call('bemo_resolve_commission_hold',args,2);await call('bemo_resolve_commission_hold',args,2);assert.equal(await stockOf(v),8);const b=await call('bemo_balance_workspace');assert.equal(b.balances[0].available_minor,100000);assert.equal(b.balances[0].reserved_minor,0);await assert.rejects(()=>call('bemo_resolve_commission_hold',[c.id,false,args[2]],2),/REQUEST_CONFLICT/);
+});
+test('commission: rule changes require admin and version, snapshot protects existing orders and product override wins',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await onboard(2);const args=[null,700,0,null,1,'Approved test global rate change'];await expectDenied(()=>call('bemo_save_commission_rule',args));await db.query("insert into bemo_private.user_roles(user_id,role) select id,'superadmin' from bemo_private.app_users where auth_subject=$1",[users[2]]);let o=(await ordered(v)).suborders[0];await call('bemo_save_commission_rule',args,2);await assert.rejects(()=>call('bemo_save_commission_rule',args,2),/VERSION_CONFLICT/);assert.equal((await db.query('select sum(amount_minor)::int n from bemo_private.order_commission_quotes')).rows[0].n,15000);const product=o.items[0].product_id;await call('bemo_save_commission_rule',[product,0,200,'IQD',0,'Free promotional fee override test'],2);const next=(await ordered(v)).suborders[0];assert.equal((await db.query('select sum(q.amount_minor)::int n from bemo_private.order_commission_quotes q join bemo_private.order_lines l on l.id=q.line_id where l.suborder_id=$1',[next.id])).rows[0].n,400);await creditFixture(o.store_id);assert.equal((await call('bemo_balance_workspace',[],1).catch(()=>({transactions:[]}))).transactions.length,0);await assert.rejects(()=>db.exec("update bemo_private.balance_ledger set reason='tamper'"),/LEDGER_IMMUTABLE/);
 });

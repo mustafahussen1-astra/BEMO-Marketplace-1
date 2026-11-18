@@ -105,3 +105,11 @@ html[data-theme=dark] .feature-panel :is(h2,p,a){color:var(--ink)}
 .primary-button,.secondary-button,.language-button{border-radius:10px}
 .primary-button:focus-visible,.secondary-button:focus-visible,.language-button:focus-visible,.workspace-nav a:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 @media(max-width:800px){.account-header .header-row{min-height:68px}.live-main{padding-block:18px 36px}.account-card,.live-main .account-card{padding:16px}.live-grid{gap:9px}.order-list article{padding:14px}}
+
+.workspace-switch{padding:7px 12px;border:1px solid #ff7800;border-radius:9px;display:inline-flex;align-items:center;gap:6px;font-weight:700}.workspace-switch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}[data-workspace=seller] .workspace-nav{border-bottom:3px solid #ff7800}.order-locked,.order-unlocked{padding:16px;border-radius:12px;white-space:pre-line}.order-locked{background:#fff4df;border:1px dashed #e9a223;color:#71450b}.order-unlocked{background:#e3f6ee;color:#087953;font-weight:700}.delivery-detail{line-height:1.9;white-space:pre-line}.order-items{padding-inline-start:22px}.order-items li{padding-block:9px;border-bottom:1px solid var(--border,#e9e4db)}.workspace-nav a[hidden]{display:none}
+
+.staff-links{display:inline-flex;gap:12px;align-items:center}.staff-links a{display:inline-flex;gap:5px;align-items:center}.staff-links svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2}.balance-page .account-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.balance-field{display:flex;flex-direction:column;gap:6px;min-width:0}.balance-field input,.balance-field select,.balance-field textarea{width:100%;box-sizing:border-box}.balance-page #workspace>.account-card{margin-block:12px}.balance-page details{margin-block:16px}.balance-page summary{cursor:pointer;font-weight:700;margin-bottom:12px}@media(max-width:650px){.balance-page .account-form{grid-template-columns:1fr}.staff-links{gap:8px}}
+
+@media(max-width:800px){.seller-sidebar{display:none}.seller-layout{grid-template-columns:minmax(0,1fr)}}
+
+.account-header [hidden]{display:none!important}.order-line-summary{font-weight:600}
