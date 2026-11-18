@@ -88,6 +88,22 @@ async function mediaFor(p,i=0){
 }
 const publicProducts=()=>asRole('anon',{},'select public.bemo_list_products() as value').then(r=>r[0].value);
 
+test('homepage discovery: staff-only editing, visible targets and withdrawal',async()=>{
+ const {v}=await stockedMerchant();
+ const sid=(await db.query('select id from bemo_private.stores limit 1')).rows[0].id;
+ const feed=async()=>(await asRole('anon',{},'select public.bemo_discovery_feed() as rows'))[0].rows;
+ const brand=['brand',sid,'Test brand',null,null,true,1];
+ await assert.rejects(()=>call('bemo_set_discovery_entry',brand),/ADMIN_REQUIRED/);
+ await adminFixture();
+ await call('bemo_set_discovery_entry',brand,2);
+ await call('bemo_set_discovery_entry',['offer',v.id,null,999999,'IQD',true,2],2);
+ assert.deepEqual((await feed()).map(row=>row.kind),['brand','offer']);
+ await call('bemo_set_discovery_entry',['offer',v.id,null,1,'IQD',true,2],2);
+ assert.deepEqual((await feed()).map(row=>row.kind),['brand']);
+ await call('bemo_set_discovery_entry',[...brand.slice(0,5),false,1],2);
+ assert.deepEqual(await feed(),[]);
+});
+
 test('delivery drafts: owner isolation, versions, duplicates and bounded validation',async()=>{
  await merchant();await merchant(1);
  const rule={country:'iq',region:' Baghdad ',label:'Baghdad',fee_minor:5000000,min_days:1,max_days:3};

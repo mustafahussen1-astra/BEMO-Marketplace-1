@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"></head>
+<body><header class="account-header"><div class="account-container"><a href="index.html" id="cartLink">BEMO</a> <button id="languageButton">English</button></div></header>
+<main class="account-container"><h1 data-t="title">مركز الإدارة</h1><p id="status" role="status"></p><p id="error" role="alert" hidden></p>
+<section id="gate"><a data-route="account.html" data-t="signin"></a></section>
+<div id="workspace" hidden><section id="adminControls" class="account-card" hidden>
+<nav><a data-route="balance.html" data-t="finance"></a> · <a id="supportLink" data-t="support"></a></nav>
+<h2 data-t="discovery"></h2><form id="entry" class="account-form">
+<label><span data-t="section"></span><select name="kind"><option value="brand" data-t="brand"></option><option value="verified" data-t="verified"></option><option value="offer" data-t="offer"></option></select></label>
+<label><span id="targetLabel"></span><input name="target" required dir="ltr" pattern="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"></label>
+<label id="brandField"><span data-t="brandName"></span><input name="label" maxlength="100"></label>
+<div id="offerFields" hidden><label><span data-t="former"></span><input name="former" inputmode="decimal"></label>
+<label><span data-t="currency"></span><select name="currency"></select></label></div>
+<label><span data-t="position"></span><input name="position" type="number" value="0" required></label>
+<label><input type="checkbox" name="enabled" checked><span data-t="visible"></span></label>
+<button class="primary-button" data-t="save"></button></form></section></div></main>
+<script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="admin-page.js"></script></body></html>

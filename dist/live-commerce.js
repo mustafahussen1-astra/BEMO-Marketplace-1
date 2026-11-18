@@ -29,5 +29,14 @@
   if(!s||!UUID.test(s.id)||s.slug!==slug||typeof s.title!=='string'||typeof s.description!=='string'||typeof s.headline!=='string'||typeof s.location_label!=='string'||!Number.isSafeInteger(s.product_count)||s.product_count<0||!Array.isArray(s.categories)||s.categories.some(c=>!categories.includes(c))||(s.currency!==null&&!/^[A-Z]{3}$/.test(s.currency))||(s.delivery_fee_minor!==null&&(!Number.isSafeInteger(s.delivery_fee_minor)||s.delivery_fee_minor<0)))throw Error('RESPONSE_INVALID');
   return {id:s.id,slug:s.slug,title:s.title,description:s.description,headline:s.headline,location_label:s.location_label,product_count:s.product_count,categories:s.categories,currency:s.currency,delivery_fee_minor:s.delivery_fee_minor};
  }
- window.BemoLive=Object.freeze({catalog,product,store,query,filters,priceMinor,imageUrl,money,digits,categories,currencies,cart:()=>cart.map(x=>({...x})),set,add,clear(){cart=[];save();}});
+ async function discoveryFeed(signal) {
+   const rows = await request('/rest/v1/rpc/bemo_discovery_feed', {}, signal);
+   if (!Array.isArray(rows) || rows.length > 72) throw Error('RESPONSE_INVALID');
+   return rows.filter(row => row && typeof row.title === 'string' && (
+     row.kind === 'offer' ? UUID.test(row.product_id) && Number.isSafeInteger(row.price_minor)
+       && Number.isSafeInteger(row.former_price) && row.price_minor < row.former_price && /^[A-Z]{3}$/.test(row.currency)
+       : ['verified','brand'].includes(row.kind) && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(row.slug)
+   ));
+ }
+ window.BemoLive=Object.freeze({catalog,product,store,discoveryFeed,query,filters,priceMinor,imageUrl,money,digits,categories,currencies,cart:()=>cart.map(x=>({...x})),set,add,clear(){cart=[];save();}});
 })();

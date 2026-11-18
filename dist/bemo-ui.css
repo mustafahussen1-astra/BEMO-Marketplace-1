@@ -131,3 +131,6 @@ html[data-theme=dark] .feature-panel :is(h2,p,a){color:var(--ink)}
   .discovery-strips .feature-panel p { grid-column: 1; }
   .discovery-strips .feature-panel a { grid-column: 2; grid-row: 1 / 3; }
 }
+.discovery-strips .strip-items { grid-column: 1 / -1; display: flex; gap: 8px; overflow-x: auto; min-width: 0; }
+.discovery-strips .strip-items[hidden] { display: none; }
+.discovery-strips .strip-items a { flex: none; gap: 6px; border: 1px solid var(--border); background: var(--surface); padding-inline: 12px; border-radius: 8px; }

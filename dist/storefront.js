@@ -88,6 +88,35 @@
     });
   }
 
+  let discoveryEntries = [];
+  let stripStatus = 'loading';
+  function renderStrips() {
+    for (const [kind, linkId] of [['brand','brandsBrowse'],['verified','verifiedBrowse'],['offer','discountBrowse']]) {
+      const panel = document.getElementById(linkId).parentElement;
+      const message = panel.querySelector('p');
+      let items = panel.querySelector('.strip-items');
+      if (!items) {
+        items = document.createElement('div');
+        items.className = 'strip-items';
+        panel.append(items);
+      }
+      const cards = discoveryEntries.filter(row => row.kind === kind).map(row => {
+        const link = document.createElement('a');
+        link.textContent = row.title;
+        link.href = kind === 'offer' ? 'product.html?' + new URLSearchParams({id:row.product_id,lang}) : searchUrl({store:row.slug});
+        if (kind === 'offer') {
+          const oldPrice = document.createElement('del');
+          oldPrice.textContent = window.BemoLive.money(row.former_price,row.currency,lang);
+          link.append(' ', oldPrice, ' ', window.BemoLive.money(row.price_minor,row.currency,lang));
+        }
+        return link;
+      });
+      items.replaceChildren(...cards);
+      items.hidden = !cards.length;
+      message.hidden = Boolean(cards.length);
+      message.textContent = t(stripStatus === 'ready' ? message.dataset.t : stripStatus);
+    }
+  }
   function renderDiscovery() {
     let rows = products.filter(product => (category === 'all' || product.category === category) && (!savedOnly || state.saved.includes(product.id)));
     if ($('#homeSort').value === 'low') rows.sort((a,b) => a.currency.localeCompare(b.currency)||a.price - b.price);
@@ -129,6 +158,7 @@
     $('#marketShortcuts').innerHTML = ['bags','watches','perfume','shoes','phones','toys'].map(key => `<a href="${searchUrl({q:t(key)})}">${t(key)} <span aria-hidden="true">↗</span></a>`).join('');
     $('#marketShortcuts').setAttribute('aria-label',t('categories'));
     $('#discountBrowse').href=searchUrl(); $('#brandsBrowse').href=searchUrl(); $('#verifiedBrowse').href='stores.html?lang='+lang;
+    renderStrips();
     $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
     $('#storesGrid').innerHTML = window.BEMO_STORES.length ? window.BEMO_STORES.map(store => {
       const rows = products.filter(product => product.store_slug === store.slug);
@@ -215,5 +245,9 @@
   window.addEventListener('bemo:saved', showSaved);
   window.addEventListener('bemo:browse', event => browse(event.detail?.category));
   render();
+  window.BemoLive.discoveryFeed().then(rows => {
+    discoveryEntries = rows;
+    stripStatus = 'ready';
+  }).catch(() => { stripStatus = 'loadError'; }).finally(renderStrips);
   if (savedOnly) $('#discover').scrollIntoView();
 })();
