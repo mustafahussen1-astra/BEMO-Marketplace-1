@@ -738,3 +738,18 @@ test('checkout charges each destination once, binds the address, and rechecks fe
  assert.equal(order.total_minor,fresh.snapshot.total_minor);
  assert.equal(order.suborders.find(s=>s.store_id===a.p.store_id).delivery_fee_minor,650);
 });
+
+test('admin console enforces roles, handles moderation and sends notifications once',async()=>{
+ const {p}=await stockedMerchant();await onboard(1);await adminFixture();
+ const directory=(section,i=2)=>call('bemo_console',[section,'',0],i);
+ await assert.rejects(()=>directory('accounts',1),/ADMIN_REQUIRED/);
+ const op=(action,id,key=randomUUID())=>call('bemo_console_action',[action,id,'Console test message',key],2);
+ const account=(await directory('accounts')).rows.find(x=>x.related);
+ await op('product_suspend',p.id);assert.equal((await directory('products')).rows[0].status,'SUSPENDED');
+ await op('product_restore',p.id);await op('verify',p.store_id);assert.equal((await directory('stores')).rows[0].related,'APPROVED');
+ await op('reject',p.store_id);await op('store_suspend',p.store_id);await op('store_restore',p.store_id);
+ const key=randomUUID();await op('notify',account.id,key);await op('notify',account.id,key);
+ assert.equal((await call('bemo_notifications')).filter(x=>x.body==='Console test message').length,1);
+ await op('broadcast',null);await op('account_suspend',account.id);await op('account_restore',account.id);
+ assert.equal((await directory('log')).rows.length,10);
+});

@@ -18,9 +18,10 @@
       const access = await request('bemo_workspace_access');
       if (!access.admin) throw {code:'ADMIN_REQUIRED'};
       w.$('adminControls').hidden = false;
+      await loadDirectory(request);
     }),
-    onClear: () => { w.$('adminControls').hidden = true; form.reset(); layout(); },
-    onLanguage: layout
+    onClear: () => { w.$('adminControls').hidden = true; data=null;query='';page=0;section='accounts';draw();form.reset(); layout(); },
+    onLanguage: () => {layout();draw();}
   });
   function layout() {
     const offer = fields.kind.value === 'offer';
@@ -44,5 +45,41 @@
       });
     },'saving');
   });
+const sections={accounts:['الحسابات','Accounts'],stores:['المتاجر والتوثيق','Stores & verification'],products:['المنشورات','Listings'],orders:['الطلبات','Orders'],log:['سجل الإدارة','Admin history']};
+const operations={account_suspend:['تعليق الحساب','Suspend account'],account_restore:['تفعيل الحساب','Restore account'],store_suspend:['إخفاء المتجر','Hide store'],store_restore:['إعادة المتجر','Restore store'],product_suspend:['إخفاء المنشور','Hide listing'],product_restore:['إعادة إلى المسودة','Restore to draft'],verify:['اعتماد التوثيق','Approve verification'],reject:['رفض التوثيق','Reject verification'],notify:['إشعار خاص','Direct notification'],broadcast:['إشعار لجميع الحسابات النشطة','Notify all active accounts']};
+let section='accounts',page=0,query='',data=null;
+Object.assign(words,sections,operations,{search:['بحث بالاسم أو المعرّف','Search by name or ID'],cases:['شكاوى مفتوحة','Open cases'],empty:['لا توجد نتائج','No results'],next:['التالي','Next'],prev:['السابق','Previous']});
+function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;}
+function button(label,fn){const b=el('button',label,'secondary-button');b.type='button';b.onclick=fn;return b;}
+async function loadDirectory(request){data=await request('bemo_console',{section_name:section,search_text:query,page_num:page});draw();}
+function refresh(){w.run(loadDirectory);}
+function operate(op,row){
+ const promptText=w.lang()==='ar'?'اكتب نص الإشعار أو سبب القرار':'Enter notification text or decision reason';
+ const reason=window.prompt(w.t(op)+' · '+(row?.title||'BEMO')+'\n'+promptText)?.trim();
+ if(!reason||reason.length<3||reason.length>500)return;
+ if(!window.confirm(w.t(op)+'\n'+reason))return;
+ const key=crypto.randomUUID();
+ w.run(async request=>{await request('bemo_console_action',{operation:op,target:row?.id||null,reason,request_id:key});await loadDirectory(request);},'saving');
+}
+function draw(){
+ const root=w.$('directory');root.replaceChildren();if(!data)return;
+ const metrics=el('div',null,'console-metrics'),nav=el('nav',null,'form-actions');
+ for(const k of Object.keys(sections)){
+ const b=button(w.t(k)+' · '+(data.counts?.[k]||0),()=>{section=k;page=0;query='';refresh();});
+ b.setAttribute('aria-pressed',String(k===section));metrics.append(b);}
+ metrics.append(el('span',w.t('cases')+' · '+data.cases));
+ const search=el('form',null,'form-actions'),input=el('input');input.value=query;input.placeholder=w.t('search');input.setAttribute('aria-label',w.t('search'));input.maxLength=160;
+ const submit=el('button',w.t('search'),'primary-button');search.append(input,submit);search.onsubmit=e=>{e.preventDefault();query=input.value.trim();page=0;refresh();};
+ root.append(metrics,el('h2',w.t(section)),search);
+ if(section==='accounts')root.append(button(w.t('broadcast'),()=>operate('broadcast')));
+ if(!data.rows.length)root.append(el('p',w.t('empty')));
+ for(const row of data.rows){const article=el('article',null,'console-entry'),actions=el('div',null,'form-actions');
+ article.append(el('strong',row.title),el('p',[row.status,row.detail,row.related].filter(Boolean).join(' · ')),el('small',row.id+' · '+new Date(row.created_at).toLocaleDateString(w.lang())));
+ const choices=section==='accounts'?['notify',row.status==='ACTIVE'?'account_suspend':'account_restore']:section==='stores'?[row.status==='ACTIVE'?'store_suspend':'store_restore','verify','reject']:section==='products'?[row.status==='SUSPENDED'?'product_restore':'product_suspend']:[];
+ for(const op of choices)actions.append(button(w.t(op),()=>operate(op,row)));
+ article.append(actions);root.append(article);}
+ if(page)nav.append(button(w.t('prev'),()=>{page--;refresh();}));
+ if(data.rows.length===25)nav.append(button(w.t('next'),()=>{page++;refresh();}));root.append(nav);
+}
   w.start();
 })();
