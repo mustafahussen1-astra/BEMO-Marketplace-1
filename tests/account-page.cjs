@@ -21,6 +21,12 @@ function boot(initial = guest, callback = false, apiPresent = true, hash = '') {
     nodes.get('pageLoading').heading = element('loadingHeading');
     for (const [formId, names, panel] of [['onboardingForm',{display_name:'onboardingName',locale:'onboardingLocale'},'onboardingPanel'],['profileForm',{display_name:'profileName',locale:'profileLocale'},'profilePanel'],['storeForm',{title:'storeName',slug:'storeSlug',description:'storeDescription'},'storePanel']]) {
       const form = nodes.get(formId), submit = element(formId + 'Submit');
+      if (formId === 'storeForm') {
+        for (const id of ['logoFile','coverFile','identityFile','legalName','sellerPhone','sellerAddress']) names[id]=id;
+        for (const id of ['logoFile','coverFile','identityFile']) nodes.get(id).files=[];
+        nodes.get('identityFile').files=[{name:'fixture.pdf',type:'application/pdf',size:120}];
+        element('sellerAgreement').checked=true; names.sellerAgreement='sellerAgreement';
+      }
       form.parent = nodes.get(panel); submit.parent = form; form.elements = Object.fromEntries(Object.entries(names).map(([name,id]) => [name,nodes.get(id)]));
       Object.values(form.elements).forEach(input => {input.parent = form;});
       form.querySelector = () => submit;
@@ -42,7 +48,7 @@ function boot(initial = guest, callback = false, apiPresent = true, hash = '') {
   };
   const location = {href:'https://bemo.example/' + (callback ? 'auth-callback.html' : 'account.html') + hash,hash,replace:value=>navigation.push(value)};
   const document = {body:{dataset:{accountView:callback?'callback':'account'}},documentElement:{},getElementById:id=>{assert(nodes.has(id),'Missing required element '+id);return nodes.get(id);},querySelectorAll:selector=>selector === '.account-form input' ? forms.flatMap(form=>Object.values(form.elements)) : []};
-  const context = {window:{BemoAccount:apiPresent?api:undefined},document,location,URL,localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},history:{replaceState(){}}};
+  const context = {window:{BemoAccount:apiPresent?api:undefined,confirm:()=>true},document,location,URL,localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},history:{replaceState(){}}};
   vm.runInNewContext(fs.readFileSync(path.join(root,'account-page.js'),'utf8'),context,{filename:'account-page.js'});
   return {nodes,document,location,navigation,actions,get focused(){return focused;},get callbackCalls(){return callbackCalls;},emit(next){current=clone(next);subscriber?.(clone(next));},click(id){nodes.get(id).listeners.click?.();},submit(id){const form=nodes.get(id);form.listeners.submit({preventDefault(){},currentTarget:form});}};
 }
