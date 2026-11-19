@@ -78,6 +78,7 @@
     const saved = state.saved.includes(product.id);
     const hasDiscount = product.oldPrice && product.oldPrice > product.price;
     const discountPercent = hasDiscount ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+    const fakeSold = Math.floor(((product.id.charCodeAt ? product.id.charCodeAt(0) : product.id) * 17) % 180) + 25;
     return `<article class="product-card">
       <div class="product-photo">
         <button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">
@@ -88,22 +89,27 @@
           ${icon('heart')}
         </button>
       </div>
-      <div class="product-info">
+      <div class="product-content">
         <div class="product-meta-row">
           <a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">🏪 ${escape(product.store)}</a>
           <span class="product-rating">★ 4.8</span>
         </div>
-        <button type="button" class="product-name" data-home-product="${product.id}">${escape(name(product))}</button>
-        <div class="product-price-row">
-          <p class="product-price">
-            <span>${window.BemoLive.money(product.priceMinor,product.currency,lang)}</span>
-            ${hasDiscount ? `<del class="old-price">${window.BemoLive.money(Math.round(product.oldPrice * 100), product.currency, lang)}</del>` : ''}
-          </p>
+        <button type="button" class="product-title" data-home-product="${product.id}">${escape(name(product))}</button>
+        <div class="price-row">
+          <span class="product-price ${hasDiscount ? 'is-discounted' : ''}">${window.BemoLive.money(product.priceMinor,product.currency,lang)}</span>
+          ${hasDiscount ? `<del class="old-price">${window.BemoLive.money(Math.round(product.oldPrice * 100), product.currency, lang)}</del>` : ''}
         </div>
-        <div class="product-buy">
-          <button type="button" class="product-add-btn" data-home-add="${product.id}">
+        ${hasDiscount ? `
+        <div class="sold-progress-box">
+          <span class="lightning-deal-tag">⚡ ${lang==='ar'?'عرض خاطف':'Deal'}</span>
+          <div class="sold-bar"><div class="sold-fill" style="width: 72%;"></div></div>
+          <span>🔥 ${fakeSold} ${lang==='ar'?'بيع':'sold'}</span>
+        </div>` : ''}
+        <div class="product-footer">
+          <span style="font-size:11px;color:var(--bemo-success);font-weight:600;">✓ ${lang==='ar'?'الدفع عند الاستلام':'COD'}</span>
+          <button type="button" class="btn-cart" data-home-add="${product.id}">
             <span>${t('add')}</span>
-            <span class="plus-icon">+</span>
+            <span>+</span>
           </button>
         </div>
       </div>

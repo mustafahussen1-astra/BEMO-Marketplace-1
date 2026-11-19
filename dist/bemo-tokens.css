@@ -687,3 +687,127 @@ html[lang="ar"] body, html[dir="rtl"] body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   TEMU-STYLE COMMERCE HEADER & TRENDING ENHANCEMENTS
+   ========================================================================== */
+.search-and-trending {
+  flex: 1;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.search-form {
+  display: flex;
+  border: 2px solid var(--bemo-primary) !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+  background: var(--bemo-surface);
+  box-shadow: 0 2px 8px rgba(255, 80, 0, 0.12);
+}
+.search-form input[type="search"] {
+  flex: 1;
+  border: none !important;
+  padding: 0 18px;
+  font-size: 13px;
+  outline: none;
+  background: transparent;
+  min-height: 40px;
+}
+.search-form button {
+  background: var(--bemo-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 0 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+.search-form button:hover {
+  background: var(--bemo-primary-hover) !important;
+}
+
+.trending-keywords {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--bemo-muted);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+.trending-keywords::-webkit-scrollbar { display: none; }
+.trending-keywords a {
+  color: var(--bemo-muted);
+  text-decoration: none;
+  background: var(--bemo-surface-secondary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--bemo-border);
+  transition: all 0.15s;
+}
+.trending-keywords a:hover {
+  color: var(--bemo-primary);
+  border-color: var(--bemo-primary);
+  background: var(--bemo-primary-soft);
+}
+
+.temu-features-banner {
+  background: #FFF7F0;
+  border-bottom: 1px solid #FFE4D1;
+  font-size: 12px;
+  padding: 6px 0;
+}
+[data-theme="dark"] .temu-features-banner {
+  background: #1e1713;
+  border-bottom: 1px solid #3d2c22;
+}
+.temu-features-inner {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--bemo-text);
+}
+.temu-features-inner span strong {
+  color: var(--bemo-primary);
+}
+
+/* Sold Count Progress Bar & Fire Tag */
+.sold-progress-box {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--bemo-muted);
+}
+.sold-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--bemo-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sold-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6a00, #ff2a00);
+  border-radius: 3px;
+}
+.lightning-deal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #fff0f0;
+  color: var(--bemo-sale);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ffcccc;
+}

@@ -3,7 +3,40 @@
 <body data-bemo-shell="modern">
 <div class="review-strip"><span data-t="review"></span><button type="button" data-home-action="about" data-t="aboutPreview"></button></div>
 <div class="utility"><div class="container utility-inner"><span data-t="destination"></span><div><button type="button" data-home-action="help" data-t="help"></button><button id="language">English</button></div></div></div>
-<header class="main-header"><div class="container header-inner"><a class="preview-logo" href="index.html" aria-label="BEMO">BEMO<span>●</span></a><form class="search-form" action="market.html" role="search"><label class="sr-only" for="homeQuery" data-t="search"></label><input id="homeQuery" name="q" type="search" data-placeholder="placeholder"><input name="lang" id="searchLang" type="hidden" value="ar"><button type="submit"><span data-icon="search"></span><span data-t="search"></span></button></form><nav class="header-actions"><button type="button" id="mobileLanguage" class="mobile-language" aria-label="Switch to English">English</button><button type="button" data-home-action="account" data-icon-label="user" data-t="account"></button><button type="button" id="savedButton" data-home-action="saved" data-icon-label="heart" data-t="saved"></button><button type="button" data-home-action="orders" data-icon-label="package" data-t="orders"></button><button type="button" class="cart-link" data-home-action="cart" data-icon-label="bag" data-t="cart"></button></nav></div></header>
+<header class="main-header"><div class="container header-inner"><a class="preview-logo" href="index.html" aria-label="BEMO">BEMO<span>●</span></a>
+  <div class="search-and-trending">
+    <form class="search-form" action="market.html" role="search">
+      <label class="sr-only" for="homeQuery" data-t="search"></label>
+      <input id="homeQuery" name="q" type="search" data-placeholder="placeholder">
+      <input name="lang" id="searchLang" type="hidden" value="ar">
+      <button type="submit"><span data-icon="search"></span><span data-t="search"></span></button>
+    </form>
+    <div class="trending-keywords" aria-label="الكلمات الرائجة">
+      <span>🔥 الأكثر بحثاً:</span>
+      <a href="market.html?q=سماعات">سماعات لاسلكية</a>
+      <a href="market.html?q=ساعات">ساعات ذكية</a>
+      <a href="market.html?q=أحذية">أحذية رياضية</a>
+      <a href="market.html?q=حقائب">حقائب جلدية</a>
+      <a href="market.html?q=عطور">عطور فاخرة</a>
+    </div>
+  </div>
+  <nav class="header-actions">
+    <button type="button" id="mobileLanguage" class="mobile-language" aria-label="Switch to English">English</button>
+    <button type="button" data-home-action="account" data-icon-label="user" data-t="account"></button>
+    <button type="button" id="savedButton" data-home-action="saved" data-icon-label="heart" data-t="saved"></button>
+    <button type="button" data-home-action="orders" data-icon-label="package" data-t="orders"></button>
+    <button type="button" class="cart-link" data-home-action="cart" data-icon-label="bag" data-t="cart"></button>
+  </nav>
+</div>
+<div class="temu-features-banner">
+  <div class="container temu-features-inner">
+    <span>🛡️ <strong>دفع عند الاستلام</strong> لجميع الطلبات</span>
+    <span>🚚 <strong>شحن مباشر وسريع</strong> من المتاجر</span>
+    <span>⚡ <strong>عروض يومية حصرية</strong> تصل حتى 70%</span>
+    <span>🔒 <strong>ضمان استلام الطلب</strong> أو استرداده</span>
+  </div>
+</div>
+</header>
 <div class="nav-shell"><nav class="container category-nav"><details id="allCategories"><summary><span data-icon="menu"></span><span data-t="allCategories"></span></summary><div id="categoryFlyout"></div></details><div id="topCategories"></div><a class="nav-offer" id="offersLink" href="search.html?offer=1" data-t="deals"></a><a class="merchant-link" href="seller.html" data-t="merchant">المتجر</a></nav></div>
 <main class="container">
 <section class="campaigns" aria-labelledby="campaignHeading"><aside id="homeCategoryRail" class="category-rail"></aside><div class="main-campaign"><div class="campaign-copy"><span class="sample-pill" data-t="campaignSample"></span><h1 id="campaignHeading" data-t="hero"></h1><p data-t="heroCopy"></p><a class="button primary" id="heroLink" href="search.html"><span data-t="explore"></span><span class="direction-arrow">←</span></a></div><div class="campaign-photo"><img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=85" alt="" fetchpriority="high"><span class="photo-note" data-t="illustrative"></span></div></div><div class="side-campaigns"><a class="mini-campaign tech-campaign" data-category="electronics"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="techTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="techImage" alt=""></a><a class="mini-campaign fashion-campaign" data-category="fashion"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="fashionTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="fashionImage" alt=""></a></div></section>
