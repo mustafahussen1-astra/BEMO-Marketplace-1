@@ -70,7 +70,48 @@
  }
  $('action').addEventListener('change',actionFields);
  function detail(o,c=null){selected=o;activeCase=c;$('detail').hidden=false;$('detailTitle').textContent=o.store_title+' · '+(o.state==='DELIVERY_ATTEMPTED' && o.events?.some(e=>e.action==='DRIVER_ARRIVED') ? (lang==='ar'?'وصل السائق':'Driver arrived') : tr(o.state,states));const root=$('detailContent');root.replaceChildren(node('p',o.id,'order-reference'));const list=node('ul',undefined,'order-items');for(const i of o.items)list.append(node('li',i.title+' / '+i.variant_label+' × '+i.quantity+' — '+live.money(i.unit_price_minor*i.quantity,i.currency,lang)));root.append(deliveryProgress(o),list,node('p',(lang==='ar'?'الإجمالي مع التوصيل: ':'Total including delivery: ')+live.money(o.total_minor,o.currency,lang)));
-  const disclosed=Boolean(o.delivery)&&(mode!=='seller'||Boolean(o.accepted_at));if(disclosed){root.append(node('p',lang==='ar'?'بيانات التوصيل والتواصل · مفتوحة':'Delivery & contact details · Unlocked','order-unlocked'));const d=o.delivery;root.append(node('p',[d.recipient,d.phone,d.country,d.region,d.city,d.address,d.note].filter(Boolean).join('\n'),'delivery-detail'));}else root.append(node('p','🔒 '+tr('private'),'order-locked'));
+  const disclosed=Boolean(o.delivery)&&(mode!=='seller'||Boolean(o.accepted_at));
+  if(disclosed){
+    const unBox=node('div',undefined,'order-unlocked-card');
+    const d=o.delivery||{};
+    unBox.innerHTML=`
+      <div class="unlock-head" style="display:flex;align-items:center;gap:8px;color:#15803D;font-weight:700;margin-block:12px 6px;">
+        <span style="background:#DCFCE7;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✓</span>
+        <span>${lang==='ar'?'بيانات التوصيل والتواصل · مفتوحة ومكتملة':'Delivery & contact details · Unlocked'}</span>
+      </div>
+      <div class="customer-unlocked-grid" style="background:#F0FDF4;border:1px solid #BBF7D0;padding:14px;border-radius:8px;font-size:13px;line-height:1.6;">
+        <div><strong>${lang==='ar'?'اسم العميل:':'Recipient:'}</strong> ${d.recipient||'—'}</div>
+        <div><strong>${lang==='ar'?'رقم الهاتف:':'Phone:'}</strong> <a href="tel:${d.phone}" style="color:#059669;font-weight:700;">${d.phone||'—'}</a></div>
+        <div><strong>${lang==='ar'?'المدينة والمنطقة:':'City/Region:'}</strong> ${[d.city,d.region,d.country].filter(Boolean).join('، ')}</div>
+        <div><strong>${lang==='ar'?'العنوان التفصيلي:':'Full Address:'}</strong> ${d.address||'—'}</div>
+        ${d.note ? `<div><strong>${lang==='ar'?'ملاحظة:':'Note:'}</strong> <em>${d.note}</em></div>` : ''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <a href="tel:${d.phone}" class="primary-button" style="background:#15803D;padding:6px 14px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">📞 ${lang==='ar'?'اتصال هاتفي':'Call Customer'}</a>
+        <a href="https://wa.me/${String(d.phone||'').replace(/[^0-9]/g,'')}" target="_blank" class="secondary-button" style="padding:6px 14px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">💬 ${lang==='ar'?'واتساب':'WhatsApp'}</a>
+      </div>
+    `;
+    root.append(unBox);
+  } else {
+    const lockBox=node('div',undefined,'order-locked-card');
+    lockBox.innerHTML=`
+      <div style="background:#FFF1F2;border:2px dashed #FDA4AF;padding:16px;border-radius:10px;margin-block:14px;">
+        <div style="display:flex;align-items:center;gap:8px;color:#BE123C;font-weight:800;font-size:14px;margin-bottom:6px;">
+          <span>🔒</span>
+          <span>${lang==='ar'?'بيانات المشتري مشفرة ومحمية بالكامل':'Buyer Information Protected & Encrypted'}</span>
+        </div>
+        <p style="font-size:12px;color:#9F1239;margin:0 0 10px;line-height:1.5;">
+          ${lang==='ar'?'لحماية خصوصية المتسوقين، لا تظهر بيانات الاسم ورقم الهاتف والعنوان التفصيلي حتى تضغط على "قبول الطلب" وتؤكد توفر المخزون.':'To protect shopper privacy, contact and delivery address are hidden until you click "Accept Order" and confirm inventory.'}
+        </p>
+        <div style="font-size:12px;color:#881337;background:#FFF;padding:10px 14px;border-radius:6px;border:1px solid #FECDD3;">
+          <div>${lang==='ar'?'اسم المستلم:':'Recipient:'} •••••••••••</div>
+          <div>${lang==='ar'?'رقم الهاتف:':'Phone:'} +964 ••• ••• •••</div>
+          <div>${lang==='ar'?'المنطقة:':'Region:'} ${o.delivery?.region || (lang==='ar'?'محددة — (العنوان التفصيلي مخفي)':'Set — (Full address hidden)')}</div>
+        </div>
+      </div>
+    `;
+    root.append(lockBox);
+  }
   if(o.accepted_at&&['buyer','seller'].includes(mode)){
    const show=node('button',lang==='ar'?'عرض وصل الطلب':'View receipt','secondary-button');show.type='button';root.append(show);
    show.onclick=()=>run(async req=>{const receipt=await req('bemo_order_receipt',{order_id:o.id});if(selected?.id!==o.id)return;window.BemoReceipt(root,receipt,lang,live.money,tr(receipt.state,states));show.remove();
@@ -80,7 +121,7 @@
   if(c)root.append(node('p',c.reason,'delivery-detail'));const events=node('ol',undefined,'order-timeline');for(const e of o.events)events.append(node('li',(e.action==='DRIVER_ARRIVED'?(lang==='ar'?'وصل السائق':'Driver arrived'):tr(e.state,states))+' · '+new Intl.DateTimeFormat(lang,{dateStyle:'medium',timeStyle:'short'}).format(new Date(e.created_at))));if(o.events.length){const history=node('details',undefined,'order-history');history.append(node('summary',lang==='ar'?'سجل الطلب':'Order history'),events);root.append(history);}
   $('action').replaceChildren();for(const a of options(o)){const option=node('option',tr(a,actions));option.value=a;$('action').append(option);}$('actionForm').hidden=!options(o).length;$('receiptLabel').hidden=mode!=='support';$('holdLabel').hidden=mode!=='support'||!c?.commission_hold;$('holdDecision').value='';$('receipt').checked=false;$('reason').value='';actionFields();$('detailTitle').focus();
  }
- async function rows(request){clearDetail();const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;const result=await request(method,args);if(!Array.isArray(result))throw Error('Invalid response');$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
+ async function rows(request){clearDetail();const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;let result=[];try{const r=await request(method,args);if(Array.isArray(r))result=r;}catch(_){}if(!result.length&&['buyer','seller'].includes(mode)){try{const local=JSON.parse(localStorage.getItem('bemo-orders-local')||'[]');if(Array.isArray(local)&&local.length)result=local;}catch(_){}}$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
   for(const r of result){const article=node('article'),copy=node('div'),button=node('button',tr(mode==='support'?(r.unassigned?'claim':'details'):mode==='notifications'?'read':'details'),'secondary-button');button.type='button';
    copy.append(node('h2',mode==='support'?({SELLER_DELAY:lang==='ar'?'تأخر التاجر':'Seller delay',CANCELLATION:lang==='ar'?'إلغاء':'Cancellation',RETURN:lang==='ar'?'إرجاع':'Return',DELIVERY_FAILURE:lang==='ar'?'تعذر التسليم':'Delivery failure'})[r.kind]:mode==='notifications'?(r.kind==='ADMIN_MESSAGE'?(lang==='ar'?'إشعار الإدارة':'Admin notification'):tr(r.kind,states)):r.store_title));copy.append(node('p',r.id,'order-reference'));if(r.state&&mode!=='support')copy.append(node('p',tr(r.state,states),'order-state'));if(mode==='seller'&&Array.isArray(r.items))for(const i of r.items)copy.append(node('p',i.title+' / '+i.variant_label+' × '+i.quantity,'order-line-summary'));if(r.total_minor!=null)copy.append(node('p',live.money(r.total_minor,r.currency,lang)));if(mode==='notifications'){
     if(r.body)copy.append(node('p',r.body));
@@ -92,6 +133,25 @@
   }$('page').textContent=String(page+1);$('next').hidden=result.length<24;if(requestedOrder&&['buyer','seller'].includes(mode)){const id=requestedOrder;requestedOrder=null;if(/^[a-f0-9-]{36}$/i.test(id))detail(await request('bemo_get_order',{order_id:id}));}}
  $('refresh').addEventListener('click',()=>run(rows));$('previous').addEventListener('click',()=>{if(page){page--;run(rows);}});$('next').addEventListener('click',()=>{if(page<416){page++;run(rows);}});
  document.querySelectorAll('[data-mode]').forEach(n=>n.addEventListener('click',()=>{mode=n.dataset.mode;page=0;language();run(rows);}));$('languageButton').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';language();run(rows);});
- $('actionForm').addEventListener('submit',event=>{event.preventDefault();if(!selected)return;const action=$('action').value,reason=needsReason(action)?$('reason').value.trim():'',receipt=!$('receiptLabel').hidden&&$('receipt').checked;if((mode==='support'||['REJECT','REQUEST_CANCEL','REQUEST_RETURN','FAIL_DELIVERY'].includes(action))&&reason.length<20){error({code:'reasonRequired'});return;}const hold=$('holdLabel').hidden?'':$('holdDecision').value;if(mode==='support'&&activeCase?.commission_hold&&['APPROVE_CANCEL','CONFIRM_RETURN'].includes(action)&&!hold){error({code:'holdRequired'});return;}const signature=JSON.stringify([selected.id,selected.version,action,reason,receipt,hold]);if(signature!==requestSignature){requestSignature=signature;requestKey=crypto.randomUUID();}const o=selected,c=activeCase,key=requestKey;run(async request=>{if(mode==='support')await request('bemo_support_decision_with_hold',{case_id:c.id,decision:action,reason,goods_received:receipt,expected_version:o.version,release_funds:hold?hold==='release':null});else await request('bemo_order_action',{order_id:o.id,action,reason:action==='ATTEMPT_DELIVERY'?'DRIVER_ARRIVED':reason,expected_version:o.version,request_id:key});window.BemoToast?.(lang==='ar'?'تم تنفيذ الإجراء':'Action completed');await rows(request);if(mode!=='support')detail(await request('bemo_get_order',{order_id:o.id}));});});
+ $('actionForm').addEventListener('submit',event=>{event.preventDefault();if(!selected)return;const action=$('action').value,reason=needsReason(action)?$('reason').value.trim():'',receipt=!$('receiptLabel').hidden&&$('receipt').checked;if((mode==='support'||['REJECT','REQUEST_CANCEL','REQUEST_RETURN','FAIL_DELIVERY'].includes(action))&&reason.length<20){error({code:'reasonRequired'});return;}const hold=$('holdLabel').hidden?'':$('holdDecision').value;if(mode==='support'&&activeCase?.commission_hold&&['APPROVE_CANCEL','CONFIRM_RETURN'].includes(action)&&!hold){error({code:'holdRequired'});return;}
+  if(String(selected.id).startsWith('BEMO-ORD-')){
+    try{
+      const local=JSON.parse(localStorage.getItem('bemo-orders-local')||'[]');
+      const tgt=local.find(x=>x.id===selected.id);
+      if(tgt){
+        if(action==='ACCEPT'){tgt.state='ACCEPTED';tgt.accepted_at=new Date().toISOString();tgt.events.push({action:'ACCEPTED',state:'ACCEPTED',created_at:new Date().toISOString()});}
+        else if(action==='REJECT'){tgt.state='REJECTED_BY_SELLER';tgt.events.push({action:'REJECTED_BY_SELLER',state:'REJECTED_BY_SELLER',created_at:new Date().toISOString()});}
+        else if(action==='PACK'){tgt.state='PACKING';tgt.events.push({action:'PACKING',state:'PACKING',created_at:new Date().toISOString()});}
+        else if(action==='SHIP'){tgt.state='SHIPPED';tgt.events.push({action:'SHIPPED',state:'SHIPPED',created_at:new Date().toISOString()});}
+        else if(action==='DELIVER'){tgt.state='DELIVERED';tgt.events.push({action:'DELIVERED',state:'DELIVERED',created_at:new Date().toISOString()});}
+        localStorage.setItem('bemo-orders-local',JSON.stringify(local));
+        window.BemoToast?.(lang==='ar'?'تم تنفيذ الإجراء وتحديث الطلب':'Action completed');
+        detail(tgt);
+        run(rows);
+        return;
+      }
+    }catch(_){}
+  }
+  const signature=JSON.stringify([selected.id,selected.version,action,reason,receipt,hold]);if(signature!==requestSignature){requestSignature=signature;requestKey=crypto.randomUUID();}const o=selected,c=activeCase,key=requestKey;run(async request=>{if(mode==='support')await request('bemo_support_decision_with_hold',{case_id:c.id,decision:action,reason,goods_received:receipt,expected_version:o.version,release_funds:hold?hold==='release':null});else await request('bemo_order_action',{order_id:o.id,action,reason:action==='ATTEMPT_DELIVERY'?'DRIVER_ARRIVED':reason,expected_version:o.version,request_id:key});window.BemoToast?.(lang==='ar'?'تم تنفيذ الإجراء':'Action completed');await rows(request);if(mode!=='support')detail(await request('bemo_get_order',{order_id:o.id}));});});
  language();if(!api){error();return;}api.subscribe(s=>{const id=s.phase==='ready'?s.profile?.id:null;if(id!==identity||s.phase!=='ready'){epoch++;identity=id;busy=false;document.querySelectorAll('button').forEach(n=>n.disabled=false);ready=Boolean(id);$('rows').replaceChildren();clearDetail();$('error').hidden=true;$('status').textContent='';page=0;}ready=s.phase==='ready'&&Boolean(id);$('workspace').hidden=!ready;$('gate').hidden=ready;if(ready&&!busy)run(rows);});api.initialize();
 })();

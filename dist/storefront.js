@@ -27,7 +27,7 @@
     dealsToday: ['عروض اليوم 🔥', "Today's Deals 🔥"],
     brands: ['الماركات والمتاجر', 'Brands & Stores'],
     newArrivals: ['وصل حديثاً', 'New Arrivals'],
-    sellerCenter: ['مركز التاجر', 'Seller Center'],
+    sellerCenter: ['المتجر', 'Store'],
     freeExpress: ['شحن مباشر وسريع', 'Free Express Delivery'],
     shopByCategory: ['تسوق حسب التصنيف', 'Shop by category'],
     catElectronics: ['الإلكترونيات', 'Electronics'],

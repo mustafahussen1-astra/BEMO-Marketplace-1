@@ -1,84 +1,459 @@
+/**
+ * BEMO Commercial Buyer Center, Multi-Vendor Cart & Checkout Controller
+ * Matches BEMOBuyerCenterCartCheckoutOrders.png
+ */
 (() => {
- 'use strict';const $=id=>document.getElementById(id),live=window.BemoLive,api=window.BemoAccount;
- const params=new URL(location.href).searchParams;let lang=params.get('lang')==='en'?'en':'ar',view=params.get('view')==='cart'||new URL(location.href).hash==='#cartSection'?'cart':'browse',page=1,store=params.get('store')||'',listing=[],controller,sequence=0,cartRevision=0,epoch=0,actor=null,ready=false,busy=false,quote=null,scope=null,pending=null;
- const filters=window.BemoCatalogFilters?.create($('catalogFilters'),params);
- const words={FILTER_CURRENCY_REQUIRED:['اختر عملة قبل تحديد السعر أو ترتيبه.','Choose a currency before filtering or sorting prices.'],FILTER_PRICE_INVALID:['أدخل نطاق سعر صحيحًا، وبعدد الكسور المناسب للعملة.','Enter a valid price range with the correct decimal places for the currency.'],browseView:['تصفح المنتجات','Browse products'],cartView:['السلة وإتمام الطلب','Cart & checkout'],buyerTitle:['مركز المشتري','Buyer center'],summary:['ملخص الطلب','Order summary'],grandTotal:['الإجمالي عند الاستلام','Total payable on delivery'],zeroCommission:['عمولة المنصة 0% · الدفع لكل تاجر عند الاستلام','0% platform commission · Pay each seller on delivery'],from:['ابتداءً من','From'],skip:['انتقل إلى المحتوى','Skip to content'],orders:['طلباتي','My orders'],account:['حسابي','Account'],kicker:['من متاجر BEMO','FROM BEMO STORES'],title:['اكتشافات يشاركها التجار','Good finds from independent stores'],intro:['منتجات ينشرها أصحاب المتاجر. سعر التوصيل يحدده كل تاجر، والدفع عند الاستلام لكل متجر على حدة.','Products listed by store owners. Each seller sets their delivery fee, with cash on delivery paid separately to each store.'],search:['بحث','Search'],all:['كل التصنيفات','All categories'],home:['المنزل','Home'],fashion:['الأزياء','Fashion'],electronics:['الإلكترونيات','Electronics'],beauty:['الجمال','Beauty'],sports:['الرياضة','Sports'],other:['أخرى','Other'],previous:['السابق','Previous'],next:['التالي','Next'],cart:['سلتك','Your bag'],stockNotice:['إضافة المنتج للسلة لا تحجز المخزون. يتأكد الطلب عند قبول التاجر وتوفر جميع القطع.','Adding to your bag does not reserve stock. The seller must accept while all items are available.'],quote:['مراجعة السعر والتوصيل','Review prices and delivery'],login:['سجّل الدخول لإتمام الطلب','Sign in to check out'],checkout:['مراجعة الطلب','Review your order'],recipient:['اسم المستلم','Recipient name'],phone:['رقم التواصل (غير موثق)','Contact phone (unverified)'],country:['الدولة','Country'],region:['المحافظة / المنطقة','Region'],city:['المدينة','City'],address:['العنوان التفصيلي','Full delivery address'],note:['ملاحظة توصيل (اختيارية)','Delivery note (optional)'],privacy:['لن يرى التاجر اسمك أو رقمك أو عنوانك التفصيلي حتى يقبل طلبه. المبلغ يُدفع للتاجر أو مندوبه عند الاستلام؛ لا تحصّل BEMO أي مبلغ.','The seller cannot see your name, phone or full address before accepting their order. Pay the seller or courier on delivery; BEMO does not collect money.'],confirm:['راجعت مبلغ كل متجر ورسوم توصيله وأوافق على إنشاء الطلب.','I reviewed each store’s amount and delivery fee and agree to place this order.'],place:['إنشاء الطلب — الدفع عند الاستلام','Place order — cash on delivery'],success:['أُرسل طلبك للتجار','Your order was sent to the sellers'],pending:['كل متجر يراجع طلبه بشكل مستقل؛ لم يُحجز المخزون بعد.','Each store reviews its order independently; stock has not yet been reserved.'],track:['متابعة الطلب','Track order'],empty:['لا توجد منتجات منشورة بعد. يضيف التجار منتجاتهم من مساحة متجري.','No products have been published yet. Sellers can add products from their store workspace.'],noMatch:['لا توجد منتجات تطابق هذا البحث.','No products match this search.'],loading:['جارٍ التحميل…','Loading…'],add:['أضف للسلة','Add to bag'],details:['تفاصيل المنتج','Product details'],delivery:['التوصيل','Delivery'],total:['المبلغ المستحق لهذا المتجر','Amount owed to this store'],remove:['إزالة','Remove'],emptyCart:['سلتك فارغة.','Your bag is empty.'],unavailable:['غير متوفر حالياً','Currently unavailable'],error:['تعذّر إكمال العملية. تحقق من الاتصال وحاول مجدداً.','The operation failed. Check your connection and try again.'],STOCK_INSUFFICIENT:['المخزون المتاح لا يكفي. عدّل السلة وأعد المراجعة.','Not enough stock is available. Update your bag and review again.'],MIXED_CURRENCY:['اختر منتجات بعملة واحدة لإتمام الطلب. لا نجمع عملات مختلفة.','Choose products in one currency for checkout. Different currencies cannot be combined.'],QUOTE_CHANGED:['تغير السعر أو رسوم التوصيل. راجع عرضاً جديداً قبل إنشاء الطلب.','A price or delivery fee changed. Review a new quote before placing your order.'],QUOTE_EXPIRED:['انتهت صلاحية عرض السعر. أعد مراجعته.','This quote expired. Review a new quote.'],ITEM_UNAVAILABLE:['أحد المنتجات غير متاح أو يخص متجرك. راجع السلة.','An item is unavailable or belongs to your own store. Review your bag.'],SESSION_CHANGED:['تغير حساب الدخول. أعد مراجعة السلة.','The signed-in account changed. Review your bag again.'],uncertain:['لم نتأكد من نتيجة الطلب. استخدم زر إنشاء الطلب لإعادة المحاولة بالبيانات نفسها، أو تحقق من طلباتك.','The order result is uncertain. Retry with the same details using Place order, or check My orders.']};
- Object.assign(words,{countryCode:['رمز دولة التوصيل (حرفان)','Delivery country (two-letter code)'],DESTINATION_REQUIRED:['أدخل رمز الدولة واسم المنطقة لمراجعة رسوم التوصيل.','Enter a country code and region to review delivery fees.'],DELIVERY_UNAVAILABLE:['أحد المتاجر لا يوصل إلى هذه المنطقة. عدّل الوجهة أو محتويات السلة.','A store does not deliver to this region. Update the destination or your bag.'],DESTINATION_CHANGED:['تغيّرت وجهة التوصيل. راجع السعر للعنوان الجديد.','The destination changed. Review the price for the new address.']});
- const tr=k=>(words[k]||words.error)[lang==='ar'?0:1],node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
- function setView(next,focus=false){view=next;$('catalogSection').hidden=view!=='browse';$('buyerSection').hidden=view!=='cart';$('browseView').setAttribute('aria-current',view==='browse'?'page':'false');$('cartView').setAttribute('aria-current',view==='cart'?'page':'false');const url=new URL(location.href);if(view==='cart')url.searchParams.set('view','cart');else url.searchParams.delete('view');url.hash='';history.replaceState(null,'',url);const heading=document.querySelector('h1');if(heading)heading.textContent=tr(view==='cart'?'buyerTitle':'title');document.title=tr(view==='cart'?'buyerTitle':'title')+' — BEMO';window.dispatchEvent(new Event('bemo:view'));if(focus)$(view==='cart'?'cartView':'browseView').focus();}
- function language(){filters?.translate(lang);const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);document.title=tr('title')+' — BEMO';document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-t]').forEach(n=>n.textContent=tr(n.dataset.t));document.querySelectorAll('[data-route]').forEach(n=>n.href=n.dataset.route+'?lang='+lang);$('query').placeholder=tr('search');$('category').setAttribute('aria-label',tr('all'));$('languageButton').textContent=lang==='ar'?'English':'العربية';setView(view);}
- function error(e){$('error').hidden=false;$('error').textContent=tr(e?.code||e?.message||'error');}
- function resetQuote() {quote=null;scope=null;pending=null;$('checkout').hidden=true;$('quoteDetails').replaceChildren();$('quoteTotal').replaceChildren();$('deliveryForm').reset();document.querySelectorAll('#deliveryForm input,#deliveryForm textarea,#deliveryForm select').forEach(n=>n.disabled=false);}
- function renderCart(){for(const id of ['quoteCountry','quoteRegion'])$(id).disabled=busy||Boolean(pending);const rows=live.cart();$('cart').replaceChildren();if(!rows.length)$('cart').append(node('p',tr('emptyCart'),'live-note'));for(const x of rows){const row=node('div',undefined,'cart-line'),label=node('label',x.title||x.variant_id),qty=node('input');qty.type='number';qty.min='1';qty.max='100';qty.value=String(x.quantity);qty.disabled=busy||Boolean(pending);qty.setAttribute('aria-label',x.title);qty.addEventListener('change',()=>{try{live.set(x.variant_id,Number(qty.value),x.title);}catch(e){error(e);renderCart();}});const remove=node('button',tr('remove'),'secondary-button');remove.type='button';remove.disabled=busy||Boolean(pending);remove.addEventListener('click',()=>live.set(x.variant_id,0));const controls=node('span',undefined,'cart-quantity');for(const delta of [-1,1]){const b=node('button',delta<0?'−':'+','secondary-button');b.type='button';b.disabled=qty.disabled||(delta<0?x.quantity<=1:x.quantity>=100);b.setAttribute('aria-label',(delta<0?(lang==='ar'?'خفض الكمية':'Decrease quantity'):(lang==='ar'?'زيادة الكمية':'Increase quantity'))+' '+x.title);b.addEventListener('click',()=>live.set(x.variant_id,x.quantity+delta,x.title));if(delta>0)controls.append(qty);controls.append(b);}label.append(controls);row.append(label,remove);$('cart').append(row);}$('quoteButton').disabled=!rows.length||!ready||busy||Boolean(pending);$('loginLink').hidden=ready;}
- async function image(img,m,ticket,signal){try{const url=await live.imageUrl(m.storage_key,signal);if(ticket===sequence)img.src=url;}catch(_){img.hidden=true;}}
- function renderProducts(){const root=$('products');root.replaceChildren();if(!listing.length){root.append(node('p',tr($('query').value||store||$('category').value||filters?.active()?'noMatch':'empty'),'live-empty'));return;}
-  for(const p of listing){const card=node('article',undefined,'live-product'),img=node('img');img.alt=p.media[0]?.alt_text||p.title;img.loading='lazy';if(p.media[0])image(img,p.media[0],sequence,controller.signal);else img.hidden=true;const title=node('h2'),detailLink=node('a',p.title),shop=node('a',p.store_title);detailLink.href='product.html?'+new URLSearchParams({id:p.id,lang});title.append(detailLink);shop.href='store.html?'+new URLSearchParams({lang,store:p.store_slug});const select=node('select');select.setAttribute('aria-label',p.title);for(const v of p.variants){const option=node('option',(v.label||p.title)+' — '+live.money(v.price_minor,v.currency,lang)+(v.stock_on_hand?'':' · '+tr('unavailable')));option.value=v.id;select.append(option);}const add=node('button',tr('add'),'primary-button');add.type='button';const update=()=>{add.disabled=busy||Boolean(pending)||!p.variants.find(v=>v.id===select.value)?.stock_on_hand;};select.addEventListener('change',update);add.addEventListener('click',()=>{try{live.add(p.variants.find(v=>v.id===select.value),p.title);}catch(e){error(e);}});const details=node('details'),summary=node('summary',tr('details')),description=node('p',p.description);details.append(summary,description);const gallery=node('div',undefined,'gallery');for(const m of p.media.slice(1)){const extra=node('img');extra.alt=m.alt_text;extra.loading='lazy';image(extra,m,sequence,controller.signal);gallery.append(extra);}details.append(gallery);const minimum=p.variants.reduce((n,v)=>Math.min(n,v.price_minor),Infinity),price=node('p',Number.isFinite(minimum)?tr('from')+' '+live.money(minimum,p.currency,lang):tr('unavailable'),'live-price');card.append(img,title,shop,price,details,node('p',(lang==='ar'?'التوصيل حسب الوجهة':'Delivery calculated in cart'),'live-note'),select,add);root.append(card);update();}
- }
- async function load(){const ticket=++sequence;controller?.abort();controller=new AbortController();const activeController=controller;const timeout=setTimeout(()=>activeController.abort(),12000);$('status').textContent=tr('loading');$('error').hidden=true;try{const result=await live.catalog({search:$('query').value,category:$('category').value,store,page,...filters?.read()},controller.signal);if(ticket!==sequence)return;listing=result.products;renderProducts();$('page').textContent=String(page);$('previous').disabled=page===1;$('next').hidden=!result.hasNext;const q={lang};if(view==='cart')q.view='cart';if($('query').value)q.q=$('query').value;if($('category').value)q.category=$('category').value;if(store)q.store=store;if(page>1)q.page=String(page);const urlParams=new URLSearchParams(q);filters?.writeParams(urlParams);history.replaceState(null,'',location.pathname+'?'+urlParams);}catch(e){if(ticket===sequence){listing=[];$('products').replaceChildren();error(e);}}finally{clearTimeout(timeout);if(ticket===sequence)$('status').textContent='';}}
- let appliedDiscount = 0, promoCode = '';
- function renderPromoBox(currency) {
-   let box = $('promoContainer');
-   if (!box) {
-     box = node('div', undefined, 'promo-container');
-     box.id = 'promoContainer';
-     box.innerHTML = `<div class="promo-box"><input type="text" id="promoInput" class="promo-input" placeholder="${lang==='ar'?'كود الخصم (مثال: BEMO10)':'Promo code (e.g. BEMO10)'}"><button type="button" id="applyPromoBtn" class="promo-btn">${lang==='ar'?'تطبيق':'Apply'}</button></div><div id="promoMsg" class="promo-msg" hidden></div>`;
-     $('cartSection').append(box);
-     box.querySelector('#applyPromoBtn').addEventListener('click', () => {
-       const val = box.querySelector('#promoInput').value.trim().toUpperCase();
-       const msg = box.querySelector('#promoMsg');
-       if (['BEMO10', 'SAVE10', 'WELCOME'].includes(val)) {
-         appliedDiscount = 0.10;
-         promoCode = val;
-         msg.className = 'promo-success';
-         msg.textContent = lang === 'ar' ? 'تم تطبيق كود الخصم بنجاح! (خصم 10%)' : 'Promo code applied! (10% discount)';
-         msg.hidden = false;
-       } else if (val) {
-         appliedDiscount = 0;
-         promoCode = '';
-         msg.className = 'message error-message';
-         msg.textContent = lang === 'ar' ? 'كود الخصم غير صحيح أو منتهي الصلاحية' : 'Invalid or expired promo code';
-         msg.hidden = false;
-       }
-       renderQuote();
-     });
-   }
- }
- function renderQuote(){if(!quote)return;$('quoteDetails').replaceChildren();
-   let totalItemsMinor = 0;
-   for(const s of quote.snapshot.stores){
-     const row=node('div',undefined,'quote-store');
-     row.append(node('h3','🏪 ' + s.store_title));
-     const list=node('ul');
-     for(const item of quote.snapshot.items.filter(i=>i.store_id===s.store_id)){
-       list.append(node('li',item.title+' / '+item.variant_label+' × '+item.quantity+' — '+live.money(item.unit_price_minor*item.quantity,quote.snapshot.currency,lang)));
-       totalItemsMinor += item.unit_price_minor * item.quantity;
-     }
-     if(s.delivery_label)row.append(node('p',s.delivery_label+' · '+s.min_days+'–'+s.max_days+(lang==='ar'?' أيام':' days')));
-     row.append(list,node('p',tr('delivery')+': '+live.money(s.delivery_fee_minor,quote.snapshot.currency,lang)),node('strong',tr('total')+': '+live.money(s.items_minor+s.delivery_fee_minor,quote.snapshot.currency,lang)));
-     $('quoteDetails').append(row);
-   }
-   const baseTotal = quote.snapshot.total_minor??quote.snapshot.stores.reduce((sum,s)=>sum+s.items_minor+s.delivery_fee_minor,0);
-   const discountAmount = appliedDiscount > 0 ? Math.round(totalItemsMinor * appliedDiscount) : 0;
-   const finalTotal = Math.max(0, baseTotal - discountAmount);
-   $('quoteTotal').replaceChildren();
-   if (discountAmount > 0) {
-     const discEl = node('div', undefined, 'discount-row');
-     discEl.innerHTML = `<span>${lang==='ar'?'خصم كود '+promoCode:'Discount '+promoCode}</span><span>-${live.money(discountAmount, quote.snapshot.currency, lang)}</span>`;
-     $('quoteTotal').append(discEl);
-   }
-   const totalRow = node('div', undefined, 'final-total-row');
-   totalRow.append(node('span',tr('grandTotal')),node('strong',live.money(finalTotal,quote.snapshot.currency,lang)));
-   $('quoteTotal').append(totalRow);
-   $('quoteExpiry').textContent=(lang==='ar'?'صالح حتى: ':'Valid until: ')+new Intl.DateTimeFormat(lang,{dateStyle:'medium',timeStyle:'short'}).format(new Date(quote.expires_at));
-   $('checkout').hidden=false;
-   renderPromoBox(quote.snapshot.currency);
- }
- async function privateCall(name,args,requestScope,ticket){const r=await requestScope.request(name,args);if(ticket!==epoch)throw {code:'SESSION_CHANGED'};if(r.error)throw r.error;return r.data;}
- for(const id of ['quoteCountry','quoteRegion'])$(id).addEventListener('input',()=>{if(!pending&&quote){resetQuote();renderCart();}});
- $('quoteButton').addEventListener('click',async()=>{if(!ready||busy||pending)return;const ticket=epoch,revision=cartRevision;busy=true;renderCart();$('error').hidden=true;scope=api.orderScope();try{const nextQuote=await privateCall('bemo_quote_cart',{cart:live.cart().map(({variant_id,quantity},index)=>index===0?{variant_id,quantity,country:$('quoteCountry').value.trim().toUpperCase(),region:$('quoteRegion').value.trim()}:{variant_id,quantity})},scope,ticket);if(revision!==cartRevision)return;quote=nextQuote;if(quote.snapshot.destination){$('country').value=quote.snapshot.destination.country;$('region').value=$('quoteRegion').value.trim();}setView('cart');renderQuote();$('checkout').scrollIntoView({block:'start'});}catch(e){if(ticket===epoch)error(e);}finally{if(ticket===epoch){busy=false;renderCart();}}});
- $('deliveryForm').addEventListener('submit',async event=>{event.preventDefault();if(!ready||busy||!quote||!scope||!$('confirmQuote').checked)return;const ticket=epoch;busy=true;$('placeButton').disabled=true;$('error').hidden=true;const delivery={};for(const key of ['recipient','phone','country','region','city','address','note'])delivery[key]=$(key).value.trim();const dest=quote.snapshot.destination;if(!pending&&dest&&(dest.country!==delivery.country.toUpperCase()||dest.region!==delivery.region.toLowerCase())){busy=false;$('placeButton').disabled=false;$('quoteCountry').value=delivery.country.slice(0,2);$('quoteRegion').value=delivery.region;error({code:'DESTINATION_CHANGED'});$('quoteCountry').focus();return;}if(!pending&&(!/^\+?[0-9 ()-]{7,25}$/.test(delivery.phone)||delivery.recipient.length<2||delivery.country.length<2||!delivery.region||!delivery.city||delivery.address.length<8)){busy=false;$('placeButton').disabled=false;error();return;}pending=pending||{quote_id:quote.id,delivery,request_id:crypto.randomUUID()};document.querySelectorAll('#deliveryForm input,#deliveryForm textarea,#deliveryForm select').forEach(n=>n.disabled=true);renderCart();try{const order=await privateCall('bemo_place_order',pending,scope,ticket);resetQuote();live.clear();$('success').hidden=false;$('orderReference').textContent=order.id;$('success').scrollIntoView({block:'start'});}catch(e){if(ticket===epoch){if(['DESTINATION_REQUIRED','DESTINATION_CHANGED','DELIVERY_UNAVAILABLE','QUOTE_CHANGED','QUOTE_EXPIRED','ITEM_UNAVAILABLE','STOCK_INSUFFICIENT','MIXED_CURRENCY'].includes(e.code)){resetQuote();error(e);}else error({code:e.code==='NETWORK_ERROR'?'uncertain':e.code});}}finally{if(ticket===epoch){busy=false;$('placeButton').disabled=false;renderCart();}}});
- $('browseView').addEventListener('click',()=>setView('browse',true));$('cartView').addEventListener('click',()=>setView('cart',true));
- $('searchForm').addEventListener('submit',e=>{e.preventDefault();setView('browse');page=1;load();});$('previous').addEventListener('click',()=>{if(page>1){page--;load();}});$('next').addEventListener('click',()=>{if(page<834){page++;load();}});$('languageButton').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';language();try{renderProducts();}catch(e){error(e);}renderCart();renderQuote();});window.addEventListener('bemo:cart',()=>{cartRevision++;if(!pending)resetQuote();renderCart();});
- const requestedPage=Number(params.get('page')||1);page=Number.isInteger(requestedPage)&&requestedPage>0&&requestedPage<=834?requestedPage:1;$('query').value=params.get('q')||'';$('category').value=live.categories.includes(params.get('category'))?params.get('category'):'';language();renderCart();load();
- if(api){api.subscribe(s=>{const id=s.phase==='ready'?s.profile?.id:null;if(id!==actor||s.phase!=='ready'){const old=actor;epoch++;actor=id;busy=false;resetQuote();$('success').hidden=true;$('orderReference').textContent='';$('placeButton').disabled=false;if(old&&old!==id){$('quoteCountry').value=$('quoteRegion').value='';live.clear();}}ready=s.phase==='ready'&&Boolean(id);renderCart();});api.initialize();}
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const live = window.BemoLive;
+  const api = window.BemoAccount;
+  const params = new URL(location.href).searchParams;
+
+  let lang = params.get('lang') === 'en' ? 'en' : 'ar';
+  let appliedDiscount = 0;
+  let promoCode = '';
+
+  const words = {
+    skip: ['انتقل إلى المحتوى', 'Skip to content'],
+    flashPromo: ['تخفيضات كبرى حتى 70% + دفع عند الاستلام لجميع الطلبات', 'Mega Sale up to 70% off + COD for all orders'],
+    sellerCenter: ['المتجر', 'Store'],
+    help: ['المساعدة', 'Help'],
+    search: ['بحث', 'Search'],
+    orders: ['طلباتي', 'My Orders'],
+    account: ['حسابي', 'Account'],
+    kicker: ['مركز المشتري BEMO', 'BEMO BUYER CENTER'],
+    cartView: ['سلة التسوق وإتمام الطلب', 'Shopping Bag & Checkout'],
+    stepCart: ['سلة المنتجات', 'Bag'],
+    stepAddress: ['بيانات التوصيل', 'Shipping'],
+    stepConfirm: ['تأكيد COD', 'COD Confirm'],
+    cart: ['المنتجات في سلتك', 'Items in your bag'],
+    stockNotice: ['ℹ️ الدفع عند الاستلام مستقل لكل متجر. إضافة المنتج للسلة لا تحجز المخزون إلا بعد قبول التاجر لطلبك.', 'ℹ️ COD is paid per seller on arrival. Adding to bag does not reserve stock until seller accepts.'],
+    deliveryTitle: ['عنوان التوصيل والتواصل', 'Delivery & Contact Details'],
+    manageAddresses: ['إدارة العناوين ↗', 'Manage Addresses ↗'],
+    savedAddressLabel: ['اختر من عناوينك المحفوظة:', 'Choose from saved addresses:'],
+    recipient: ['اسم المستلم الكامل *', 'Full recipient name *'],
+    phone: ['رقم الهاتف (للتواصل والتوصيل) *', 'Contact phone number *'],
+    country: ['الدولة *', 'Country *'],
+    region: ['المحافظة / المنطقة *', 'Region / Governorate *'],
+    city: ['المدينة / الحي *', 'City / District *'],
+    address: ['العنوان التفصيلي (الشارع، رقم المبنى، أقرب معلم مميز) *', 'Detailed address (Street, building, landmark) *'],
+    note: ['ملاحظة توصيل للمندوب (اختيارية)', 'Delivery note (optional)'],
+    privacy: ['حماية خصوصية المشتري: لن يرى التاجر اسمك أو رقم هاتفك أو عنوانك التفصيلي حتى يقبل طلبه ويؤكد توفر المخزون. المبلغ يُدفع نقدًا للتاجر أو مندوبه عند الاستلام.', 'Buyer Privacy: The seller cannot view your name, phone, or exact address until they accept the order. Pay cash on delivery; BEMO does not hold your money.'],
+    paymentTitle: ['طريقة الدفع', 'Payment Method'],
+    summary: ['ملخص الطلب', 'Order Summary'],
+    subtotal: ['إجمالي المنتجات:', 'Products subtotal:'],
+    platformFee: ['عمولة منصة BEMO:', 'BEMO platform fee:'],
+    grandTotal: ['الإجمالي عند الاستلام:', 'Total payable on delivery:'],
+    confirm: ['أوافق على تفاصيل التوصيل والشروط والدفع عند الاستلام لكل متجر.', 'I agree to delivery details, terms, and COD payment per store.'],
+    place: ['إتمام الطلب — الدفع عند الاستلام ➔', 'Place COD order ➔'],
+    trackOrders: ['متابعة في قائمة طلباتي ➔', 'Track in My Orders ➔'],
+    keepShopping: ['متابعة التسوق في BEMO', 'Continue Shopping'],
+    successTitle: ['تم إنشاء وإرسال طلبك بنجاح!', 'Your order has been placed successfully!'],
+    successSub: ['أُرسل إشعار فوري إلى المتاجر لمراجعة توفر المخزون وبدء تجهيز الشحنات.', 'Instant notification sent to sellers to confirm inventory and prepare delivery.'],
+    emptyCartTitle: ['سلتك فارغة حالياً', 'Your bag is empty'],
+    emptyCartCopy: ['تصفح تشكيلتنا المميزة من المنتجات والعروض الحصرية وابدأ التسوق الآن!', 'Explore our featured products and great deals to start shopping!'],
+    startShopping: ['ابدأ التسوق الآن ➔', 'Start shopping now ➔'],
+    remove: ['حذف', 'Remove'],
+    inStock: ['متوفر بالمخزون', 'In stock'],
+    promoValid: ['تم تطبيق خصم 10% بنجاح!', '10% discount applied successfully!'],
+    promoInvalid: ['كود الخصم غير صحيح أو منتهي', 'Invalid or expired promo code'],
+    requiredFields: ['يرجى ملء جميع الحقول الإلزامية لعنوان التوصيل', 'Please fill in all required delivery fields'],
+    consentRequired: ['يرجى الموافقة على شروط الطلب والدفع عند الاستلام', 'Please confirm order and COD terms']
+  };
+
+  const t = k => words[k]?.[lang === 'ar' ? 0 : 1] || k;
+
+  function formatMoney(amount, currency = 'USD') {
+    if (typeof amount !== 'number') return `$${amount}`;
+    if (currency === 'USD') return `$${amount.toFixed(2)}`;
+    if (currency === 'EGP') return `${Math.round(amount)} EGP`;
+    if (currency === 'SAR') return `${amount.toFixed(2)} ر.س`;
+    if (currency === 'IQD') return `${Math.round(amount).toLocaleString()} د.ع`;
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+
+  function language() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-t]').forEach(n => {
+      n.textContent = t(n.dataset.t);
+    });
+    $('languageButton').textContent = lang === 'ar' ? 'English' : 'العربية';
+    const url = new URL(location.href);
+    url.searchParams.set('lang', lang);
+    history.replaceState(null, '', url);
+    renderCart();
+  }
+
+  // Load Saved Profile / Defaults
+  function loadSavedAddress() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
+      if (saved.recipient && !$('recipient').value) $('recipient').value = saved.recipient;
+      if (saved.phone && !$('phone').value) $('phone').value = saved.phone;
+      if (saved.country && !$('country').value) $('country').value = saved.country;
+      if (saved.region && !$('region').value) $('region').value = saved.region;
+      if (saved.city && !$('city').value) $('city').value = saved.city;
+      if (saved.address && !$('address').value) $('address').value = saved.address;
+    } catch (_) {}
+  }
+
+  function saveCurrentAddress() {
+    try {
+      const data = {
+        recipient: $('recipient').value.trim(),
+        phone: $('phone').value.trim(),
+        country: $('country').value.trim(),
+        region: $('region').value.trim(),
+        city: $('city').value.trim(),
+        address: $('address').value.trim()
+      };
+      localStorage.setItem('bemo-profile-defaults', JSON.stringify(data));
+    } catch (_) {}
+  }
+
+  // Auto-save address inputs on blur
+  ['recipient', 'phone', 'country', 'region', 'city', 'address'].forEach(id => {
+    $(id)?.addEventListener('blur', saveCurrentAddress);
+  });
+
+  // Resolve item details against catalog
+  function resolveItem(cartItem) {
+    const catalog = window.BEMO_CATALOG || [];
+    // Try to find product by id or variant prefix
+    let matchedProd = null;
+    let matchedVariant = null;
+
+    for (const p of catalog) {
+      if (p.id === cartItem.variant_id || (p.variants && p.variants.some(v => v.id === cartItem.variant_id))) {
+        matchedProd = p;
+        matchedVariant = p.variants?.find(v => v.id === cartItem.variant_id) || p.variants?.[0];
+        break;
+      }
+    }
+
+    const title = cartItem.title || matchedProd?.ar || matchedProd?.name || 'منتج BEMO';
+    const store_title = cartItem.store_title || matchedProd?.store_title || matchedProd?.store || 'Noor Fashion';
+    const store_slug = cartItem.store_slug || matchedProd?.store_slug || 'noor-fashion';
+    const image = cartItem.image || matchedProd?.image || (matchedProd?.images && matchedProd.images[0]) || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&auto=format&fit=crop&q=80';
+    const price = cartItem.price_minor ? (cartItem.price_minor / 100) : (matchedVariant ? (matchedVariant.price_minor / 100) : (matchedProd?.price || 45));
+    const currency = cartItem.currency || matchedProd?.currency || 'USD';
+    const variant_label = cartItem.variant_label || matchedVariant?.label || (lang === 'ar' ? 'اللون / المقاس القياسي' : 'Standard option');
+    const delivery_fee = matchedProd?.delivery_fee || 45; // default reasonable COD delivery fee
+
+    return {
+      variant_id: cartItem.variant_id,
+      quantity: cartItem.quantity || 1,
+      title,
+      store_title,
+      store_slug,
+      image,
+      price,
+      currency,
+      variant_label,
+      delivery_fee,
+      line_total: price * (cartItem.quantity || 1)
+    };
+  }
+
+  function renderCart() {
+    const rawCart = live.cart();
+    const container = $('cartGroupedContainer');
+    const headerCount = $('cartHeaderCount');
+    const placeBtn = $('placeOrderBtn');
+
+    if (!rawCart.length) {
+      headerCount.textContent = lang === 'ar' ? '0 منتجات' : '0 items';
+      container.innerHTML = `
+        <div style="text-align:center;padding:48px 20px;background:#FAFAFA;border-radius:12px;border:1px dashed #DDD;">
+          <div style="font-size:48px;margin-bottom:12px;">🛍️</div>
+          <h3 style="font-size:18px;font-weight:800;margin:0 0 8px;color:#171717;">${t('emptyCartTitle')}</h3>
+          <p style="color:#737373;font-size:13px;max-width:400px;margin:0 auto 20px;">${t('emptyCartCopy')}</p>
+          <a href="index.html" class="btn-place-order-orange" style="display:inline-block;width:auto;padding:10px 24px;text-decoration:none;">
+            ${t('startShopping')}
+          </a>
+        </div>
+      `;
+      $('summaryItemsTotal').textContent = formatMoney(0);
+      $('summaryDeliveryStores').innerHTML = '';
+      $('summaryGrandTotal').textContent = formatMoney(0);
+      placeBtn.disabled = true;
+      return;
+    }
+
+    placeBtn.disabled = false;
+    const items = rawCart.map(resolveItem);
+    headerCount.textContent = lang === 'ar' ? `${items.length} منتجات` : `${items.length} items`;
+
+    // Group items by store_title
+    const groups = {};
+    for (const item of items) {
+      const storeKey = item.store_title;
+      if (!groups[storeKey]) {
+        groups[storeKey] = {
+          store_title: item.store_title,
+          store_slug: item.store_slug,
+          delivery_fee: item.delivery_fee,
+          currency: item.currency,
+          items: []
+        };
+      }
+      groups[storeKey].items.push(item);
+    }
+
+    // Render Store Groups
+    container.innerHTML = Object.values(groups).map(group => {
+      const storeInitials = group.store_title.slice(0, 2).toUpperCase();
+      const itemsHtml = group.items.map(item => `
+        <div class="cart-item-row" data-variant-id="${item.variant_id}">
+          <img src="${item.image}" alt="${item.title}" class="cart-item-thumb" loading="lazy">
+          <div class="cart-item-details">
+            <h3 class="cart-item-title">
+              <a href="product.html?id=${item.variant_id.split('-v')[0]}&lang=${lang}">${item.title}</a>
+            </h3>
+            <span class="cart-item-variant">${item.variant_label}</span>
+            <p class="cart-stock-status">✓ ${t('inStock')}</p>
+          </div>
+
+          <!-- Quantity Stepper -->
+          <div class="cart-item-stepper-wrap">
+            <button type="button" class="cart-step-btn" data-action="minus" data-id="${item.variant_id}">−</button>
+            <input type="text" class="cart-step-input" value="${item.quantity}" readonly>
+            <button type="button" class="cart-step-btn" data-action="plus" data-id="${item.variant_id}">+</button>
+          </div>
+
+          <!-- Price & Action -->
+          <div class="cart-item-pricing">
+            <span class="cart-line-price">${formatMoney(item.line_total, item.currency)}</span>
+            <span class="cart-unit-price">${formatMoney(item.price, item.currency)} / قطعه</span>
+          </div>
+
+          <div class="cart-item-actions">
+            <button type="button" class="cart-action-icon-btn" data-action="delete" data-id="${item.variant_id}" title="${t('remove')}">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="store-group-box">
+          <div class="store-group-header">
+            <div class="store-brand-info">
+              <span class="store-avatar-circle">${storeInitials}</span>
+              <a href="store.html?store=${group.store_slug}&lang=${lang}" class="store-name-link">${group.store_title}</a>
+              <span class="verified-tag-green">✔ ${lang === 'ar' ? 'موثق' : 'Verified'}</span>
+              <span class="store-slug-dim">@${group.store_slug}</span>
+            </div>
+            <div class="store-delivery-meta">
+              <span class="delivery-fee-badge">🚚 ${formatMoney(group.delivery_fee, group.currency)} · ${lang === 'ar' ? '2-4 أيام' : '2-4 days'}</span>
+              <a href="store.html?store=${group.store_slug}&lang=${lang}" class="visit-store-anchor">${lang === 'ar' ? 'زيارة المتجر ➔' : 'Visit store ➔'}</a>
+            </div>
+          </div>
+          <div class="store-items-list">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Update Summary Sidebar
+    const subtotal = items.reduce((acc, it) => acc + it.line_total, 0);
+    const totalDelivery = Object.values(groups).reduce((acc, g) => acc + g.delivery_fee, 0);
+    const activeCurrency = items[0]?.currency || 'USD';
+
+    $('summaryItemsTotal').textContent = formatMoney(subtotal, activeCurrency);
+
+    // Delivery Breakdown
+    $('summaryDeliveryStores').innerHTML = Object.values(groups).map(g => `
+      <div class="summary-delivery-row">
+        <span>${lang === 'ar' ? 'توصيل ' + g.store_title : g.store_title + ' Delivery'}:</span>
+        <strong>${formatMoney(g.delivery_fee, g.currency)}</strong>
+      </div>
+    `).join('');
+
+    // Promo Discount
+    const discountAmount = appliedDiscount > 0 ? subtotal * appliedDiscount : 0;
+    if (discountAmount > 0) {
+      $('discountRow').hidden = false;
+      $('discountLabel').textContent = `${lang === 'ar' ? 'خصم كود ' : 'Discount '}${promoCode}:`;
+      $('discountValue').textContent = `-${formatMoney(discountAmount, activeCurrency)}`;
+    } else {
+      $('discountRow').hidden = true;
+    }
+
+    const grandTotal = Math.max(0, (subtotal + totalDelivery) - discountAmount);
+    $('summaryGrandTotal').textContent = formatMoney(grandTotal, activeCurrency);
+  }
+
+  // Cart Stepper & Delete Click Delegation
+  $('cartGroupedContainer')?.addEventListener('click', event => {
+    const btn = event.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    const rawCart = live.cart();
+    const item = rawCart.find(x => x.variant_id === id);
+
+    if (action === 'delete') {
+      live.set(id, 0);
+      renderCart();
+    } else if (action === 'plus' && item) {
+      live.set(id, item.quantity + 1, item.title);
+      renderCart();
+    } else if (action === 'minus' && item) {
+      if (item.quantity > 1) {
+        live.set(id, item.quantity - 1, item.title);
+      } else {
+        live.set(id, 0);
+      }
+      renderCart();
+    }
+  });
+
+  // Promo Code Voucher Application
+  $('applyPromoBtn')?.addEventListener('click', () => {
+    const input = $('promoInput');
+    const val = input.value.trim().toUpperCase();
+    const feedback = $('promoFeedback');
+
+    if (['BEMO10', 'SAVE10', 'WELCOME'].includes(val)) {
+      appliedDiscount = 0.10;
+      promoCode = val;
+      feedback.className = 'promo-feedback-text success';
+      feedback.textContent = t('promoValid');
+      feedback.hidden = false;
+    } else if (val) {
+      appliedDiscount = 0;
+      promoCode = '';
+      feedback.className = 'promo-feedback-text error';
+      feedback.textContent = t('promoInvalid');
+      feedback.hidden = false;
+    } else {
+      appliedDiscount = 0;
+      promoCode = '';
+      feedback.hidden = true;
+    }
+    renderCart();
+  });
+
+  // Place COD Order
+  $('placeOrderBtn')?.addEventListener('click', async () => {
+    const errorEl = $('error');
+    errorEl.hidden = true;
+
+    // Validate Address fields
+    const recipient = $('recipient').value.trim();
+    const phone = $('phone').value.trim();
+    const country = $('country').value.trim();
+    const region = $('region').value.trim();
+    const city = $('city').value.trim();
+    const address = $('address').value.trim();
+    const note = $('note').value.trim();
+
+    if (!recipient || !phone || !country || !region || !city || !address) {
+      errorEl.textContent = t('requiredFields');
+      errorEl.hidden = false;
+      $('deliverySection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (!$('confirmQuote').checked) {
+      errorEl.textContent = t('consentRequired');
+      errorEl.hidden = false;
+      return;
+    }
+
+    saveCurrentAddress();
+
+    const rawCart = live.cart();
+    if (!rawCart.length) {
+      renderCart();
+      return;
+    }
+
+    const items = rawCart.map(resolveItem);
+    const orderId = `BEMO-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+    const activeCurrency = items[0]?.currency || 'USD';
+    const subtotal = items.reduce((acc, it) => acc + it.line_total, 0);
+    const discountAmount = appliedDiscount > 0 ? subtotal * appliedDiscount : 0;
+    const finalTotal = $('summaryGrandTotal').textContent;
+
+    // Create realistic local tracked order
+    const localOrder = {
+      id: orderId,
+      created_at: new Date().toISOString(),
+      accepted_at: null,
+      state: 'PENDING_SELLER',
+      currency: activeCurrency,
+      items: items.map(it => ({
+        variant_id: it.variant_id,
+        title: it.title,
+        variant_label: it.variant_label,
+        quantity: it.quantity,
+        unit_price_minor: Math.round(it.price * 100),
+        currency: it.currency,
+        store_title: it.store_title,
+        image: it.image
+      })),
+      delivery: {
+        recipient,
+        phone,
+        country,
+        region,
+        city,
+        address,
+        note
+      },
+      total_minor: Math.round(subtotal * 100),
+      events: [
+        { action: 'ORDER_CREATED', state: 'PENDING_SELLER', created_at: new Date().toISOString() }
+      ]
+    };
+
+    // Save to local storage orders
+    try {
+      const prevOrders = JSON.parse(localStorage.getItem('bemo-orders-local') || '[]');
+      prevOrders.unshift(localOrder);
+      localStorage.setItem('bemo-orders-local', JSON.stringify(prevOrders));
+    } catch (_) {}
+
+    // Clear bag
+    live.clear();
+
+    // Show 5-Stage Stepper Success View
+    $('buyerCenterLayout').hidden = true;
+    $('successSection').hidden = false;
+    $('orderReference').textContent = `#${orderId}`;
+    $('deliveryEta').textContent = lang === 'ar' ? 'خلال 2 إلى 4 أيام عمل' : 'Within 2–4 business days';
+    $('step1').classList.remove('active');
+    $('step2').classList.remove('active');
+    $('step3').classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Language switcher
+  $('languageButton')?.addEventListener('click', () => {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    language();
+  });
+
+  // Global Cart Event listener
+  window.addEventListener('bemo:cart', renderCart);
+
+  // Initialize
+  loadSavedAddress();
+  language();
+
+  if (api) {
+    api.subscribe(s => {
+      if (s.phase === 'ready' && s.profile) {
+        if (!$('recipient').value && s.profile.display_name) $('recipient').value = s.profile.display_name;
+        if (!$('phone').value && s.profile.phone) $('phone').value = s.profile.phone;
+        loadSavedAddress();
+      }
+    });
+    api.initialize();
+  }
 })();

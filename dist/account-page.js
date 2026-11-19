@@ -214,7 +214,7 @@
       runAction(() => api.saveProfile(input), 'profileSaved', formId === 'onboardingForm' ? $('profileTitle') : form.querySelector('[type=submit]'), result => result.profile?.display_name === input.display_name && result.profile?.locale === input.locale);
     });
   }
-  $('storeForm').addEventListener('submit', event => {
+  $('storeForm')?.addEventListener('submit', event => {
     event.preventDefault(); const form=event.currentTarget;
     const title=form.elements.title;
     title.setCustomValidity(title.value.trim().length >= 2 ? '' : errorText('STORE_INVALID'));

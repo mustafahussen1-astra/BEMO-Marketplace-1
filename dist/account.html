@@ -5,118 +5,281 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta name="description" content="حساب BEMO ومتجرك، في مكان واحد.">
-  <title>حسابك — BEMO</title>
+  <meta name="description" content="الملف الشخصي وإعدادات الحساب — BEMO">
+  <title>حسابك الشخصي — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
   <link rel="stylesheet" href="account.css">
-<link rel="stylesheet" href="bemo-ui.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head>
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
 <body data-account-view="account">
   <a class="skip-link" href="#accountMain" data-i18n="skip">انتقل إلى المحتوى</a>
-  <div class="development-note" data-i18n="development">نسخة تطوير — المنتجات والطلبات للتجربة؛ البيع الفعلي غير متاح بعد.</div>
-  <header class="account-header">
-    <div class="account-container header-row">
-      <a class="brand" href="index.html" data-route="index.html" aria-label="BEMO">BEMO<span aria-hidden="true">●</span></a>
-      <nav aria-label="التنقل" data-nav-label>
-        <a class="browse-link" href="search.html" data-route="search.html" data-i18n="browse">استكشف المنتجات</a>
-        <button id="languageButton" class="language-button" type="button" lang="en">English</button>
+
+  <!-- Announcement Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">BEMO</span>
+        <span>حسابك الشخصي الموحد للتسوق ومتابعة الطلبات</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="help.html" class="top-link">المساعدة</a>
+        <span class="top-sep">|</span>
+        <button id="languageButton" class="top-lang-btn" type="button" lang="en">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">My Account</span>
+        </div>
+      </a>
+
+      <nav class="header-actions">
+        <a class="header-action-btn" href="index.html">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>الرئيسية</span>
+        </a>
+        <a class="header-action-btn" href="orders.html">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلباتي</span>
+        </a>
+        <a class="header-action-btn" href="market.html?view=cart">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          <span>السلة</span>
+        </a>
+        <a class="header-action-btn" href="seller.html">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 2-6h14l2 6M4 13v8h16v-8M9 21v-7h6v7"/></svg>
+          <span>المتجر</span>
+        </a>
       </nav>
     </div>
   </header>
+
   <main id="accountMain" class="account-container account-layout" tabindex="-1">
+    <!-- Left Sidebar: Account Overview -->
     <aside class="welcome-panel" aria-labelledby="welcomeTitle">
-      <span class="section-kicker" data-i18n="yourSpace">مساحتك في BEMO</span>
-      <h1 id="welcomeTitle" data-i18n="welcome">أهلاً بك.<br>كل بداية جميلة، هنا.</h1>
-      <p class="welcome-copy" data-i18n="welcomeCopy">حساب واحد لملفك الشخصي ومتجرك. ابدأ بحساب Gmail الخاص بك.</p>
-      <div class="welcome-art" aria-hidden="true"><span class="art-orbit"></span><span class="art-square"><svg viewBox="0 0 64 64"><path d="M18 21h28l4 32H14l4-32Z"/><path d="M24 24V17a8 8 0 0 1 16 0v7"/><path d="m26 38 4 4 9-10"/></svg></span><span class="art-dot"></span></div>
+      <span class="section-kicker">مساحتك في BEMO</span>
+      <h1 id="welcomeTitle">ملفك الشخصي<br>وعناوين التوصيل</h1>
+      <p class="welcome-copy">حسابك الأساسي لإدارة بياناتك الشخصية، تثبيت عناوين الشحن، وتتبع طلباتك الدفع عند الاستلام بسهولة.</p>
+      
+      <div class="welcome-art" aria-hidden="true">
+        <span class="art-orbit"></span>
+        <span class="art-square">
+          <svg viewBox="0 0 64 64"><path d="M18 21h28l4 32H14l4-32Z"/><path d="M24 24V17a8 8 0 0 1 16 0v7"/><path d="m26 38 4 4 9-10"/></svg>
+        </span>
+        <span class="art-dot"></span>
+      </div>
+
       <ul class="account-benefits">
-        <li><span class="benefit-number" aria-hidden="true">01</span><div><strong data-i18n="benefitOne">دخول مباشر باستخدام Google</strong><p data-i18n="benefitOneCopy">استخدم حساب Gmail الذي تختاره.</p></div></li>
-        <li><span class="benefit-number" aria-hidden="true">02</span><div><strong data-i18n="benefitTwo">متجر واحد باسمك</strong><p data-i18n="benefitTwoCopy">اختر اسمه ومعرّفه ووصفه بعد إكمال حسابك.</p></div></li>
-        <li><span class="benefit-number" aria-hidden="true">03</span><div><strong data-i18n="benefitThree">بداية بلا رسوم منصة</strong><p data-i18n="benefitThreeCopy">رسوم BEMO في الإصدار الأول صفر.</p></div></li>
+        <li>
+          <span class="benefit-number">01</span>
+          <div>
+            <strong>تثبيت العنوان ورقم الهاتف</strong>
+            <p>ملء تلقائي وسريع لسلة التسوق في كل طلب دون إعادة كتابة.</p>
+          </div>
+        </li>
+        <li>
+          <span class="benefit-number">02</span>
+          <div>
+            <strong>حماية كاملة لبياناتك</strong>
+            <p>لا يرى التاجر معلوماتك الشخصية حتى يقبل طلبه ويؤكد توفر القطع.</p>
+          </div>
+        </li>
+        <li>
+          <span class="benefit-number">03</span>
+          <div>
+            <strong>تتبع مباشر لحالة الشحن</strong>
+            <p>متابعة مراحل التسليم من التجهيز وحتى وصول المندوب لباب منزلك.</p>
+          </div>
+        </li>
       </ul>
-      <a class="back-link" href="index.html" data-route="index.html"><span aria-hidden="true">↗</span><span data-i18n="backToMarket">العودة إلى السوق التجريبي</span></a>
+
+      <a class="back-link" href="index.html">
+        <span>↗</span>
+        <span>العودة للتسوق في السوق</span>
+      </a>
     </aside>
 
+    <!-- Right Content: Profile Form, Saved Addresses, Shortcuts -->
     <div class="account-content">
-      <div id="pageLoading" class="account-card loading-card" role="status"><span class="spinner" aria-hidden="true"></span><h2 data-i18n="checking">جارٍ التحقق من حسابك</h2><p data-i18n="checkingCopy">لحظات، ونجهّز مساحتك.</p></div>
+      <div id="pageLoading" class="account-card loading-card" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <h2>جارٍ تجهيز حسابك</h2>
+        <p>لحظات، ونجهّز مساحتك الشخصية.</p>
+      </div>
+
       <div id="pageMessage" class="message success-message" role="status" aria-live="polite" hidden></div>
-      <div id="pageError" class="message error-message" role="alert" tabindex="-1" hidden><p id="pageErrorText"></p><div class="error-actions"><button id="retryButton" type="button" class="secondary-button" data-i18n="retry">إعادة المحاولة</button><button id="recoverySignOut" type="button" class="text-button" data-i18n="signOut">تسجيل الخروج</button></div></div>
+      <div id="pageError" class="message error-message" role="alert" tabindex="-1" hidden>
+        <p id="pageErrorText"></p>
+        <div class="error-actions">
+          <button id="retryButton" type="button" class="secondary-button">إعادة المحاولة</button>
+          <button id="recoverySignOut" type="button" class="text-button">تسجيل الخروج</button>
+        </div>
+      </div>
 
+      <!-- Sign In Panel -->
       <section id="signInPanel" class="account-card sign-in-card" aria-labelledby="signInTitle" hidden>
-        <span class="small-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
-        <span class="section-kicker" data-i18n="startHere">لنبدأ</span>
-        <h2 id="signInTitle" data-i18n="signInTitle">حسابك، بطريقتك.</h2>
-        <p class="section-copy" data-i18n="signInCopy">تابع باستخدام Google للوصول إلى حسابك وإنشاء متجرك.</p>
-        <button id="googleButton" class="google-button" type="button" disabled><span class="google-letter" aria-hidden="true">G</span><span data-i18n="google">المتابعة باستخدام Google</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+        <span class="small-icon pale" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </span>
+        <span class="section-kicker">تسجيل الدخول</span>
+        <h2 id="signInTitle">مرحباً بك في BEMO</h2>
+        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك وتثبيت بيانات الشحن.</p>
+        
+        <button id="googleButton" class="google-button" type="button">
+          <span class="google-letter" aria-hidden="true">G</span>
+          <span>المتابعة باستخدام Google</span>
+          <span class="button-arrow" aria-hidden="true">↗</span>
+        </button>
         <p id="providerMessage" class="provider-message" role="status" aria-live="polite"></p>
-        <button id="providerRetry" class="text-button" type="button" data-i18n="checkAgain">تحقق مجدداً</button>
+        <button id="providerRetry" class="text-button" type="button">تحقق مجدداً</button>
+
         <div class="card-divider"></div>
-        <p class="quiet-copy" data-i18n="browseWithoutAccount">يمكنك استكشاف المجموعة التجريبية دون تسجيل الدخول.</p>
-        <a class="secondary-button full-width" href="search.html" data-route="search.html" data-i18n="browse">استكشف المنتجات</a>
+        <p class="quiet-copy">يمكنك استكشاف المنتجات والطلب كضيف دون تسجيل الدخول.</p>
+        <a class="secondary-button full-width" href="search.html">استكشف المنتجات</a>
       </section>
 
+      <!-- Onboarding Panel (First-time setup: Name, Phone, Address) -->
       <section id="onboardingPanel" class="account-card" aria-labelledby="onboardingTitle" hidden>
-        <span class="section-kicker" data-i18n="oneMoreStep">خطوة واحدة</span>
-        <h2 id="onboardingTitle" data-i18n="completeProfile">أكمل ملفك الشخصي</h2>
-        <p class="section-copy" data-i18n="profileIntro">اختر الاسم الذي تريد استخدامه ورقم هاتفك وعنوانك لتسهيل إتمام طلباتك دائماً.</p>
-        <p class="identity-line"><span data-i18n="email">البريد</span><b id="onboardingEmail" dir="ltr"></b></p>
+        <span class="section-kicker">إكمال الحساب</span>
+        <h2 id="onboardingTitle">أكمل بيانات ملفك الشخصي</h2>
+        <p class="section-copy">سجّل اسمك ورقم هاتفك وعنوانك لتسهيل إتمام طلباتك دائماً والتوصيل السريع.</p>
+        <p class="identity-line"><span>البريد الإلكتروني:</span> <b id="onboardingEmail" dir="ltr"></b></p>
+
         <form id="onboardingForm" class="account-form">
-          <label for="onboardingName" data-i18n="displayName">الاسم الكامل</label><input id="onboardingName" name="display_name" autocomplete="name" required maxlength="80" minlength="1" data-placeholder="namePlaceholder">
-          <label for="onboardingPhone">رقم الهاتف (للتواصل والتوصيل)</label><input id="onboardingPhone" name="phone" type="tel" dir="ltr" placeholder="+964..." required>
-          <label for="onboardingCity">المدينة / المحافظة</label><input id="onboardingCity" name="city" placeholder="مثال: بغداد / المنصور" required>
-          <label for="onboardingAddress">العنوان التفصيلي</label><input id="onboardingAddress" name="address" placeholder="الشارع، رقم المبنى، معلم مميز" required>
-          <label for="onboardingLocale" data-i18n="preferredLanguage">لغة الحساب</label><select id="onboardingLocale" name="locale"><option value="ar">العربية</option><option value="en">English</option></select>
-          <button class="primary-button" type="submit" data-i18n="finishProfile">حفظ ومتابعة</button>
+          <label for="onboardingName">الاسم الكامل *</label>
+          <input id="onboardingName" name="display_name" autocomplete="name" required maxlength="80" minlength="2" placeholder="مثال: محمد أحمد العبيدي">
+
+          <label for="onboardingPhone">رقم الهاتف الافتراضي (للتوصيل والتواصل) *</label>
+          <input id="onboardingPhone" name="phone" type="tel" dir="ltr" placeholder="+964 770 123 4567" required pattern="\+?[0-9 ()-]{7,25}">
+
+          <div class="field-pair">
+            <div>
+              <label for="onboardingCity">المدينة / الحي *</label>
+              <input id="onboardingCity" name="city" placeholder="مثال: بغداد / المنصور" required>
+            </div>
+            <div>
+              <label for="onboardingCountry">الدولة *</label>
+              <input id="onboardingCountry" name="country" value="العراق (Iraq)" required>
+            </div>
+          </div>
+
+          <label for="onboardingAddress">العنوان التفصيلي (الشارع، رقم المبنى، أقرب نقطة دالة) *</label>
+          <input id="onboardingAddress" name="address" placeholder="الشارع العام، عمارة 14، قرب صيدلية الأمل" required minlength="6">
+
+          <label for="onboardingLocale">لغة الواجهة المفضلة</label>
+          <select id="onboardingLocale" name="locale">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+          </select>
+
+          <button class="primary-button" type="submit">حفظ وتثبيت البيانات</button>
         </form>
-        <button id="onboardingSignOut" class="text-button sign-out-link" type="button" data-i18n="differentAccount">الخروج لاستخدام حساب آخر</button>
+        <button id="onboardingSignOut" class="text-button sign-out-link" type="button">تسجيل الخروج</button>
       </section>
 
+      <!-- Profile Panel (Full User Profile with Name, Phone, Address, Orders Shortcuts) -->
       <section id="profilePanel" class="account-card" aria-labelledby="profileTitle" hidden>
-        <div class="card-heading"><div><span class="section-kicker" data-i18n="myAccount">حسابي</span><h2 tabindex="-1" id="profileTitle" data-i18n="profileTitle">ملفك الشخصي</h2></div><span class="account-avatar" id="accountAvatar" aria-hidden="true"></span></div>
-        <p class="identity-line"><span data-i18n="email">البريد</span><b id="profileEmail" dir="ltr"></b></p>
+        <div class="card-heading">
+          <div>
+            <span class="section-kicker">الملف الشخصي</span>
+            <h2 tabindex="-1" id="profileTitle">بيانات حسابك</h2>
+          </div>
+          <span class="account-avatar" id="accountAvatar" aria-hidden="true">👤</span>
+        </div>
+
+        <p class="identity-line"><span>البريد المرتبط:</span> <b id="profileEmail" dir="ltr">user@example.com</b></p>
+
+        <!-- Quick Shortcuts -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-block:16px;">
+          <a href="orders.html" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+            <div style="font-size:20px;margin-bottom:4px;">📦</div>
+            <strong style="font-size:13px;display:block;">طلباتي</strong>
+            <small style="color:#64748B;font-size:11px;">تتبع الشحنات</small>
+          </a>
+          <a href="addresses.html" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+            <div style="font-size:20px;margin-bottom:4px;">📍</div>
+            <strong style="font-size:13px;display:block;">عناويني</strong>
+            <small style="color:#64748B;font-size:11px;">عناوين التوصيل</small>
+          </a>
+          <a href="market.html?view=cart" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+            <div style="font-size:20px;margin-bottom:4px;">🛒</div>
+            <strong style="font-size:13px;display:block;">السلة</strong>
+            <small style="color:#64748B;font-size:11px;">إتمام الشراء</small>
+          </a>
+        </div>
+
         <form id="profileForm" class="account-form">
-          <label for="profileName" data-i18n="displayName">الاسم الكامل</label><input id="profileName" name="display_name" autocomplete="name" required maxlength="80" minlength="1">
-          <label for="profilePhone">رقم الهاتف الافتراضي للشحن</label><input id="profilePhone" name="phone" type="tel" dir="ltr">
-          <label for="profileCity">المدينة / المحافظة</label><input id="profileCity" name="city">
-          <label for="profileAddress">العنوان التفصيلي الافتراضي</label><input id="profileAddress" name="address">
-          <label for="profileLocale" data-i18n="preferredLanguage">لغة الحساب</label><select id="profileLocale" name="locale"><option value="ar">العربية</option><option value="en">English</option></select>
-          <div class="form-actions"><button class="primary-button" type="submit" data-i18n="saveChanges">حفظ التغييرات</button><button id="signOutButton" class="text-button" type="button" data-i18n="signOut">تسجيل الخروج</button></div>
+          <label for="profileName">الاسم الكامل *</label>
+          <input id="profileName" name="display_name" autocomplete="name" required maxlength="80" minlength="2">
+
+          <label for="profilePhone">رقم الهاتف الأساسي للتوصيل *</label>
+          <input id="profilePhone" name="phone" type="tel" dir="ltr" placeholder="+964..." required>
+
+          <div class="field-pair">
+            <div>
+              <label for="profileCity">المدينة / المحافظة</label>
+              <input id="profileCity" name="city" placeholder="بغداد / المنصور">
+            </div>
+            <div>
+              <label for="profileCountry">الدولة</label>
+              <input id="profileCountry" name="country" value="العراق (Iraq)">
+            </div>
+          </div>
+
+          <label for="profileAddress">العنوان التفصيلي الافتراضي للشحن</label>
+          <input id="profileAddress" name="address" placeholder="الشارع، رقم المبنى، أقرب نقطة دالة">
+
+          <label for="profileLocale">لغة الحساب</label>
+          <select id="profileLocale" name="locale">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+          </select>
+
+          <div class="form-actions" style="margin-top:20px;">
+            <button class="primary-button" type="submit">حفظ التغييرات</button>
+            <button id="signOutButton" class="text-button" type="button">تسجيل الخروج</button>
+          </div>
         </form>
+
+        <!-- Separate Store Portal Callout (Does not clutter buyer profile) -->
+        <div style="margin-top:24px;padding:16px;background:#FFF1E8;border:1px solid #FED7AA;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:28px;">🏪</span>
+            <div>
+              <strong style="font-size:14px;color:#9A3412;display:block;">هل ترغب في البيع على BEMO؟</strong>
+              <p style="font-size:12px;color:#B45309;margin:2px 0 0;">افتح متجرك المستقل وابدأ إدارة منتجاتك وطلباتك بعمولة 0%.</p>
+            </div>
+          </div>
+          <a href="seller.html" class="primary-button" style="background:#FF5000;text-decoration:none;padding:8px 16px;font-size:13px;">
+            الانتقال إلى المتجر ➔
+          </a>
+        </div>
       </section>
 
-      <section id="storePanel" class="account-card" aria-labelledby="storeTitle" hidden>
-        <div class="card-heading"><div><span class="section-kicker" data-i18n="sellerSpace">مساحة البائع</span><h2 tabindex="-1" id="storeTitle" data-i18n="yourStore">متجرك في BEMO</h2></div><span class="small-icon pale" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 9 2-6h14l2 6M4 13v8h16v-8M9 21v-7h6v7M3 9c0 4 6 4 6 0 0 4 6 4 6 0 0 4 6 4 6 0"/></svg></span></div>
-        <div id="newStoreArea">
-          <p class="section-copy" data-i18n="storeIntro">ابدأ بمتجر واحد لحسابك، دون انتظار موافقة مسبقة.</p>
-          <form id="storeForm" class="account-form">
-            <label for="storeName" data-i18n="storeName">اسم المتجر</label><input id="storeName" name="title" required minlength="2" maxlength="80" autocomplete="organization" data-placeholder="storeNamePlaceholder">
-            <label for="storeSlug" data-i18n="storeIdentifier">معرّف المتجر</label><input id="storeSlug" name="slug" dir="ltr" required minlength="3" maxlength="48" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="my-good-finds" aria-describedby="slugHelp"><p id="slugHelp" class="field-help" data-i18n="slugHelp">من 3 إلى 48 حرفاً إنجليزياً صغيراً أو رقماً، مع فواصل -. اختر معرّفاً فريداً.</p>
-            <label for="storeDescription" data-i18n="storeDescription">وصف المتجر <span class="optional">(اختياري)</span></label><textarea id="storeDescription" name="description" rows="4" maxlength="2000" data-placeholder="descriptionPlaceholder"></textarea>
-            <div class="form-note"><p data-i18n="storePublicNote">سيظهر اسم المتجر ووصفه ومعرّفه في دليل المتاجر. لا تتوفر ميزة تعديلها أو إغلاق المتجر في هذه المرحلة.</p><p data-i18n="oneStoreNote">لكل حساب متجر واحد؛ يمكنك إدارة المنتجات والمخزون؛ استقبال الطلبات قيد الإعداد.</p></div>
-            <label for="logoFile" data-i18n="logo">شعار المتجر</label><input type="file" id="logoFile" name="logoFile" accept="image/png,image/jpeg">
-            <label for="coverFile" data-i18n="cover">غلاف المتجر</label><input type="file" id="coverFile" name="coverFile" accept="image/png,image/jpeg">
-            <fieldset><legend data-i18n="privateIdentity">بيانات البائع الخاصة</legend>
-            <label for="legalName" data-i18n="legalName">الاسم القانوني</label><input id="legalName" name="legalName" autocomplete="name" required minlength="2" maxlength="120">
-            <label for="sellerPhone" data-i18n="sellerPhone">رقم الهاتف مع رمز الدولة</label><input id="sellerPhone" name="sellerPhone" type="tel" autocomplete="tel" dir="ltr" pattern="\+[1-9][0-9]{7,14}" placeholder="+964…" required>
-            <label for="sellerAddress" data-i18n="sellerAddress">العنوان الشخصي</label><input id="sellerAddress" name="sellerAddress" autocomplete="street-address" required minlength="8" maxlength="400">
-            <label for="identityFile" data-i18n="identityFile">مستند الهوية</label><input id="identityFile" name="identityFile" type="file" required accept="image/jpeg,image/png,application/pdf">
-            <p data-i18n="identityNotice"></p></fieldset>
-            <label><input type="checkbox" name="sellerAgreement" required><span data-i18n="sellerAgreement"></span></label>
-            <button class="primary-button" type="submit" data-i18n="createStore">إنشاء متجري</button>
-          </form>
-        </div>
-        <div id="existingStoreArea" hidden>
-          <div class="store-summary"><span class="store-initial" id="storeInitial" aria-hidden="true"></span><div><h3 id="savedStoreName"></h3><p class="store-identifier" id="savedStoreSlug" dir="ltr"></p></div><span id="savedStoreStatus" class="store-status"></span></div>
-          <p id="savedStoreDescription" class="saved-description"></p>
-          <a class="primary-button" href="merchant.html?new=1" id="accountAddProduct" data-i18n="addProduct">إضافة منتج</a>
-          <a class="secondary-button" href="merchant.html" data-route="merchant.html" data-i18n="manageProducts">إدارة المنتجات والمخزون</a>
-          <a class="back-link" href="stores.html" data-route="stores.html" data-i18n="directory">استعرض دليل المتاجر</a>
-          <div class="form-note"><p data-i18n="storeSavedNote">حُفظ متجرك في حسابك. يمكنك إدارة المنتجات والمخزون؛ استقبال الطلبات قيد الإعداد.</p></div>
-        </div>
-      </section>
-      <p class="page-footnote" data-i18n="realDataNote">بيانات الحساب والمتجر هنا مستقلة عن المنتجات والطلبات التجريبية في السوق.</p>
+      <!-- Hidden placeholder for legacy storePanel to maintain script compatibility -->
+      <div id="storePanel" hidden>
+        <div id="newStoreArea" hidden></div>
+        <div id="existingStoreArea" hidden></div>
+      </div>
     </div>
   </main>
-  <footer class="account-container account-footer"><span>© 2026 BEMO</span><span data-i18n="footerLine">عالم من الاكتشافات الجميلة.</span></footer>
-  <noscript><p class="noscript-note">يلزم تشغيل JavaScript لاستخدام الحساب. JavaScript is required to use your account.</p></noscript>
+
+  <footer class="account-container account-footer">
+    <span>© 2026 BEMO. عالم من الاكتشافات الجميلة.</span>
+  </footer>
+
   <script src="vendor/supabase-2.118.0.js"></script>
   <script src="backend-config.js"></script>
   <script src="account-session.js"></script>

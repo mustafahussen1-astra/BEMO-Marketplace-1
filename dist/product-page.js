@@ -201,12 +201,26 @@
     if (!selectedVariant) return;
     const qty = Number($('quantity').value) || 1;
     try {
-      live.add({ ...selectedVariant, stock_on_hand: selectedVariant.stock_on_hand || 100 }, product.name || product.title);
-      $('cartStatus').textContent = t('added');
+      live.add(
+        { ...selectedVariant, stock_on_hand: selectedVariant.stock_on_hand || 100 },
+        product.name || product.title,
+        {
+          image: product.image || (product.images && product.images[0]) || '',
+          store_title: product.store_title || product.store || 'BEMO Official Store',
+          store_slug: product.store_slug || 'official-store',
+          variant_label: selectedVariant.label || ''
+        }
+      );
       if (checkout) {
         location.href = `market.html?view=cart&lang=${lang}`;
       } else {
-        setTimeout(() => { $('cartStatus').textContent = ''; }, 3000);
+        $('cartStatus').innerHTML = `
+          <div style="display:inline-flex;align-items:center;gap:8px;background:#ECFDF5;color:#065F46;padding:6px 12px;border-radius:20px;font-size:13px;border:1px solid #A7F3D0;">
+            <span>✓ ${t('added')}</span>
+            <a href="market.html?view=cart&lang=${lang}" style="color:#059669;font-weight:700;text-decoration:underline;">${lang === 'ar' ? 'الانتقال للسلة ➔' : 'View Cart ➔'}</a>
+          </div>
+        `;
+        setTimeout(() => { $('cartStatus').textContent = ''; }, 4500);
       }
     } catch (_) {
       $('cartStatus').textContent = t('stockError');

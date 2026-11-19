@@ -1,1 +1,396 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>لوحة البائع — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="market.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><div class="account-container seller-layout"><aside class="seller-sidebar" id="sellerNavigation"></aside><main id="main" class="merchant-main"><div class="workspace-heading"><div><span class="section-kicker" data-t="seller">مركز البائع</span><h1 data-t="title">لوحة متجرك</h1></div><button id="refresh" type="button" class="secondary-button" data-t="refresh">تحديث</button></div><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="gate" class="account-card" hidden><h2 data-t="gateTitle">سجّل الدخول للمتابعة</h2><p data-t="gateCopy">افتح حسابك وأكمل بياناتك.</p><a class="primary-button" data-route="account.html" data-t="account">حسابي</a></section><div id="workspace" hidden><section class="seller-welcome"><div><p data-t="overview">نظرة على نشاط متجرك</p><h2 id="shopTitle"></h2></div><a class="primary-button" id="addProduct" href="merchant.html?new=1" data-t="addProduct">إضافة منتج</a></section><div class="metric-grid" id="metrics"></div><div class="dashboard-grid"><section class="account-card"><div class="section-heading"><h2 data-t="trend">الطلبات خلال 14 يومًا</h2><span class="live-note">UTC</span></div><div id="trend" class="sales-bars" role="img"></div><p id="trendSummary" class="live-note"></p></section><section class="account-card"><h2 data-t="todo">المتابعة اليوم</h2><div id="todo" class="todo-list"></div></section></div><section class="account-card"><div class="section-heading"><h2 data-t="latest">أحدث الطلبات</h2><a id="ordersLink" href="orders.html?view=seller" data-t="viewAll">عرض الكل</a></div><div id="recent" class="recent-orders"></div></section><section class="account-card"><h2 data-t="codTitle">مبالغ الطلبات المسلّمة</h2><div id="codTotals" class="cod-totals"></div><p class="live-note" data-t="codNote">سجل لقيمة الطلبات المسلّمة، وليس رصيدًا لدى BEMO أو إثباتًا لتحصيل النقد.</p></section></div></main></div><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="seller-page.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>مركز التاجر — BEMO Seller Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
+<body data-page="seller-center">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Seller Center</span>
+        </div>
+      </a>
+
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>السوق</span>
+        </a>
+        <a href="orders.html?view=seller" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلبات المتجر</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+        <button type="button" id="languageButton" class="top-lang-btn" style="border:1px solid #CCC;padding:4px 10px;border-radius:6px;background:#FFF;cursor:pointer;">English</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Status / Error Alerts -->
+  <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+  <div id="error" class="message error-message" role="alert" hidden></div>
+
+  <!-- 1. Gate View: Sign-In Prompt if Not Authenticated -->
+  <section id="gate" class="container account-card" style="max-width:600px;margin:40px auto;text-align:center;padding:32px;" hidden>
+    <div style="font-size:40px;margin-bottom:12px;">🏪</div>
+    <h2 id="gateTitle" data-t="gateTitle">سجّل الدخول للوصول إلى مساحة التاجر</h2>
+    <p id="gateCopy" data-t="gateCopy" style="color:#737373;margin-bottom:20px;">افتح حسابك وسجّل بيانات متجرك المستقل في BEMO.</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <a class="primary-button" data-route="account.html" href="account.html" data-t="account">تسجيل الدخول / فتح الحساب</a>
+      <button type="button" id="demoSellerBtn" class="secondary-button">معاينة لوحة تاجر تجريبية</button>
+    </div>
+  </section>
+
+  <!-- 2. Seller Registration Wizard (Matching 6SellerRegistration.png) -->
+  <section id="registrationWizard" class="container" style="max-width:1100px;margin:30px auto;" hidden>
+    <div class="registration-wizard-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+      <!-- Progress Stepper Header -->
+      <div style="background:#0F1E36;color:#FFF;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+        <div>
+          <span style="font-size:11px;color:#FF5000;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">BEMO SELLER REGISTRATION</span>
+          <h1 style="font-size:24px;font-weight:800;margin:4px 0 0;color:#FFF;">تسجيل متجر جديد — 3 خطوات سهلة</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:13px;font-weight:700;">
+          <span style="background:#15803D;color:#FFF;padding:4px 12px;border-radius:20px;">1 الحساب ✓</span>
+          <span>➔</span>
+          <span style="background:#FF5000;color:#FFF;padding:4px 12px;border-radius:20px;">2 بيانات المتجر</span>
+          <span>➔</span>
+          <span style="background:#1E293B;color:#94A3B8;padding:4px 12px;border-radius:20px;">3 التحقق والإطلاق</span>
+        </div>
+      </div>
+
+      <!-- Registration Form Body -->
+      <form id="sellerRegisterForm" style="padding:32px;" class="merchant-form">
+        <!-- Benefit Callout -->
+        <div style="background:#FFF1E8;border:1px solid #FED7AA;border-radius:10px;padding:16px;margin-bottom:24px;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:28px;">🚀</span>
+          <div style="font-size:13px;color:#9A3412;line-height:1.5;">
+            <strong>ابدأ البيع لآلاف المشترين بعمولة منصة 0% في الإصدار الحالي.</strong>
+            <span> دفع عند الاستلام لكل متجر مستقل، تتبع مباشر للطلبات، وأدوات متقدمة لإدارة المخزون والأسعار.</span>
+          </div>
+        </div>
+
+        <!-- Section 1: Store Basics -->
+        <h3 style="font-size:17px;font-weight:800;margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid #EEE;">1. بيانات المتجر الأساسية</h3>
+        
+        <div class="field-pair">
+          <label>
+            <span>اسم المتجر التجاري *</span>
+            <input id="newStoreTitle" name="title" required minlength="2" maxlength="80" placeholder="مثال: Noor Fashion / متجر النور">
+          </label>
+          <label>
+            <span>معرّف المتجر الدائم (@username) *</span>
+            <input id="newStoreSlug" name="slug" dir="ltr" required minlength="3" maxlength="48" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="noor-store">
+            <small style="color:#64748B;font-size:11px;">أحرف إنجليزية صغيرة وأرقام وفواصل -. لا يمكن تغييره بعد التسجيل.</small>
+          </label>
+        </div>
+
+        <div class="field-pair">
+          <label>
+            <span>التصنيف الأساسي للمنتجات *</span>
+            <select id="newStoreCategory" name="category" required>
+              <option value="fashion">الأزياء والموضة (Fashion)</option>
+              <option value="electronics">الإلكترونيات والملحقات (Electronics)</option>
+              <option value="home">المنزل والمعيشة والمطبخ (Home)</option>
+              <option value="beauty">الجمال والعناية الشخصية (Beauty)</option>
+              <option value="sports">الرياضة واللياقة (Sports)</option>
+              <option value="other">أخرى ومتنوعة (Other)</option>
+            </select>
+          </label>
+          <label>
+            <span>رقم هاتف المتجر الأساسي للتواصل *</span>
+            <input id="newStorePhone" name="sellerPhone" type="tel" dir="ltr" required placeholder="+964 770 123 4567">
+          </label>
+        </div>
+
+        <label>
+          <span>نبذة ووصف المتجر (تظهر للمتسوقين في صفحة المتجر)</span>
+          <textarea id="newStoreDesc" name="description" rows="3" maxlength="1500" placeholder="أخبر المتسوقين عن تخصص متجرك، منتجاتك، ومعايير الجودة التي تقدمها..."></textarea>
+        </label>
+
+        <div class="field-pair" style="margin-top:10px;">
+          <label>
+            <span>شعار المتجر (Logo)</span>
+            <input type="file" id="newStoreLogo" accept="image/png,image/jpeg">
+          </label>
+          <label>
+            <span>غلاف المتجر الرئيسي (Cover Banner 1200x300)</span>
+            <input type="file" id="newStoreCover" accept="image/png,image/jpeg">
+          </label>
+        </div>
+
+        <!-- Section 2: Identity Verification (National ID / Iqama / CR) -->
+        <h3 style="font-size:17px;font-weight:800;margin:28px 0 16px;padding-bottom:8px;border-bottom:1px solid #EEE;">
+          2. التحقق من الهوية الرسمية للبائع (Identity Verification)
+        </h3>
+
+        <div class="identity-verification-box" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;">نوع وثيقة الإثبات الرسمية *</label>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" value="national_id" checked> <span>بطاقة وطنية (National ID)</span></label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" value="iqama"> <span>إقامة نظامية (Iqama)</span></label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" value="passport"> <span>جواز سفر (Passport)</span></label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" value="cr"> <span>سجل تجاري (Commercial CR)</span></label>
+            </div>
+          </div>
+
+          <div class="field-pair">
+            <label>
+              <span>الاسم القانوني الكامل (كما في الوثيقة) *</span>
+              <input id="legalName" name="legalName" required minlength="2" placeholder="الاسم الرباعي أو اسم الشركة">
+            </label>
+            <label>
+              <span>رقم الهوية أو السجل التجاري *</span>
+              <input id="idNumber" name="idNumber" dir="ltr" required placeholder="1234567890">
+            </label>
+          </div>
+
+          <div class="field-pair">
+            <label>
+              <span>صورة الوجه الأمامي للوثيقة (Front) *</span>
+              <input type="file" id="idFrontFile" accept="image/jpeg,image/png,application/pdf" required>
+            </label>
+            <label>
+              <span>صورة الوجه الخلفي للوثيقة (Back) *</span>
+              <input type="file" id="idBackFile" accept="image/jpeg,image/png,application/pdf" required>
+            </label>
+          </div>
+
+          <p style="font-size:11px;color:#64748B;margin:6px 0 0;line-height:1.5;">
+            🔒 <strong>تنبيه الأمان والخصوصية:</strong> مستندات الهوية مشفرة وتُحفظ في سجل تدقيق خاص بإدارة BEMO للتحقق من هوية التجار ومكافحة الاحتيال، ولا تظهر للمتسوقين أبداً.
+          </p>
+        </div>
+
+        <!-- Section 3: Pickup Address for Courier -->
+        <h3 style="font-size:17px;font-weight:800;margin:28px 0 16px;padding-bottom:8px;border-bottom:1px solid #EEE;">
+          3. عنوان استلام الشحنات من التاجر (Pickup Address)
+        </h3>
+
+        <div class="field-pair">
+          <label>
+            <span>المدينة / المحافظة *</span>
+            <input id="pickupCity" name="pickupCity" required placeholder="مثال: بغداد / الرياض / القاهرة">
+          </label>
+          <label>
+            <span>الحي / المنطقة *</span>
+            <input id="pickupDistrict" name="pickupDistrict" required placeholder="مثال: المنصور / العليا / المعادي">
+          </label>
+        </div>
+
+        <label>
+          <span>الشارع ورقم المستودع أو المحل أو المبنى *</span>
+          <input id="pickupStreet" name="sellerAddress" required minlength="6" placeholder="الشارع العام، عمارة 12، الطابق الأرضي">
+        </label>
+
+        <!-- Terms Agreement -->
+        <label class="check-label" style="margin-top:20px;cursor:pointer;">
+          <input type="checkbox" name="sellerAgreement" id="sellerAgreement" required style="width:18px;height:18px;accent-color:#FF5000;">
+          <span style="font-size:13px;color:#171717;">
+            أوافق على اتفاقية البيع وسياسات التجار في BEMO، والالتزام بمعايير فحص وتوفير المخزون والدفع عند الاستلام.
+          </span>
+        </label>
+
+        <!-- Submit Button -->
+        <div style="margin-top:24px;text-align:end;">
+          <button type="submit" id="submitStoreBtn" class="primary-button" style="background:#FF5000;font-size:16px;font-weight:800;padding:12px 28px;border-radius:8px;">
+            تأكيد تسجيل المتجر وإطلاق مساحتي ➔
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 3. Seller Center Dashboard View (Matching 5SellerCenterDashboard.png) -->
+  <div id="sellerDashboardLayout" class="account-container seller-layout" style="display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;padding-block:24px;" hidden>
+    <!-- Dark Navy Sidebar (#0F1E36) Matching Mockup -->
+    <aside class="seller-sidebar-navy" style="background:#0F1E36;border-radius:14px;padding:20px;color:#FFF;align-self:start;">
+      <!-- Store Mini Brand Profile -->
+      <div class="seller-brand-card" style="display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #1E293B;">
+        <div id="sideStoreAvatar" style="width:44px;height:44px;border-radius:10px;background:#FF5000;color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;">
+          NS
+        </div>
+        <div>
+          <strong id="sideStoreTitle" style="font-size:14px;display:block;color:#FFF;">Noor Store</strong>
+          <span style="font-size:11px;color:#4ADE80;background:#064E3B;padding:1px 6px;border-radius:4px;font-weight:700;">✔ متجر موثق</span>
+          <span id="sideStoreSlug" style="display:block;font-size:11px;color:#94A3B8;direction:ltr;">@noor_store</span>
+        </div>
+      </div>
+
+      <!-- Nav Sections -->
+      <div class="sidebar-section-group">
+        <span style="font-size:10px;color:#64748B;font-weight:700;letter-spacing:0.05em;display:block;margin-bottom:8px;">MANAGE</span>
+        <nav style="display:flex;flex-direction:column;gap:4px;">
+          <a href="seller.html" class="side-nav-item active" style="background:#1E293B;color:#FF5000;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span>📊</span>
+            <span>لوحة المتجر</span>
+          </a>
+          <a href="orders.html?view=seller" class="side-nav-item" style="color:#CBD5E1;padding:10px 14px;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:10px;"><span>📦</span> <span>الطلبات</span></span>
+            <span style="background:#FF5000;color:#FFF;font-size:11px;padding:1px 6px;border-radius:10px;font-weight:700;">5</span>
+          </a>
+          <a href="merchant.html" class="side-nav-item" style="color:#CBD5E1;padding:10px 14px;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span>🏷️</span>
+            <span>المنتجات والمخزون</span>
+          </a>
+          <a href="store-editor.html" class="side-nav-item" style="color:#CBD5E1;padding:10px 14px;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span>🎨</span>
+            <span>محرر المتجر والغلاف</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-section-group" style="margin-top:20px;">
+        <span style="font-size:10px;color:#64748B;font-weight:700;letter-spacing:0.05em;display:block;margin-bottom:8px;">FINANCES</span>
+        <nav style="display:flex;flex-direction:column;gap:4px;">
+          <a href="balance.html" class="side-nav-item" style="color:#CBD5E1;padding:10px 14px;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span>💳</span>
+            <span>الرصيد والشحن</span>
+          </a>
+          <a href="regions.html" class="side-nav-item" style="color:#CBD5E1;padding:10px 14px;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span>🚚</span>
+            <span>مناطق ورسوم التوصيل</span>
+          </a>
+        </nav>
+      </div>
+
+      <div style="margin-top:30px;padding-top:16px;border-top:1px solid #1E293B;">
+        <a id="publicStorefrontLink" href="store.html?store=noor_store" target="_blank" style="background:#FF5000;color:#FFF;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <span>زيارة المتجر للزوار ↗</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Seller Workspace Column -->
+    <main id="main" class="merchant-main" style="padding-block:0;">
+      <!-- Welcome Hero Banner (Matching 5SellerCenterDashboard.png) -->
+      <section class="seller-welcome" style="background:linear-gradient(115deg,#0F1E36 0%,#1E3A8A 100%);padding:24px 30px;border-radius:14px;color:#FFF;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+        <div>
+          <span style="font-size:12px;color:#93C5FD;font-weight:700;">مرحباً بك مجدداً 👋</span>
+          <h2 id="shopTitle" style="font-size:26px;font-weight:800;margin:4px 0 0;color:#FFF;">متجر النور الفاخر</h2>
+          <p style="color:#E2E8F0;font-size:13px;margin:4px 0 0;">جميع العمليات ونشاطات البيع المباشر والدفع عند الاستلام تسير بصورة ممتازة.</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <a class="primary-button" id="addProduct" href="merchant.html?new=1" style="background:#FF5000;text-decoration:none;padding:10px 18px;font-size:13px;font-weight:700;">
+            + إضافة منتج جديد
+          </a>
+        </div>
+      </section>
+
+      <!-- 4 KPI Metrics Grid (Matching 5SellerCenterDashboard.png) -->
+      <div class="metric-grid" id="metrics" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px;">
+        <div class="metric" style="background:#FFF;border:1px solid #E5E5E5;border-top:3px solid #15803D;border-radius:12px;padding:18px;">
+          <span style="font-size:12px;color:#737373;font-weight:600;">مبيعات COD المسلّمة</span>
+          <strong id="kpiSales" style="font-size:26px;font-weight:900;color:#15803D;display:block;margin-top:4px;">124,500 EGP</strong>
+          <small style="color:#15803D;font-size:11px;font-weight:700;">↑ +14.2% هذا الشهر</small>
+        </div>
+        <div class="metric" style="background:#FFF;border:1px solid #E5E5E5;border-top:3px solid #FF5000;border-radius:12px;padding:18px;">
+          <span style="font-size:12px;color:#737373;font-weight:600;">إجمالي الطلبات المستلمة</span>
+          <strong id="kpiOrders" style="font-size:26px;font-weight:900;color:#171717;display:block;margin-top:4px;">342 طلب</strong>
+          <small style="color:#FF5000;font-size:11px;font-weight:700;">5 بانتظار قرارك</small>
+        </div>
+        <div class="metric" style="background:#FFF;border:1px solid #E5E5E5;border-top:3px solid #2563EB;border-radius:12px;padding:18px;">
+          <span style="font-size:12px;color:#737373;font-weight:600;">المنتجات النشطة</span>
+          <strong id="kpiProducts" style="font-size:26px;font-weight:900;color:#2563EB;display:block;margin-top:4px;">18 منتج</strong>
+          <small style="color:#64748B;font-size:11px;">مخزون مكتمل</small>
+        </div>
+        <div class="metric" style="background:#FFF;border:1px solid #E5E5E5;border-top:3px solid #EAB308;border-radius:12px;padding:18px;">
+          <span style="font-size:12px;color:#737373;font-weight:600;">تقييم المتجر العام</span>
+          <strong id="kpiRating" style="font-size:26px;font-weight:900;color:#CA8A04;display:block;margin-top:4px;">★ 4.9</strong>
+          <small style="color:#64748B;font-size:11px;">(98% رضا المشترين)</small>
+        </div>
+      </div>
+
+      <!-- Dashboard Charts & To-Do Grid -->
+      <div class="dashboard-grid" style="display:grid;grid-template-columns:1.8fr 1fr;gap:20px;margin-bottom:20px;">
+        <!-- 14-day Orders Trend Bar Chart -->
+        <section class="account-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:20px;">
+          <div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h2 data-t="trend" style="font-size:16px;font-weight:800;margin:0;">الطلبات خلال الـ 14 يوماً الماضية</h2>
+            <span class="live-note" style="font-size:11px;color:#888;">تحديث مباشر</span>
+          </div>
+          <div id="trend" class="sales-bars" role="img" style="display:flex;align-items:flex-end;height:150px;gap:6px;direction:ltr;background:#F8FAFC;border-radius:8px;padding:12px;"></div>
+          <p id="trendSummary" class="live-note" style="margin-top:10px;font-size:12px;color:#64748B;"></p>
+        </section>
+
+        <!-- To-Do Action List -->
+        <section class="account-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:20px;">
+          <h2 data-t="todo" style="font-size:16px;font-weight:800;margin:0 0 14px;">إجراءات اليوم والمتابعة</h2>
+          <div id="todo" class="todo-list">
+            <a href="orders.html?view=seller" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EEE;text-decoration:none;color:#171717;">
+              <strong style="width:36px;height:36px;border-radius:8px;background:#FFF1E8;color:#FF5000;display:flex;align-items:center;justify-content:center;font-size:16px;">5</strong>
+              <div>
+                <span style="font-size:13px;font-weight:700;display:block;">طلبات بانتظار قرارك</span>
+                <small style="color:#737373;font-size:11px;">قبول الطلبات لفتح بيانات التوصيل</small>
+              </div>
+            </a>
+            <a href="merchant.html" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EEE;text-decoration:none;color:#171717;">
+              <strong style="width:36px;height:36px;border-radius:8px;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;font-size:16px;">2</strong>
+              <div>
+                <span style="font-size:13px;font-weight:700;display:block;">منتجات بمخزون منخفض</span>
+                <small style="color:#737373;font-size:11px;">تحديث الكميات لتجنب نفاد المخزون</small>
+              </div>
+            </a>
+            <a href="regions.html" style="display:flex;align-items:center;gap:12px;padding:10px 0;text-decoration:none;color:#171717;">
+              <strong style="width:36px;height:36px;border-radius:8px;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center;font-size:16px;">✓</strong>
+              <div>
+                <span style="font-size:13px;font-weight:700;display:block;">مناطق التوصيل</span>
+                <small style="color:#737373;font-size:11px;">تغطية 14 محافظة بنجاح</small>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+
+      <!-- Recent Orders Table -->
+      <section class="account-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:20px;">
+        <div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 data-t="latest" style="font-size:16px;font-weight:800;margin:0;">أحدث الطلبات الواردة</h2>
+          <a id="ordersLink" href="orders.html?view=seller" style="color:#FF5000;font-size:13px;font-weight:700;text-decoration:none;">عرض كل الطلبات ➔</a>
+        </div>
+        <div id="recent" class="recent-orders"></div>
+      </section>
+
+      <!-- Delivered COD Totals -->
+      <section class="account-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:20px;margin-top:20px;">
+        <h2 data-t="codTitle" style="font-size:16px;font-weight:800;margin:0 0 10px;">سجل مبالغ الطلبات المسلّمة</h2>
+        <div id="codTotals" class="cod-totals" style="color:#15803D;font-size:24px;font-weight:900;"></div>
+        <p class="live-note" data-t="codNote" style="font-size:12px;color:#737373;margin-top:6px;">سجل لقيمة الطلبات المسلّمة، ويتم تحصيل النقد مباشرة من المشتري عند الاستلام دون عمولة منصة في الإصدار الحالي.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="account-container account-footer">
+    <span>© 2026 BEMO Seller Center. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="seller-page.js"></script>
+</body>
+</html>

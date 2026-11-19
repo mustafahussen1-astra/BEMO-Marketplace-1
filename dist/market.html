@@ -1,9 +1,374 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><title>منتجات BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
-<header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="orders.html" data-t="orders">طلباتي</a><a data-route="account.html" data-t="account">حسابي</a><button id="languageButton" class="language-button">English</button></nav></div></header>
-<main class="account-container live-main" id="main"><span class="section-kicker" data-t="kicker">من متاجر BEMO</span><h1 data-t="title">اكتشافات يشاركها التجار</h1><p class="section-copy" data-t="intro">منتجات ينشرها أصحاب المتاجر. سعر التوصيل يحدده كل تاجر، والدفع عند الاستلام لكل متجر على حدة.</p>
-<nav class="market-view-nav" aria-label="Browse and checkout"><button type="button" id="browseView" data-t="browseView">تصفح المنتجات</button><button type="button" id="cartView" data-t="cartView">السلة وإتمام الطلب</button><a data-route="orders.html" data-t="orders">طلباتي</a></nav><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" tabindex="-1" hidden></div><section id="catalogSection"><form id="searchForm" class="live-search" role="search"><label class="sr-only" for="query" data-t="search">بحث</label><input type="search" id="query" maxlength="120"><select id="category" aria-label="التصنيف"><option value="" data-t="all">كل التصنيفات</option><option value="home" data-t="home">المنزل</option><option value="fashion" data-t="fashion">الأزياء</option><option value="electronics" data-t="electronics">الإلكترونيات</option><option value="beauty" data-t="beauty">الجمال</option><option value="sports" data-t="sports">الرياضة</option><option value="other" data-t="other">أخرى</option></select><button class="primary-button" data-t="search">بحث</button><div id="catalogFilters" class="catalog-filter-tools"></div></form>
-<div id="products" class="live-grid"></div><div class="form-actions"><button id="previous" class="secondary-button" data-t="previous">السابق</button><span id="page"></span><button id="next" class="secondary-button" data-t="next">التالي</button></div>
-</section><div id="buyerSection" class="buyer-layout" hidden><section class="account-card" id="cartSection"><h2 data-t="cart">سلتك</h2><p class="section-copy" data-t="stockNotice">إضافة المنتج للسلة لا تحجز المخزون. يتأكد الطلب عند قبول التاجر وتوفر جميع القطع.</p><div id="cart"></div><div class="field-pair account-form" id="quoteDestination"><label><span data-t="countryCode"></span><input id="quoteCountry" maxlength="2" placeholder="IQ" dir="ltr"></label><label><span data-t="region"></span><input id="quoteRegion" maxlength="120"></label></div><button id="quoteButton" class="primary-button" data-t="quote">مراجعة السعر والتوصيل</button><a class="text-button" data-route="account.html" id="loginLink" data-t="login">سجّل الدخول لإتمام الطلب</a></section>
-<section class="account-card" id="checkout" hidden><h2 data-t="checkout">مراجعة الطلب</h2><aside class="checkout-summary"><div class="summary-heading"><h3 data-t="summary">ملخص الطلب</h3><span>COD</span></div><div class="summary-body"><div id="quoteDetails"></div><div id="quoteTotal" class="quote-total"></div><p id="quoteExpiry" class="live-note quote-expiry"></p><p class="live-note" data-t="zeroCommission">عمولة المنصة 0% · الدفع لكل تاجر عند الاستلام</p></div></aside><form id="deliveryForm" class="account-form" autocomplete="off"><div id="savedAddressPicker" class="saved-address-picker" hidden><label for="savedAddressSelect" id="savedAddressLabel">عنوان محفوظ</label><select id="savedAddressSelect"></select><a id="manageAddresses" href="addresses.html">إدارة العناوين</a><p id="savedAddressStatus" role="status"></p></div><label for="recipient" data-t="recipient">اسم المستلم</label><input id="recipient" minlength="2" maxlength="120" required><label for="phone" data-t="phone">رقم التواصل (غير موثق)</label><input id="phone" type="tel" minlength="7" maxlength="25" pattern="\+?[0-9 ]{7,25}" dir="ltr" required><label for="country" data-t="country">الدولة</label><input id="country" minlength="2" maxlength="80" required><label for="region" data-t="region">المحافظة / المنطقة</label><input id="region" maxlength="120" required><label for="city" data-t="city">المدينة</label><input id="city" maxlength="120" required><label for="address" data-t="address">العنوان التفصيلي</label><textarea id="address" minlength="8" maxlength="600" required></textarea><label for="note" data-t="note">ملاحظة توصيل (اختيارية)</label><textarea id="note" maxlength="1000"></textarea><p class="form-note" data-t="privacy">لن يرى التاجر اسمك أو رقمك أو عنوانك التفصيلي حتى يقبل طلبه. المبلغ يُدفع للتاجر أو مندوبه عند الاستلام؛ لا تحصّل BEMO أي مبلغ.</p><label><input id="confirmQuote" type="checkbox" required><span data-t="confirm">راجعت مبلغ كل متجر ورسوم توصيله وأوافق على إنشاء الطلب.</span></label><button id="placeButton" type="submit" class="primary-button" data-t="place">إنشاء الطلب — الدفع عند الاستلام</button></form></section>
-<section id="success" class="account-card" hidden><h2 data-t="success">أُرسل طلبك للتجار</h2><p id="orderReference" class="order-reference"></p><p data-t="pending">كل متجر يراجع طلبه بشكل مستقل؛ لم يُحجز المخزون بعد.</p><a class="primary-button" data-route="orders.html" data-t="track">متابعة الطلب</a></section>
-</div></main><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="catalog-filters.js"></script><script src="market-page.js"></script><script src="checkout-addresses.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>سلة التسوق وإتمام الطلب — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
+<body data-page="buyer-center">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">11.11</span>
+        <span data-t="flashPromo">تخفيضات كبرى حتى 70% + دفع عند الاستلام لجميع الطلبات</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link" data-t="sellerCenter">المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="help.html" class="top-link" data-t="help">المساعدة</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Buyer Center</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 500px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input id="navQuery" name="q" type="search" placeholder="ابحث عن منتجات، متاجر..." data-placeholder="search">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span data-t="search">بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Header Shortcuts -->
+      <nav class="header-actions">
+        <a href="seller.html" class="header-action-btn" data-t="sellerCenter">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 2-6h14l2 6M4 13v8h16v-8M9 21v-7h6v7"/></svg>
+          <span data-t="sellerCenter">المتجر</span>
+        </a>
+        <a href="orders.html" class="header-action-btn" data-route="orders.html" data-t="orders">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span data-t="orders">طلباتي</span>
+        </a>
+        <a href="account.html" class="header-action-btn" data-route="account.html" data-t="account">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span data-t="account">حسابي</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container buyer-center-main" id="main">
+    <!-- Breadcrumbs & Step Wizard Bar -->
+    <div class="buyer-wizard-strip">
+      <div class="buyer-kicker-title">
+        <span class="section-kicker" data-t="kicker">مركز المشتري BEMO</span>
+        <h1 id="pageTitle" data-t="cartView">سلة التسوق وإتمام الطلب</h1>
+      </div>
+      <div class="wizard-steps-pill">
+        <div class="wizard-step active" id="step1">
+          <span class="step-num">1</span>
+          <span data-t="stepCart">سلة المنتجات</span>
+        </div>
+        <div class="wizard-sep">➔</div>
+        <div class="wizard-step active" id="step2">
+          <span class="step-num">2</span>
+          <span data-t="stepAddress">بيانات التوصيل</span>
+        </div>
+        <div class="wizard-sep">➔</div>
+        <div class="wizard-step" id="step3">
+          <span class="step-num">3</span>
+          <span data-t="stepConfirm">تأكيد COD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status & Alerts -->
+    <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+    <div id="error" class="message error-message" role="alert" tabindex="-1" hidden></div>
+
+    <!-- Success Order Confirmation View (5-Stage Tracker matching design) -->
+    <section id="successSection" class="buyer-success-card" hidden>
+      <div class="success-header-banner">
+        <div class="success-check-badge">✓</div>
+        <div>
+          <h2 data-t="successTitle">تم إنشاء وإرسال طلبك بنجاح!</h2>
+          <p data-t="successSub">أُرسل إشعار فوري إلى المتاجر لمراجعة توفر المخزون وبدء تجهيز الشحنات.</p>
+        </div>
+      </div>
+
+      <div class="order-meta-box">
+        <div class="order-meta-col">
+          <span class="meta-label">رقم الطلب (Order ID):</span>
+          <strong id="orderReference" class="meta-value order-id-bold">#BEMO-ORD-XXXXXX</strong>
+        </div>
+        <div class="order-meta-col">
+          <span class="meta-label">طريقة الدفع:</span>
+          <span class="meta-value">💵 الدفع عند الاستلام (COD)</span>
+        </div>
+        <div class="order-meta-col">
+          <span class="meta-label">الوقت المتوقع للتسليم:</span>
+          <span class="meta-value" id="deliveryEta">خلال 2 إلى 4 أيام عمل</span>
+        </div>
+      </div>
+
+      <!-- 5-Stage Delivery Timeline Tracker -->
+      <div class="order-timeline-card">
+        <h3 class="timeline-title">متابعة حالة الطلب والشحن</h3>
+        <div class="live-stepper-5">
+          <div class="step-point completed">
+            <div class="circle-icon">✓</div>
+            <strong class="point-label">تم الطلب</strong>
+            <span class="point-time">الآن</span>
+          </div>
+          <div class="step-line active"></div>
+          <div class="step-point active">
+            <div class="circle-icon">⏳</div>
+            <strong class="point-label">قبول المتجر</strong>
+            <span class="point-time">قيد المراجعة</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-point">
+            <div class="circle-icon">📦</div>
+            <strong class="point-label">قيد التجهيز</strong>
+            <span class="point-time">—</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-point">
+            <div class="circle-icon">🚚</div>
+            <strong class="point-label">خرج للتوصيل</strong>
+            <span class="point-time">—</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-point">
+            <div class="circle-icon">🏡</div>
+            <strong class="point-label">تم الاستلام</strong>
+            <span class="point-time">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="success-actions-row">
+        <a class="primary-button" data-route="orders.html" href="orders.html" data-t="trackOrders">متابعة في قائمة طلباتي ➔</a>
+        <a class="secondary-button" href="index.html" data-t="keepShopping">متابعة التسوق في BEMO</a>
+      </div>
+    </section>
+
+    <!-- Main Buyer Center Two-Column Layout (Cart & Checkout) -->
+    <div id="buyerCenterLayout" class="buyer-center-layout">
+      <!-- Left Column: Store-Grouped Cart Items + Delivery Address Form + Payment Method -->
+      <div class="buyer-main-column">
+        <!-- 1. Multi-Vendor Cart Group -->
+        <section class="buyer-card cart-items-card" id="cartSection">
+          <div class="buyer-card-header">
+            <div class="card-title-group">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+              <h2 data-t="cart">المنتجات في سلتك</h2>
+            </div>
+            <span class="cart-items-count" id="cartHeaderCount">0 منتجات</span>
+          </div>
+
+          <p class="section-notice" data-t="stockNotice">
+            ℹ️ الدفع عند الاستلام مستقل لكل متجر. إضافة المنتج للسلة لا تحجز المخزون إلا بعد قبول التاجر لطلبك.
+          </p>
+
+          <!-- Store-Grouped Items Rendered Here -->
+          <div id="cartGroupedContainer" class="cart-groups-container"></div>
+        </section>
+
+        <!-- 2. Delivery Address Card (Auto-filled & Saved Picker) -->
+        <section class="buyer-card delivery-card" id="deliverySection">
+          <div class="buyer-card-header">
+            <div class="card-title-group">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <h2 data-t="deliveryTitle">عنوان التوصيل والتواصل</h2>
+            </div>
+            <a href="addresses.html" id="manageAddressesLink" class="manage-addr-link" data-t="manageAddresses">إدارة العناوين ↗</a>
+          </div>
+
+          <form id="deliveryForm" class="bemo-checkout-form" autocomplete="on">
+            <!-- Saved Address Picker Dropdown -->
+            <div id="savedAddressPicker" class="form-row-saved-picker" hidden>
+              <label for="savedAddressSelect" data-t="savedAddressLabel">اختر من عناوينك المحفوظة:</label>
+              <select id="savedAddressSelect" class="form-select"></select>
+            </div>
+
+            <div class="form-grid-two">
+              <div class="form-field">
+                <label for="recipient" data-t="recipient">اسم المستلم الكامل *</label>
+                <input id="recipient" name="name" required minlength="2" maxlength="120" placeholder="مثال: أحمد محمد علي">
+              </div>
+              <div class="form-field">
+                <label for="phone" data-t="phone">رقم الهاتف (للتواصل والتوصيل) *</label>
+                <input id="phone" name="tel" type="tel" dir="ltr" required pattern="\+?[0-9 ()-]{7,25}" placeholder="+964 770 123 4567">
+              </div>
+            </div>
+
+            <div class="form-grid-three">
+              <div class="form-field">
+                <label for="country" data-t="country">الدولة *</label>
+                <input id="country" name="country" required minlength="2" maxlength="80" value="العراق (Iraq)">
+              </div>
+              <div class="form-field">
+                <label for="region" data-t="region">المحافظة / المنطقة *</label>
+                <input id="region" name="region" required maxlength="120" placeholder="مثال: بغداد">
+              </div>
+              <div class="form-field">
+                <label for="city" data-t="city">المدينة / الحي *</label>
+                <input id="city" name="city" required maxlength="120" placeholder="مثال: المنصور">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="address" data-t="address">العنوان التفصيلي (الشارع، رقم المبنى، أقرب معلم مميز) *</label>
+              <textarea id="address" name="street" required minlength="8" maxlength="600" rows="2" placeholder="الشارع العام، بناية رقم 14، بجوار صيدلية الأمل..."></textarea>
+            </div>
+
+            <div class="form-field">
+              <label for="note" data-t="note">ملاحظة توصيل للمندوب (اختيارية)</label>
+              <input id="note" name="delivery_note" maxlength="300" placeholder="مثال: يرجى الاتصال قبل الوصول بنصف ساعة">
+            </div>
+
+            <div class="privacy-notice-box">
+              <span class="privacy-lock-icon">🔒</span>
+              <p data-t="privacy">
+                <strong>حماية خصوصية المشتري:</strong> لن يرى التاجر اسمك أو رقم هاتفك أو عنوانك التفصيلي حتى يقبل طلبه ويؤكد توفر المخزون. المبلغ يُدفع نقدًا للتاجر أو مندوبه عند الاستلام.
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <!-- 3. Payment Method Card (COD) -->
+        <section class="buyer-card payment-method-card">
+          <div class="buyer-card-header">
+            <div class="card-title-group">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <h2 data-t="paymentTitle">طريقة الدفع</h2>
+            </div>
+            <span class="badge-cod-active">✓ معتمدة</span>
+          </div>
+
+          <div class="payment-cod-option active">
+            <div class="payment-radio-wrap">
+              <input type="radio" id="codMethod" name="payment_method" checked readonly>
+              <label for="codMethod">
+                <strong>💵 الدفع نقدًا عند الاستلام (Cash on Delivery)</strong>
+                <p>ادفع نقدًا للتاجر أو مندوب الشحن بعد معاينة واستلام طلبك عند باب منزلك. عمولة المنصة 0% للمشتري.</p>
+              </label>
+            </div>
+            <span class="cod-zero-fee">0% رسوم إضافية</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Sticky Commercial Order Summary Sidebar -->
+      <aside class="buyer-sidebar-column">
+        <div class="order-summary-sticky-card">
+          <h3 class="summary-heading" data-t="summary">ملخص الطلب</h3>
+
+          <div class="summary-calc-rows">
+            <div class="calc-row">
+              <span data-t="subtotal">إجمالي المنتجات:</span>
+              <strong id="summaryItemsTotal">0 EGP</strong>
+            </div>
+
+            <!-- Stores delivery breakdown -->
+            <div id="summaryDeliveryStores" class="summary-delivery-breakdown"></div>
+
+            <div class="calc-row fee-free">
+              <span data-t="platformFee">عمولة منصة BEMO:</span>
+              <span class="free-pill">مجاناً (0%)</span>
+            </div>
+
+            <div id="discountRow" class="calc-row discount-row" hidden>
+              <span id="discountLabel">خصم الكود:</span>
+              <strong id="discountValue" class="discount-num">-0 EGP</strong>
+            </div>
+          </div>
+
+          <!-- Promo Code Box -->
+          <div class="promo-voucher-box">
+            <div class="promo-input-wrap">
+              <input type="text" id="promoInput" placeholder="كود الخصم (جرب: BEMO10)" maxlength="20">
+              <button type="button" id="applyPromoBtn" class="btn-promo-apply">تطبيق</button>
+            </div>
+            <p id="promoFeedback" class="promo-feedback-text" hidden></p>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <!-- Grand Total Row -->
+          <div class="grand-total-block">
+            <span class="total-title" data-t="grandTotal">الإجمالي عند الاستلام:</span>
+            <div class="total-price-large" id="summaryGrandTotal">0 EGP</div>
+            <small class="total-tax-note">شامل جميع رسوم التوصيل المحددة</small>
+          </div>
+
+          <!-- Confirm Checkbox -->
+          <label class="confirm-quote-label">
+            <input id="confirmQuote" type="checkbox" checked required>
+            <span data-t="confirm">أوافق على تفاصيل التوصيل والشروط والدفع عند الاستلام لكل متجر.</span>
+          </label>
+
+          <!-- Large CTA Button -->
+          <button id="placeOrderBtn" type="button" class="btn-place-order-orange">
+            <span data-t="place">إتمام الطلب — الدفع عند الاستلام ➔</span>
+          </button>
+
+          <!-- Buyer Protection Banner -->
+          <div class="buyer-protection-box">
+            <div class="protect-badge-row">
+              <span class="shield-green">🛡️</span>
+              <strong>100% حماية المشتري في BEMO</strong>
+            </div>
+            <ul class="protect-perks-list">
+              <li>✓ فحص ومعاينة المنتج نقدًا عند التسليم</li>
+              <li>✓ إرجاع مجاني خلال 14 يومًا في حال عدم المطابقة</li>
+              <li>✓ تجار موثقون وخاضعون لمعايير الجودة</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="account-container account-footer">
+    <div class="container footer-content">
+      <span>© 2026 BEMO Global Marketplace. جميع الحقوق محفوظة.</span>
+      <div class="footer-links">
+        <a href="help.html">مركز المساعدة</a>
+        <a href="seller.html">انضم كتاجر</a>
+        <a href="orders.html">متابعة الطلبات</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="catalog.js"></script>
+  <script src="catalog-filters.js"></script>
+  <script src="checkout-addresses.js"></script>
+  <script src="market-page.js"></script>
+</body>
+</html>

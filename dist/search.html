@@ -1,1 +1,324 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بحث BEMO</title><link rel="stylesheet" href="account.css"></head><body><main class="account-container"><h1>BEMO</h1><p>جارٍ فتح البحث في منتجات التجار… / Opening seller product search…</p><a href="market.html">فتح المنتجات / Open products</a></main><script>location.replace("market.html"+location.search);</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>بحث المنتجات — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="search.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
+<body data-page="search">
+  <a class="skip-link" href="#searchMain">انتقل إلى المحتوى</a>
+
+  <!-- 1. Top Announcement Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">11.11</span>
+        <span id="flashPromoText">تخفيضات كبرى حتى 70% + دفع عند الاستلام لجميع الطلبات</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="help.html" class="top-link">المساعدة</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="language" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Global Marketplace</span>
+        </div>
+      </a>
+
+      <!-- Search Form Pill -->
+      <div class="search-container">
+        <form id="searchForm" class="search-form-pill" role="search">
+          <div class="search-category-select">
+            <select id="searchCategory" aria-label="اختر القسم">
+              <option value="">كل التصنيفات ▾</option>
+              <option value="electronics">الإلكترونيات</option>
+              <option value="fashion">الأزياء</option>
+              <option value="home">المنزل</option>
+              <option value="beauty">الجمال</option>
+              <option value="sports">الرياضة</option>
+            </select>
+          </div>
+          <div class="search-divider"></div>
+          <input id="query" name="q" type="search" placeholder="ابحث عن منتجات، علامات تجارية، متاجر..." autocomplete="off">
+          <button type="submit" id="searchButton" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Header Actions -->
+      <nav class="header-actions">
+        <a href="seller.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 2-6h14l2 6M4 13v8h16v-8M9 21v-7h6v7"/></svg>
+          <span>المتجر</span>
+        </a>
+        <a href="orders.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>الطلبات</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>الحساب</span>
+        </a>
+        <a href="market.html?view=cart" class="header-action-btn cart-btn">
+          <div class="action-icon-wrap">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+            <span class="action-badge cart-count" id="headerCartCount">0</span>
+          </div>
+          <span>السلة</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 3. Category Nav Bar -->
+  <div class="nav-shell">
+    <nav class="container category-nav">
+      <div class="all-categories-menu">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>كل التصنيفات</span>
+      </div>
+      <div class="top-nav-links">
+        <a href="search.html?category=electronics">الإلكترونيات</a>
+        <a href="search.html?category=fashion">الأزياء</a>
+        <a href="search.html?category=home">المنزل والمعيشة</a>
+        <a href="search.html?offer=1" class="highlight-link">عروض اليوم 🔥</a>
+        <a href="stores.html">الماركات والمتاجر</a>
+        <a href="search.html?sort=newest">وصل حديثاً</a>
+        <a href="seller.html" class="merchant-link">المتجر</a>
+      </div>
+      <div class="nav-right-badge">
+        <span>🚚 <strong>شحن مباشر وسريع</strong></span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 4. Search Main Container (matching 3SearchFilters.png) -->
+  <main id="searchMain" class="container search-main-wrapper" style="max-width:1440px;margin:0 auto;padding:20px 16px 60px;">
+    <!-- Breadcrumb & Header -->
+    <div class="search-page-header">
+      <div class="search-heading-row">
+        <h1 id="searchTitleText" class="search-main-title">نتائج البحث عن: <span id="queryHighlight" class="highlight-query">الكل</span></h1>
+        <span id="resultCountPill" class="search-count-badge">15 منتج</span>
+      </div>
+
+      <!-- Scope Tabs (Products, Stores, Sellers) -->
+      <div class="search-scope-tabs" id="scopes">
+        <button class="scope-tab active" data-scope="products">المنتجات (1,420)</button>
+        <button class="scope-tab" data-scope="stores">المتاجر (340)</button>
+        <button class="scope-tab" data-scope="sellers">البائعون (1.2k)</button>
+      </div>
+
+      <!-- Quick Filter Chips Row (matching 3SearchFilters.png) -->
+      <div class="quick-filter-chips-row" id="quickChips">
+        <button type="button" class="chip-filter active" data-filter-chip="all">الكل</button>
+        <button type="button" class="chip-filter" data-filter-chip="free-shipping">⚡ شحن مجاني</button>
+        <button type="button" class="chip-filter" data-filter-chip="rating-4">★ 4.0 فما فوق</button>
+        <button type="button" class="chip-filter" data-filter-chip="verified">✔ متاجر موثقة</button>
+        <button type="button" class="chip-filter" data-filter-chip="cod">💵 دفع عند الاستلام (COD)</button>
+        <button type="button" class="chip-filter" data-filter-chip="deals">خصومات 11.11</button>
+        <button type="button" class="chip-clear-all" id="clearAllFilters">مسح الكل ↺</button>
+      </div>
+    </div>
+
+    <!-- 2-Column Search Layout: Left Sidebar + Right Products Grid -->
+    <div class="search-content-grid" style="display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start;">
+      <!-- Left Filter Sidebar -->
+      <aside class="search-sidebar-panel" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #EEE;">
+          <h2 style="font-size:16px;font-weight:800;margin:0;">تصفية النتائج</h2>
+          <button type="button" id="sidebarResetBtn" style="background:none;border:none;color:#FF5000;font-size:12px;font-weight:700;cursor:pointer;padding:0;">إعادة ضبط</button>
+        </div>
+
+        <!-- Category Tree -->
+        <div class="sidebar-filter-group" style="margin-bottom:20px;">
+          <h3 style="font-size:13px;font-weight:700;margin:0 0 10px;color:#171717;">التصنيفات</h3>
+          <div class="category-filter-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="catFilter" value="" checked style="accent-color:#FF5000;">
+                <span>جميع الأقسام</span>
+              </span>
+              <small style="color:#888;">(15)</small>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="catFilter" value="electronics" style="accent-color:#FF5000;">
+                <span>الإلكترونيات</span>
+              </span>
+              <small style="color:#888;">(4)</small>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="catFilter" value="fashion" style="accent-color:#FF5000;">
+                <span>الأزياء والموضة</span>
+              </span>
+              <small style="color:#888;">(4)</small>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="catFilter" value="home" style="accent-color:#FF5000;">
+                <span>المنزل والمطبخ</span>
+              </span>
+              <small style="color:#888;">(3)</small>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="catFilter" value="beauty" style="accent-color:#FF5000;">
+                <span>الجمال والعناية</span>
+              </span>
+              <small style="color:#888;">(2)</small>
+            </label>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#EEE;margin-bottom:16px;"></div>
+
+        <!-- Brands Checkboxes -->
+        <div class="sidebar-filter-group" style="margin-bottom:20px;">
+          <h3 style="font-size:13px;font-weight:700;margin:0 0 10px;color:#171717;">العلامات التجارية الشهيرة</h3>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Apple" style="accent-color:#FF5000;"> <span>Apple (84)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Anker" style="accent-color:#FF5000;"> <span>Anker (42)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Xiaomi" style="accent-color:#FF5000;"> <span>Xiaomi (38)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Zara" style="accent-color:#FF5000;"> <span>Zara (62)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Nike" style="accent-color:#FF5000;"> <span>Nike (55)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" name="brandCheck" value="Noor" style="accent-color:#FF5000;"> <span>Moda Noor (51)</span></label>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#EEE;margin-bottom:16px;"></div>
+
+        <!-- Price Range -->
+        <div class="sidebar-filter-group" style="margin-bottom:20px;">
+          <h3 style="font-size:13px;font-weight:700;margin:0 0 10px;color:#171717;">نطاق السعر ($ / EGP)</h3>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" id="minPrice" placeholder="من" style="width:100%;padding:6px 8px;border:1px solid #CCC;border-radius:6px;font-size:12px;">
+            <span>—</span>
+            <input type="number" id="maxPrice" placeholder="إلى" style="width:100%;padding:6px 8px;border:1px solid #CCC;border-radius:6px;font-size:12px;">
+            <button type="button" id="applyPriceBtn" style="background:#171717;color:#FFF;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:bold;cursor:pointer;">تطبيق</button>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#EEE;margin-bottom:16px;"></div>
+
+        <!-- Star Ratings -->
+        <div class="sidebar-filter-group" style="margin-bottom:20px;">
+          <h3 style="font-size:13px;font-weight:700;margin:0 0 10px;color:#171717;">تقييم المشترين</h3>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="radio" name="ratingFilter" value="4.5" style="accent-color:#FF5000;"> <span style="color:#EAB308;">★★★★★</span> <span>4.5 فأعلى</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="radio" name="ratingFilter" value="4.0" style="accent-color:#FF5000;"> <span style="color:#EAB308;">★★★★☆</span> <span>4.0 فأعلى</span></label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="radio" name="ratingFilter" value="3.5" style="accent-color:#FF5000;"> <span style="color:#EAB308;">★★★☆☆</span> <span>3.5 فأعلى</span></label>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#EEE;margin-bottom:16px;"></div>
+
+        <!-- Toggles -->
+        <div class="sidebar-filter-group">
+          <h3 style="font-size:13px;font-weight:700;margin:0 0 10px;color:#171717;">خيارات الشراء والتوثيق</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span>متاجر موثقة رسمياً</span>
+              <input type="checkbox" id="verifiedOnlyToggle" style="width:18px;height:18px;accent-color:#15803D;">
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span>المتوفر بالمخزون فقط</span>
+              <input type="checkbox" id="inStockToggle" checked style="width:18px;height:18px;accent-color:#15803D;">
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+              <span>الدفع عند الاستلام (COD)</span>
+              <input type="checkbox" id="codOnlyToggle" checked style="width:18px;height:18px;accent-color:#15803D;">
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Main Column -->
+      <div class="search-main-results-column">
+        <!-- Top Store Match Banner (Directly from 3SearchFilters.png) -->
+        <div class="top-store-match-card" style="background:#FFF;border:1px solid #E5E5E5;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:52px;height:52px;border-radius:10px;background:#FFF1E8;color:#FF5000;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;border:1px solid #FED7AA;">
+              MN
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong style="font-size:16px;color:#171717;">Moda Noor</strong>
+                <span style="font-size:11px;font-weight:700;color:#15803D;background:#DCFCE7;padding:2px 8px;border-radius:4px;">✔ متجر رسمي موثق</span>
+                <span style="font-size:12px;color:#EAB308;">★ 4.9 <small style="color:#666;">(1.2k تقييم)</small></span>
+              </div>
+              <p style="font-size:12px;color:#737373;margin:4px 0 0;">المتجر الرسمي للأزياء والعبايات الفاخرة • شحن سريع خلال 48 ساعة • دفع عند الاستلام</p>
+            </div>
+          </div>
+          <a href="store.html?store=modanoor" style="background:#FF5000;color:#FFF;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <span>زيارة المتجر ➔</span>
+          </a>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="search-toolbar-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:#FFF;border:1px solid #E5E5E5;border-radius:8px;">
+          <span style="font-size:13px;color:#737373;">عرض <strong id="visibleCount" style="color:#171717;">1–15</strong> من 15 نتيجة</span>
+
+          <div style="display:flex;align-items:center;gap:12px;">
+            <label style="font-size:12px;color:#737373;display:flex;align-items:center;gap:6px;">
+              <span>ترتيب حسب:</span>
+              <select id="sortSelect" style="padding:6px 12px;border:1px solid #CCC;border-radius:6px;font-size:12px;background:#FFF;">
+                <option value="relevance">الأكثر صلة وشعبية</option>
+                <option value="price_asc">السعر: من الأقل للأعلى</option>
+                <option value="price_desc">السعر: من الأعلى للأقل</option>
+                <option value="rating">الأعلى تقييماً ★</option>
+                <option value="newest">وصل حديثاً</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <!-- 5-Column High-Density Product Grid -->
+        <div id="searchResultsGrid" class="bemo-7col-grid" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
+          <!-- Product cards injected by search-page.js -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="search-pagination-row" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:32px;">
+          <button type="button" class="pagination-btn" disabled>السابق</button>
+          <button type="button" class="pagination-btn active">1</button>
+          <button type="button" class="pagination-btn">2</button>
+          <button type="button" class="pagination-btn">3</button>
+          <button type="button" class="pagination-btn">التالي</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="account-container account-footer">
+    <span>© 2026 BEMO Global Marketplace. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="catalog.js"></script>
+  <script src="search-page.js"></script>
+</body>
+</html>
