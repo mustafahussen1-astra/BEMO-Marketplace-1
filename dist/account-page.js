@@ -9,6 +9,7 @@
     identityFile:['مستند الهوية (PDF أو صورة، حتى 5 ميغابايت)','Identity document (PDF, JPG or PNG, up to 5 MB)'],
     identityNotice:['تُحفظ الهوية والعنوان وبيانات الاتصال في سجل خاص.','Your identity document, address and contact information are stored privately.'],
     sellerAgreement:['أوافق على حفظ بياناتي الخاصة للتحقق من هوية البائع ونشر اسم المتجر ومعرّفه ووصفه.','I agree to storage of my private information for seller identification and publication of my store name, username and description.'],
+    addProduct:['إضافة منتج','Add product'],
     manageProducts:['إدارة المنتجات والمخزون','Manage products and stock'],
     directory:['استعرض دليل المتاجر','Browse the store directory'],
     skip:['انتقل إلى المحتوى','Skip to content'], development:['نسخة تطوير — المنتجات والطلبات للتجربة؛ البيع الفعلي غير متاح بعد.','Development preview · Sample products and orders. Real selling is not available yet.'],
