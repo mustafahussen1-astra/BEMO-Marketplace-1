@@ -45,13 +45,13 @@
       });
     },'saving');
   });
-const sections={accounts:['الحسابات','Accounts'],stores:['المتاجر والتوثيق','Stores & verification'],products:['المنشورات','Listings'],orders:['الطلبات','Orders'],log:['سجل الإدارة','Admin history']};
+const sections={receipts:['الوصولات','Receipts'],accounts:['الحسابات','Accounts'],stores:['المتاجر والتوثيق','Stores & verification'],products:['المنشورات','Listings'],orders:['الطلبات','Orders'],log:['سجل الإدارة','Admin history']};
 const operations={account_suspend:['تعليق الحساب','Suspend account'],account_restore:['تفعيل الحساب','Restore account'],store_suspend:['إخفاء المتجر','Hide store'],store_restore:['إعادة المتجر','Restore store'],product_suspend:['إخفاء المنشور','Hide listing'],product_restore:['إعادة إلى المسودة','Restore to draft'],verify:['اعتماد التوثيق','Approve verification'],reject:['رفض التوثيق','Reject verification'],notify:['إشعار خاص','Direct notification'],broadcast:['إشعار لجميع الحسابات النشطة','Notify all active accounts']};
 let section='accounts',page=0,query='',data=null;
 Object.assign(words,sections,operations,{search:['بحث بالاسم أو المعرّف','Search by name or ID'],cases:['شكاوى مفتوحة','Open cases'],empty:['لا توجد نتائج','No results'],next:['التالي','Next'],prev:['السابق','Previous']});
 function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;}
 function button(label,fn){const b=el('button',label,'secondary-button');b.type='button';b.onclick=fn;return b;}
-async function loadDirectory(request){data=await request('bemo_console',{section_name:section,search_text:query,page_num:page});draw();}
+async function loadDirectory(request){if(section==='receipts'){const found=await request('bemo_receipt_directory',{search_text:query,page_num:page});data={...data,rows:found.rows};draw();return;}data=await request('bemo_console',{section_name:section,search_text:query,page_num:page});draw();}
 function refresh(){w.run(loadDirectory);}
 function operate(op,row){
  const promptText=w.lang()==='ar'?'اكتب نص الإشعار أو سبب القرار':'Enter notification text or decision reason';
@@ -65,12 +65,15 @@ function draw(){
  const root=w.$('directory');root.replaceChildren();if(!data)return;
  const metrics=el('div',null,'console-metrics'),nav=el('nav',null,'form-actions');
  for(const k of Object.keys(sections)){
- const b=button(w.t(k)+' · '+(data.counts?.[k]||0),()=>{section=k;page=0;query='';refresh();});
+ const b=button(k==='receipts'?w.t(k):w.t(k)+' · '+(data.counts?.[k]||0),()=>{section=k;page=0;query='';refresh();});
  b.setAttribute('aria-pressed',String(k===section));metrics.append(b);}
  metrics.append(el('span',w.t('cases')+' · '+data.cases));
  const search=el('form',null,'form-actions'),input=el('input');input.value=query;input.placeholder=w.t('search');input.setAttribute('aria-label',w.t('search'));input.maxLength=160;
  const submit=el('button',w.t('search'),'primary-button');search.append(input,submit);search.onsubmit=e=>{e.preventDefault();query=input.value.trim();page=0;refresh();};
  root.append(metrics,el('h2',w.t(section)),search);
+ if(section==='receipts'&&data.rows.length)root.append(button(w.lang()==='ar'?'تصدير النتائج':'Export results',()=>{
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data.rows,null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download='BEMO-receipts.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }));
  if(section==='accounts')root.append(button(w.t('broadcast'),()=>operate('broadcast')));
  if(!data.rows.length)root.append(el('p',w.t('empty')));
  for(const row of data.rows){const article=el('article',null,'console-entry'),actions=el('div',null,'form-actions');

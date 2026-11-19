@@ -772,3 +772,14 @@ test('detailed listing creates a priced option and initial stock atomically',asy
  assert.equal(Number(row.former_minor),30000000);assert.equal(row.offer_title,'Weekend');assert.equal(row.stock_on_hand,3);
  await assert.rejects(()=>call('bemo_save_listing',[randomUUID(),randomUUID(),{...details,former:100},1]),/VARIANT_INVALID/);
 });
+test('receipts are acceptance-only, scoped, stable on retry and separate from seller funds',async()=>{
+ const {v}=await stockedMerchant();await onboard(1);await onboard(2);const o=(await ordered(v)).suborders[0];const key=randomUUID();
+ const read=i=>call('bemo_order_receipt',[o.id],i);await assert.rejects(()=>read(0),/ORDER_UNAVAILABLE/);await action(o,'ACCEPT',0,'',key);await action(o,'ACCEPT',0,'',key);
+ const r=await read(1);assert.equal(r.receipt_number,(await read(0)).receipt_number);assert.equal(r.total_minor,o.total_minor);assert.equal(r.delivery.phone,deliveryFixture.phone);assert.ok(r.items[0].sku);assert.equal(r.commission_hold,undefined);await assert.rejects(()=>read(2),/ORDER_UNAVAILABLE/);
+ await assert.rejects(()=>call('bemo_receipt_directory',['',0],1),/ADMIN_REQUIRED/);
+});
+test('legacy incomplete draft can be completed, photographed and published',async()=>{
+ await stockedMerchant();const id=randomUUID(),vid=randomUUID();const title='Classic shoes',description='Black formal shoes with laces and a slim profile.';
+ const draft=await call('bemo_save_product',[id,title,description,'fashion',0]);const p=await call('bemo_save_listing',[id,vid,{title,description,category:'fashion',version:draft.version,sku:'TEST-BLACK',price:25000000},2]);
+ await assert.rejects(()=>call('bemo_product_status',[id,'ACTIVE',p.version]),/IMAGE_REQUIRED/);await mediaFor(p,0);await call('bemo_product_status',[id,'ACTIVE',p.version]);assert.equal((await call('bemo_get_product',[id])).title,title);
+});
