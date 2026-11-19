@@ -762,3 +762,13 @@ test('store branding publication is owner-scoped and atomic with profile edits',
  assert.equal(next.title,'Updated shop');assert.equal(next.logo_path,null);
  await assert.rejects(()=>call('bemo_publish_store_profile',[...args,{}]),/VERSION_CONFLICT/);
 });
+
+test('detailed listing creates a priced option and initial stock atomically',async()=>{
+ await stockedMerchant();
+ const id=randomUUID(),vid=randomUUID(),details={title:'Classic shoes',description:'Black lace-up shoes with a polished finish.',category:'fashion',sku:'SHOE-001',price:25000000,former:30000000,offer:'Weekend'};
+ const args=[id,vid,details,3];
+ await call('bemo_save_listing',args);await call('bemo_save_listing',args);
+ const row=(await db.query('select v.former_minor,v.offer_title,s.stock_on_hand from bemo_private.product_variants v join bemo_private.stock_positions s on s.variant_id=v.id where v.id=$1',[vid])).rows[0];
+ assert.equal(Number(row.former_minor),30000000);assert.equal(row.offer_title,'Weekend');assert.equal(row.stock_on_hand,3);
+ await assert.rejects(()=>call('bemo_save_listing',[randomUUID(),randomUUID(),{...details,former:100},1]),/VARIANT_INVALID/);
+});
