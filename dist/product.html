@@ -1,12 +1,315 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>تفاصيل المنتج — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="product.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head>
-<body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="market.html" data-t="shop">تصفح المنتجات</a><a id="cartLink" href="market.html?view=cart" data-t="cart">السلة</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header>
-<main id="main" class="account-container live-main"><nav class="product-breadcrumb"><a data-route="market.html" data-t="shop">تصفح المنتجات</a><span aria-hidden="true">/</span><span id="breadcrumbTitle" data-t="title">تفاصيل المنتج</span></nav>
-<p id="status" role="status" aria-live="polite"></p><section id="unavailable" class="account-card" hidden><h1 data-t="unavailable">المنتج غير متاح</h1><p data-t="unavailableCopy">قد يكون الرابط غير صحيح أو توقف المتجر عن نشر هذا المنتج.</p><a class="primary-button" data-route="market.html" data-t="shop">تصفح المنتجات</a></section>
-<section id="failure" class="account-card" role="alert" hidden><h1 data-t="error">تعذّر تحميل المنتج</h1><p data-t="errorCopy">تحقق من الاتصال ثم حاول مجدداً.</p><button id="retry" type="button" class="primary-button" data-t="retry">إعادة المحاولة</button></section>
-<article id="product" class="product-layout" hidden>
-<section class="product-gallery"><div class="product-stage"><img id="heroImage" alt="" hidden><p id="imageStatus" role="status"></p></div><div id="thumbnails" class="product-thumbnails"></div></section>
-<section class="account-card product-info"><span class="section-kicker" data-t="cod">الدفع عند الاستلام</span><h1 id="productTitle"></h1><p id="price" class="product-detail-price"></p><label for="variant" data-t="variant">اختر الخيار</label><select id="variant"></select><p id="stock" class="live-note"></p><label for="quantity" data-t="quantity">الكمية</label><input id="quantity" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"><div class="product-actions"><button type="button" id="add" class="secondary-button" data-t="add">أضف للسلة</button><button type="button" id="buy" class="primary-button" data-t="buy">تابع إلى الطلب</button></div><p id="cartStatus" role="status" aria-live="polite"></p><p class="live-note" data-t="stockNotice">السلة لا تحجز المخزون. تُراجع الأسعار والتوصيل قبل إنشاء الطلب، ويؤكد التاجر توفر القطع عند القبول.</p></section>
-<aside class="product-side"><section class="account-card"><span class="section-kicker" data-t="soldBy">يباع بواسطة</span><h2 id="storeTitle"></h2><a id="storeLink" class="secondary-button" data-t="visitStore">منتجات المتجر</a></section><section class="account-card product-delivery"><h2 data-t="delivery">التوصيل</h2><p id="deliveryPrice"></p><p data-t="deliveryCopy">رسوم يحددها التاجر لكل طلب من متجره. راجع الإجمالي في السلة.</p></section><section class="account-card"><h2 data-t="orderInfo">معلومات الطلب</h2><p data-t="privacy">بيانات التواصل والعنوان تُتاح للتاجر بعد قبول طلبه فقط.</p><a data-route="help.html" data-t="help">المساعدة وسياسة الطلبات</a></section></aside>
-<section class="account-card product-description"><h2 data-t="description">وصف المنتج</h2><p id="description"></p></section>
-</article></main><footer class="account-container account-footer">© 2026 BEMO</footer><script src="backend-config.js"></script><script src="live-commerce.js"></script><script src="product-page.js"></script></body></html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>تفاصيل المنتج — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="product.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="categories-data.js"></script>
+  <script src="catalog.js"></script>
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
+<body data-bemo-shell="modern">
+
+<!-- 1. Top Announcement Bar -->
+<div class="top-announcement-bar">
+  <div class="container announcement-inner">
+    <div class="announcement-left">
+      <span class="flash-tag">FLASH</span>
+      <span class="flash-text" data-t="flashPromo">تخفيضات كبرى حتى 70% + شحن مجاني للطلبات فوق 29$</span>
+      <span class="flash-timer">00:14:22</span>
+    </div>
+    <div class="announcement-right">
+      <a href="seller.html" class="top-link" data-t="sellOnBemo">البيع على BEMO</a>
+      <span class="top-sep">|</span>
+      <a href="help.html" class="top-link" data-t="help">المساعدة</a>
+      <span class="top-sep">|</span>
+      <button type="button" id="languageButton" class="top-lang-btn">EN ▾</button>
+      <span class="top-sep">|</span>
+      <span class="top-location">📍 <span data-t="location">الرياض</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Main Header -->
+<header class="main-header">
+  <div class="container header-inner">
+    <a class="bemo-brand" href="index.html" aria-label="BEMO">
+      <div class="brand-square">B</div>
+      <div class="brand-text">
+        <span class="brand-name">BEMO</span>
+        <span class="brand-sub">Global Marketplace</span>
+      </div>
+    </a>
+    <div class="search-container">
+      <form class="search-form-pill" action="market.html" role="search">
+        <div class="search-category-select">
+          <select aria-label="اختر القسم">
+            <option value="">كل التصنيفات ▾</option>
+            <option value="electronics">الإلكترونيات</option>
+            <option value="fashion">الأزياء</option>
+            <option value="home">المنزل</option>
+          </select>
+        </div>
+        <div class="search-divider"></div>
+        <input name="q" type="search" placeholder="ابحث عن هواتف، عبايات، قلايات هوائية، أحذية رياضية..." data-placeholder="placeholder">
+        <button type="submit" class="search-submit-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+          <span data-t="search">بحث</span>
+        </button>
+      </form>
+    </div>
+    <nav class="header-actions">
+      <a href="account.html" class="header-action-btn">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+        <span data-t="account">الحساب</span>
+      </a>
+      <a href="index.html?saved=1" class="header-action-btn">
+        <div class="action-icon-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
+          <span class="action-badge">8</span>
+        </div>
+        <span data-t="saved">المفضلة</span>
+      </a>
+      <a href="orders.html" class="header-action-btn">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11M7.5 4.5l9 5v5"/></svg>
+        <span data-t="orders">الطلبات</span>
+      </a>
+      <a href="market.html?view=cart" class="header-action-btn cart-btn" id="cartLink">
+        <div class="action-icon-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          <span class="action-badge cart-count">3</span>
+        </div>
+        <span data-t="cart">السلة</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- Main Container -->
+<main class="container pdp-main-wrap">
+  <!-- Breadcrumbs -->
+  <nav class="pdp-breadcrumbs">
+    <a href="index.html" data-t="home">الرئيسية</a>
+    <span class="sep">›</span>
+    <a href="market.html" id="breadcrumbCategory" data-t="category">الإلكترونيات</a>
+    <span class="sep">›</span>
+    <span id="breadcrumbTitle" class="current-crumb">تفاصيل المنتج</span>
+  </nav>
+
+  <!-- Status / Error Messages -->
+  <p id="status" role="status" aria-live="polite" class="status-msg"></p>
+  <section id="unavailable" class="pdp-state-box" hidden>
+    <h2 data-t="unavailable">المنتج غير متاح حالياً</h2>
+    <p data-t="unavailableCopy">قد يكون الرابط غير صحيح أو توقف المتجر عن نشر هذا المنتج.</p>
+    <a href="market.html" class="btn-hero-primary" data-t="shop">تصفح المنتجات الأخرى</a>
+  </section>
+  <section id="failure" class="pdp-state-box" hidden>
+    <h2 data-t="error">تعذّر تحميل المنتج</h2>
+    <button id="retry" type="button" class="btn-hero-primary" data-t="retry">إعادة المحاولة</button>
+  </section>
+
+  <!-- 3-Column PDP Grid matching 4ProductDetail.png -->
+  <article id="product" class="pdp-layout-grid" hidden>
+
+    <!-- Column 1: Gallery -->
+    <section class="pdp-gallery-col">
+      <div class="pdp-main-image-wrap">
+        <img id="heroImage" alt="" loading="eager">
+        <p id="imageStatus" role="status"></p>
+      </div>
+      <div id="thumbnails" class="pdp-thumbnails-strip">
+        <!-- Thumbnail items -->
+      </div>
+    </section>
+
+    <!-- Column 2: Details & Buying Center -->
+    <section class="pdp-details-col">
+      <!-- Badges row -->
+      <div class="pdp-badges-row">
+        <span class="pdp-badge badge-sale" id="badgeDiscount">-58%</span>
+        <span class="pdp-badge badge-choice">BEMO Choice</span>
+        <span class="pdp-sold-count" id="badgeSold">12.4k بيع</span>
+      </div>
+
+      <!-- Title -->
+      <h1 id="productTitle" class="pdp-title"></h1>
+
+      <!-- Rating & Social Proof -->
+      <div class="pdp-rating-row">
+        <span class="pdp-stars">★ 4.8</span>
+        <a href="#reviews" class="pdp-reviews-link" id="pdpReviewCount">8,214 تقييم</a>
+        <span class="pdp-sep">•</span>
+        <span class="pdp-bought-count" data-t="boughtCount">2,000+ تم شراؤه هذا الشهر</span>
+      </div>
+
+      <!-- Price Box -->
+      <div class="pdp-price-box">
+        <div class="pdp-prices">
+          <span id="price" class="pdp-price-main"></span>
+          <del id="oldPrice" class="pdp-price-old"></del>
+        </div>
+        <span class="pdp-cod-badge" data-t="codBadge">✓ متوفر دفع عند الاستلام</span>
+      </div>
+
+      <!-- Color Swatches -->
+      <div class="pdp-option-group" id="colorGroup">
+        <label class="option-label"><span data-t="colorLabel">اللون:</span> <strong id="selectedColorName">أسود مطفي</strong></label>
+        <div class="color-swatches-row" id="colorSwatches">
+          <button type="button" class="color-swatch-btn active" style="--swatch-color: #171717;" title="Matte Black"></button>
+          <button type="button" class="color-swatch-btn" style="--swatch-color: #FF5000;" title="Sunset Orange"></button>
+          <button type="button" class="color-swatch-btn" style="--swatch-color: #F5E6D3;" title="Sand Cream"></button>
+          <button type="button" class="color-swatch-btn" style="--swatch-color: #0D9488;" title="Teal Green"></button>
+        </div>
+      </div>
+
+      <!-- Bundles / Variants -->
+      <div class="pdp-option-group">
+        <label class="option-label" data-t="bundleLabel">الحزمة / الخيار:</label>
+        <div class="bundle-chips-row" id="bundleChips">
+          <!-- Populated from product.variants -->
+        </div>
+        <select id="variant" class="sr-only"></select>
+      </div>
+
+      <!-- Shipping & Trust Perks -->
+      <div class="pdp-perks-box">
+        <div class="perk-item">
+          <span class="perk-icon">🚚</span>
+          <span><strong data-t="freeExpressTitle">شحن سريع 2-4 أيام</strong> • شحن مباشر من الرياض</span>
+        </div>
+        <div class="perk-item">
+          <span class="perk-icon">🔄</span>
+          <span data-t="returnsPerk">استرجاع مجاني خلال 15 يوماً</span>
+        </div>
+        <div class="perk-item">
+          <span class="perk-icon">🛡️</span>
+          <span>ضمان لمدة عامين من المتجر المعتمد</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pdp-cta-actions">
+        <button type="button" id="add" class="btn-pdp-cart" data-t="addToCart">أضف إلى السلة</button>
+        <button type="button" id="buy" class="btn-pdp-buy" data-t="buyNowCod">شراء الآن (دفع عند الاستلام) ➔</button>
+        <button type="button" id="saveBtn" class="btn-pdp-heart" aria-label="حفظ بالمفضلة">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
+        </button>
+      </div>
+
+      <p id="cartStatus" role="status" aria-live="polite" class="pdp-cart-status"></p>
+
+      <!-- Description Block -->
+      <div class="pdp-description-block">
+        <h3 data-t="productDescription">تفاصيل المنتج ومواصفاته</h3>
+        <p id="description" class="pdp-desc-text"></p>
+      </div>
+    </section>
+
+    <!-- Column 3: Store & Guarantee Cards -->
+    <aside class="pdp-side-col">
+      <!-- Store Card -->
+      <div class="pdp-card store-card-pdp">
+        <div class="store-top-row">
+          <div class="store-avatar-box" id="storeAvatar">TS</div>
+          <div class="store-meta">
+            <h3 id="storeTitle" class="store-name-pdp">TechSouq</h3>
+            <span class="store-followers">98.2% تقييم إيجابي • 120k متابع</span>
+          </div>
+        </div>
+        <div class="store-actions-row">
+          <a href="help.html" class="btn-store-chat" data-t="chatWithSeller">محادثة</a>
+          <a id="storeLink" class="btn-store-visit" data-t="visitStore">زيارة المتجر ➔</a>
+        </div>
+      </div>
+
+      <!-- Delivery Estimate Card -->
+      <div class="pdp-card delivery-card-pdp">
+        <h4 data-t="deliveryEst">تقدير التوصيل</h4>
+        <p class="delivery-time-text">📍 الرياض — التوصيل المتوقع: غداً، مجاناً</p>
+        <div class="quantity-stepper-wrap">
+          <label for="quantity" data-t="quantity">الكمية:</label>
+          <div class="stepper-box">
+            <button type="button" id="qtyMinus" class="stepper-btn">-</button>
+            <input id="quantity" type="number" min="1" max="100" value="1" readonly>
+            <button type="button" id="qtyPlus" class="stepper-btn">+</button>
+          </div>
+          <span id="stock" class="pdp-stock-text">متوفر: 840 قطعة</span>
+        </div>
+      </div>
+
+      <!-- Buyer Protection Card -->
+      <div class="pdp-card protection-card-pdp">
+        <h4 data-t="buyerProtectionTitle">🛡️ حماية المشتري في BEMO</h4>
+        <ul class="protection-list">
+          <li data-t="protect1">استرداد كامل في حال عدم استلام المنتج</li>
+          <li data-t="protect2">ضمان مطابقة الوصف والأصالة 100%</li>
+          <li data-t="protect3">دفع آمن عند الاستلام لكل متجر مستقل</li>
+        </ul>
+      </div>
+    </aside>
+
+  </article>
+
+  <!-- 4. Trust Strip below (matching 4ProductDetail.png) -->
+  <section class="pdp-trust-strip">
+    <div class="trust-strip-item">
+      <span class="trust-icon">⭐</span>
+      <div class="trust-text">
+        <strong>8,214 تقييم حقيقي</strong>
+        <small>92% يوصون بهذا المنتج</small>
+      </div>
+    </div>
+    <div class="trust-strip-item">
+      <span class="trust-icon">💬</span>
+      <div class="trust-text">
+        <strong>3,102 سؤال وجواب</strong>
+        <small>متوسط رد التاجر خلال ساعة</small>
+      </div>
+    </div>
+    <div class="trust-strip-item">
+      <span class="trust-icon">🚚</span>
+      <div class="trust-text">
+        <strong>توصيل دقيق خلال 2.1 يوم</strong>
+        <small>نسبة الالتزام بالوقت 97%</small>
+      </div>
+    </div>
+    <div class="trust-strip-item">
+      <span class="trust-icon">🛡️</span>
+      <div class="trust-text">
+        <strong>فحص وتوثيق BEMO</strong>
+        <small>سلسلة توريد ومتاجر معتمدة</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Frequently Bought Together (matching 4ProductDetail.png) -->
+  <section class="home-section fbt-section">
+    <div class="section-header-row">
+      <div class="header-left">
+        <h2><span data-t="fbtTitle">منتجات تُشترى معاً عادةً</span></h2>
+      </div>
+    </div>
+    <div class="product-grid-density-7" id="fbtGrid">
+      <!-- 6 complementary items populated from catalog -->
+    </div>
+  </section>
+</main>
+
+<footer class="main-footer">
+  <div class="container footer-bottom-bar">
+    <span>© 2026 BEMO — جميع الحقوق محفوظة</span>
+    <span>الدفع عند الاستلام · ضمان كامل لطلباتك</span>
+  </div>
+</footer>
+
+<script src="backend-config.js"></script>
+<script src="live-commerce.js"></script>
+<script src="product-page.js"></script>
+</body>
+</html>

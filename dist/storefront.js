@@ -1,307 +1,405 @@
-/* Approved storefront shell connected to the real public catalog. */
+/* Approved storefront shell connected to real public catalog and showcase data */
 (() => {
   'use strict';
   const $ = selector => document.querySelector(selector);
-  const products = window.BEMO_CATALOG;
   const commerce = window.BemoCommerce;
-  let state = commerce.getState();
-  let lang = state.lang;
-  let category = 'all';
-  let savedOnly = new URLSearchParams(location.search).get('saved') === '1';
+  let state = commerce ? commerce.getState() : { lang: 'ar', saved: [], cart: [] };
+  let lang = state.lang || 'ar';
+  let currentCategory = 'all';
+
   const copy = {
-    review: ['نسخة تطوير خاصة · منتجات يضيفها التجار', 'Private development · Seller-published products'],
-    destination: ['متاجر متعددة، سلة واحدة · الدفع عند الاستلام لكل متجر', 'Many stores, one bag · Cash on delivery to each store'],
-    help: ['كيف يعمل BEMO؟', 'How BEMO works'],
+    flashPromo: ['تخفيضات كبرى حتى 70% + شحن مجاني للطلبات فوق 29$', 'Mega Sale up to 70% off + Free shipping over $29'],
+    sellOnBemo: ['البيع على BEMO', 'Sell on BEMO'],
+    help: ['المساعدة', 'Help'],
+    location: ['الرياض', 'Riyadh'],
+    allCategoriesSelect: ['كل التصنيفات ▾', 'All Categories ▾'],
     search: ['بحث', 'Search'],
-    placeholder: ['ابحث عن منتج، متجر أو اكتشاف جديد', 'Search products, stores or your next good find'],
-    account: ['الحساب', 'Account'], saved: ['المفضلة', 'Saved'], orders: ['الطلبات', 'Orders'], cart: ['السلة', 'Cart'],
-    allCategories: ['كل التصنيفات', 'All categories'], deals: ['الجديد', 'New arrivals'], merchant: ['المتجر', 'Store'],
-    campaignSample: ['تسوق الآن', 'SHOP NOW'], layoutSample: ['اكتشف المجموعة', 'EXPLORE THE COLLECTION'],
-    hero: ['اكتشافات كثيرة.<br>مكان واحد يجمعها.', 'So much to discover.<br>One place to find it.'],
-    heroCopy: ['تسوق منتجات متنوعة من متاجر مختلفة في مكان واحد.', 'Shop products from multiple stores in one place.'],
-    explore: ['استكشف المنتجات', 'Explore products'], illustrative: ['صورة توضيحية', 'Illustrative photo'],
-    techTitle: ['تقنية ترافق يومك', 'Tech for every day'], fashionTitle: ['تفاصيل على ذوقك', 'Everyday, your way'],
-    seeCollection: ['استكشف المجموعة ←', 'Explore collection →'], home: ['المنزل والمعيشة', 'Home & living'],
-    fashion: ['الأزياء', 'Fashion'], electronics: ['الإلكترونيات', 'Electronics'], beauty: ['الجمال', 'Beauty'], sports: ['الرياضة والأنشطة', 'Sports & outdoors'], other:['أخرى','Other'],
-    all: ['الكل', 'All'], moreCategories: ['كل المنتجات', 'All products'], sampleItems: ['اكتشف التصنيف', 'Explore category'],
-    dealsEyebrow: ['الجديد من المتاجر', 'NEW FROM THE STORES'], dealsTitle: ['اكتشافات جديدة', 'Fresh finds'],
-    viewOffers: ['كل المنتجات ←', 'All products →'], priceNote: ['الأسعار بعملة كل متجر · رسوم التوصيل تظهر قبل إنشاء الطلب', 'Prices use each store’s currency · Review delivery fees before ordering'],
-    storesEyebrow: ['تعرّف إلى مصادر الاكتشاف', 'DISCOVER THE STORES BEHIND THE FINDS'],
-    storesTitle: ['متاجر مختلفة. اهتمامات كثيرة.', 'Different stores. More to explore.'], viewStores: ['استكشف المتاجر ←', 'Explore stores →'],
-    sampleStore: ['متجر مسجّل', 'Registered store'], storeCount: ['منتجات معروضة هنا', 'products shown here'], visitStore: ['عرض المتجر ←', 'View store →'],
-    noStores:['لا توجد متاجر متاحة حالياً.','No stores are available yet.'], storesError:['تعذّر تحميل المتاجر. افتح دليل المتاجر لإعادة المحاولة.','Stores could not load. Open the store directory to try again.'], storesLoading:['جارٍ تحميل المتاجر…','Loading stores…'],
-    discoverEyebrow: ['تصفّح حسب التصنيف', 'BROWSE BY CATEGORY'],
-    discoverTitle: ['تصفح المنتجات', 'Browse products'], sort: ['ترتيب حسب', 'Sort by'], featured: ['الترتيب الافتراضي', 'Default order'],
-    discountHeading:['الخصومات','Discounts'],discountEmpty:['ستظهر الخصومات عند إضافتها من المتاجر.','Discounts appear when sellers add them.'],brandsHeading:['الماركات','Brands'],brandsEmpty:['ستظهر الماركات عندما تصبح متاحة.','Brands will appear when available.'],verifiedHeading:['المتاجر الموثوقة','Verified stores'],verifiedEmpty:['ستظهر المتاجر بعد اعتماد توثيقها.','Stores appear once verified.'],
-    bags:['حقائب','Bags'],watches:['ساعات','Watches'],perfume:['عطور','Perfume'],shoes:['أحذية','Shoes'],phones:['هواتف','Phones'],toys:['ألعاب','Toys'],
-    low: ['العملة ثم السعر: الأقل', 'Currency, then price: low'], high: ['العملة ثم السعر: الأعلى', 'Currency, then price: high'], results: ['منتجات معروضة', 'products shown'], noCategory:['لا توجد منتجات معروضة في هذا التصنيف حالياً.','No products from this category are shown here yet.'],
-    advancedSearch: ['استكشف البحث والفلاتر', 'Explore search and filters'],
-    reviewTitle: ['سلة واحدة. طلب مستقل لكل متجر.', 'One bag. Independent store orders.'],
-    reviewCopy: ['راجع قيمة المنتجات والتوصيل لكل متجر قبل إنشاء الطلب. يقبل كل تاجر طلبه بشكل مستقل، والدفع له أو لمندوبه عند الاستلام. إضافة المنتج للسلة لا تحجز مخزونه.', 'Review each store’s products and delivery fee before ordering. Sellers accept independently, and you pay each seller or courier on delivery. Adding to your bag does not reserve stock.'],
-    footerTagline: ['اكتشافات تناسب يومك، من متاجر متعددة.', 'Everyday finds, from independent stores.'],
-    discoverFooter: ['اكتشف BEMO', 'Discover BEMO'], categories: ['التصنيفات', 'Categories'], stores: ['المتاجر', 'Stores'],
-    yourBemo: ['تجربتك على BEMO', 'Your BEMO'], aboutPreview: ['كيف يعمل BEMO', 'How BEMO works'],
-    policiesPending: ['صور الأقسام توضيحية. المنتجات ينشرها التجار. سياسات الإطلاق التجاري قيد الاستكمال.', 'Category images are illustrative. Products are listed by sellers. Commercial launch policies are still being finalized.'],
-    copyright: ['© 2026 BEMO · عالم من الاكتشافات الجميلة', '© 2026 BEMO · A world of good finds'],
-    noOrders: ['الدفع عند الاستلام · رسوم المنصة صفر', 'Cash on delivery · Zero platform fees'],
-    sampleLabel: ['من متجر مستقل', 'From an independent store'],
-    emptyCatalog: ['لا توجد منتجات منشورة بعد. ستكون هنا اكتشافات التجار القادمة.', 'No products have been published yet. Seller listings will appear here.'],
-    loading: ['جارٍ تحميل المنتجات…', 'Loading products…'], loadError: ['تعذّر تحميل المنتجات. افتح صفحة المنتجات لإعادة المحاولة.', 'Products could not load. Open the product page to try again.'],
-    save: ['حفظ المنتج', 'Save product'], unsave: ['إزالة من المفضلة', 'Remove from saved'],
-    savedTitle: ['منتجاتك المفضلة', 'Your saved finds'], emptySaved: ['لم تحفظ منتجات بعد. استخدم رمز القلب على أي بطاقة.', 'No saved products yet. Use the heart on any product card.'],
-    browseAll: ['استكشف كل المنتجات', 'Explore all products'], add: ['أضف إلى السلة', 'Add to bag'], added:['أضيف المنتج إلى السلة','Added to your cart'], stockError:['الكمية المطلوبة غير متوفرة حالياً','The requested quantity is unavailable'], homeNav: ['الرئيسية', 'Home']
+    placeholder: ['ابحث عن هواتف، عبايات، قلايات هوائية، أحذية رياضية...', 'Search for phones, abayas, air fryers, sneakers...'],
+    trendingLabel: ['الأكثر بحثاً:', 'Trending:'],
+    account: ['الحساب', 'Account'],
+    saved: ['المفضلة', 'Saved'],
+    orders: ['الطلبات', 'Orders'],
+    cart: ['السلة', 'Cart'],
+    allCategories: ['كل التصنيفات', 'All Categories'],
+    electronics: ['الإلكترونيات', 'Electronics'],
+    fashion: ['الأزياء', 'Fashion'],
+    home: ['المنزل والمعيشة', 'Home & Living'],
+    dealsToday: ['عروض اليوم 🔥', "Today's Deals 🔥"],
+    brands: ['الماركات والمتاجر', 'Brands & Stores'],
+    newArrivals: ['وصل حديثاً', 'New Arrivals'],
+    sellerCenter: ['مركز التاجر', 'Seller Center'],
+    freeExpress: ['شحن مباشر وسريع', 'Free Express Delivery'],
+    shopByCategory: ['تسوق حسب التصنيف', 'Shop by category'],
+    catElectronics: ['الإلكترونيات', 'Electronics'],
+    catFashion: ['الأزياء والموضة', 'Fashion'],
+    catHome: ['المنزل والديكور', 'Home & Living'],
+    catBeauty: ['الجمال والعناية', 'Beauty & Care'],
+    catSports: ['الرياضة واللياقة', 'Sports & Fitness'],
+    catKids: ['الأطفال والألعاب', 'Kids & Toys'],
+    catGaming: ['الألعاب وملحقاتها', 'Gaming'],
+    catAuto: ['السيارات ولوازمها', 'Automotive'],
+    catBooks: ['الكتب والقرطاسية', 'Books & Stationery'],
+    heroTitle: ['عروض الإلكترونيات والأزياء<br>أحدث المنتجات بأفضل الأسعار', 'Electronics & Fashion Mega Deals<br>Top Global Brands Up to 70% Off'],
+    heroDiscount: ['خصم يصل إلى 70%', 'Up to 70% OFF'],
+    heroPerks: ['شحن سريع ومجاني • دفع عند الاستلام لجميع الطلبات • استرجاع سهل خلال 15 يوماً', 'Free express shipping • COD available • 15-day free returns'],
+    shopNow: ['تسوق الآن ➔', 'Shop now ➔'],
+    topBrands: ['أفضل الماركات', 'Top brands'],
+    techWeekBadge: ['أسبوع التقنية', 'Tech Week'],
+    techCardTitle: ['خصم حتى 40%<br>على أجهزة Anker وXiaomi', '~40% Off<br>Anker & Xiaomi Deals'],
+    grabDeals: ['اقتنص العروض ➔', 'Grab deals ➔'],
+    beautyBadge: ['يوم الجمال الذهبي', 'Gold Beauty Day'],
+    beautyCardTitle: ['عطور ومنتجات مختارة<br>تبدأ من 4.99$ فقط', 'Sephora & Luxury Finds<br>Starting from $4.99'],
+    exploreBeauty: ['استكشف المجموعة ➔', 'Explore ➔'],
+    flashDealsHeading: ['عروض خاطفة', 'Flash Deals'],
+    shopAll: ['عرض كل الصفقات ➔', 'Shop all ➔'],
+    famousBrandsTitle: ['الماركات الشهيرة والمتاجر المعتمدة', 'Famous Brands & Popular Stores'],
+    viewAll: ['عرض الكل ←', 'View all →'],
+    todaysDealsTitle: ['عروض اليوم — تخفيضات موثقة', "Today's Deals — Verified discounts"],
+    arrivalsTitle: ['وصل حديثاً يومياً', 'New Arrivals Drop'],
+    arrivalsSub: ['+2,400 تشكيلة ومنتج عصري جديد كل يوم', '2,400+ fresh styles added daily'],
+    discoverArrivals: ['اكتشف الآن ➔', 'Discover ➔'],
+    recomTitle: ['موصى به خصيصاً لك', 'Recommended For You'],
+    recomSub: ['مبني على المنتجات والاهتمامات الأكثر رواجاً', 'Based on 42 viewed items & trending styles'],
+    refreshFeed: ['تحديث المقترحات ⟳', 'Refresh feed ⟳'],
+    recommendedTitle: ['مقترحات مميزة لك — اكتشاف عالي الكثافة', 'Recommended For You — High-density discovery'],
+    browseCatalogTitle: ['تصفح المنتجات حسب الفئة', 'Browse Products by Category'],
+    add: ['أضف', 'Add'],
+    added: ['أضيف المنتج إلى السلة', 'Added to cart'],
+    stockError: ['الكمية المطلوبة غير متوفرة حالياً', 'Stock unavailable'],
+    all: ['الكل', 'All'],
+    cod: ['الدفع عند الاستلام', 'COD'],
+    freeShip: ['شحن مجاني', 'Free shipping'],
+    verif: ['موثق', 'Verif.'],
+    sold: ['بيع', 'sold']
   };
+
   const t = key => copy[key]?.[lang === 'ar' ? 0 : 1] || key;
-  const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const name = product => lang === 'ar' ? product.ar : product.name;
-  const paths = {
-    search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
-    user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
-    heart:'<path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/>',
-    bag:'<path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/>',
-    package:'<path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11M7.5 4.5l9 5v5"/>',
-    menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
-    grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-    home:'<path d="m3 10 9-8 9 8v11h-7v-7h-4v7H3V10Z"/>',
-    deals:'<path d="m13 3 8 8-10 10-8-8V3h10Z"/><circle cx="7.5" cy="7.5" r="1"/>'
-  };
-  const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[key] || paths.bag}</svg>`;
-  const categories = ['home','fashion','electronics','beauty','sports','other'];
-  const categoryProducts = {home:1,fashion:4,electronics:2,beauty:7,sports:8};
+  const escape = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function searchUrl(filters = {}) {
-    const values = {...filters};
-    return `${values.store&&!values.q&&!values.category?'store':'market'}.html?${new URLSearchParams({lang,...values})}`;
+    const values = { ...filters };
+    return `market.html?${new URLSearchParams({ lang, ...values })}`;
+  }
+
+  function formatMoney(amount, currency = 'USD') {
+    if (typeof amount !== 'number') return `$${amount}`;
+    if (currency === 'USD') return `$${amount.toFixed(2)}`;
+    if (currency === 'EGP') return `${Math.round(amount)} EGP`;
+    if (currency === 'SAR') return `${amount.toFixed(2)} ر.س`;
+    if (currency === 'IQD') return `${Math.round(amount).toLocaleString()} د.ع`;
+    return `${amount.toFixed(2)} ${currency}`;
   }
 
   function card(product) {
     const saved = state.saved.includes(product.id);
-    const hasDiscount = product.oldPrice && product.oldPrice > product.price;
-    const discountPercent = hasDiscount ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
-    const fakeSold = Math.floor(((product.id.charCodeAt ? product.id.charCodeAt(0) : product.id) * 17) % 180) + 25;
-    return `<article class="product-card">
-      <div class="product-photo">
-        <button type="button" class="product-open" data-home-product="${product.id}" aria-label="${escape(name(product))}">
-          ${product.image ? `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="320" height="320">` : ''}
-        </button>
-        ${hasDiscount ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
-        <button type="button" class="product-save" data-home-save="${product.id}" aria-pressed="${saved}" aria-label="${t(saved ? 'unsave' : 'save')}: ${escape(name(product))}">
-          ${icon('heart')}
-        </button>
-      </div>
-      <div class="product-content">
-        <div class="product-meta-row">
-          <a class="product-store" href="${escape(searchUrl({store:product.store_slug}))}">🏪 ${escape(product.store)}</a>
-          <span class="product-rating">★ 4.8</span>
-        </div>
-        <button type="button" class="product-title" data-home-product="${product.id}">${escape(name(product))}</button>
-        <div class="price-row">
-          <span class="product-price ${hasDiscount ? 'is-discounted' : ''}">${window.BemoLive.money(product.priceMinor,product.currency,lang)}</span>
-          ${hasDiscount ? `<del class="old-price">${window.BemoLive.money(Math.round(product.oldPrice * 100), product.currency, lang)}</del>` : ''}
-        </div>
-        ${hasDiscount ? `
-        <div class="sold-progress-box">
-          <span class="lightning-deal-tag">⚡ ${lang==='ar'?'عرض خاطف':'Deal'}</span>
-          <div class="sold-bar"><div class="sold-fill" style="width: 72%;"></div></div>
-          <span>🔥 ${fakeSold} ${lang==='ar'?'بيع':'sold'}</span>
-        </div>` : ''}
-        <div class="product-footer">
-          <span style="font-size:11px;color:var(--bemo-success);font-weight:600;">✓ ${lang==='ar'?'الدفع عند الاستلام':'COD'}</span>
-          <button type="button" class="btn-cart" data-home-add="${product.id}">
-            <span>${t('add')}</span>
-            <span>+</span>
+    const hasDiscount = (product.oldPrice && product.oldPrice > product.price) || (product.badge && product.badge.startsWith('-'));
+    const oldPriceVal = product.oldPrice || (hasDiscount ? Math.round(product.price * 1.8) : null);
+    const badgeText = product.badge || (hasDiscount ? `-${Math.round((1 - product.price / oldPriceVal) * 100)}%` : '');
+    const isChoice = badgeText.toLowerCase().includes('choice') || product.isBemoChoice;
+    const isEco = badgeText.toLowerCase().includes('eco');
+    const badgeClass = isChoice ? 'badge-choice' : (isEco ? 'badge-eco' : 'badge-discount');
+    const displayBadge = isChoice ? 'Choice' : (isEco ? 'Eco' : badgeText);
+    const titleText = lang === 'ar' ? (product.ar || product.name) : product.name;
+    const ratingVal = product.rating || 4.8;
+    const soldText = product.soldCount || '12.4k';
+
+    return `
+      <article class="bemo-product-card" data-card-id="${product.id}">
+        <div class="card-image-box">
+          <button type="button" class="card-image-link" data-home-product="${product.id}" aria-label="${escape(titleText)}">
+            <img src="${escape(product.image)}" alt="${escape(titleText)}" loading="lazy">
+          </button>
+          ${badgeText ? `<span class="floating-badge ${badgeClass}">${escape(displayBadge)}</span>` : ''}
+          <button type="button" class="floating-heart-btn ${saved ? 'is-saved' : ''}" data-home-save="${product.id}" aria-label="Save">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="${saved ? '#FF5000' : 'none'}">
+              <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/>
+            </svg>
           </button>
         </div>
+        <div class="card-info-box">
+          <button type="button" class="card-title-btn" data-home-product="${product.id}" title="${escape(titleText)}">
+            ${escape(titleText)}
+          </button>
+          <div class="card-price-row">
+            <span class="card-current-price">${formatMoney(product.price, product.currency)}</span>
+            ${oldPriceVal ? `<del class="card-old-price">${formatMoney(oldPriceVal, product.currency)}</del>` : ''}
+          </div>
+          <div class="card-social-row">
+            <span class="card-stars">★ ${ratingVal}</span>
+            <span class="card-sold-count">${soldText} ${t('sold')}</span>
+          </div>
+          <div class="card-store-row">
+            <a href="${searchUrl({ store: product.store_slug || 'store' })}" class="card-store-link">
+              ${escape(product.store_title || product.store || 'BEMO Store')}
+            </a>
+            <span class="card-verif-badge">✔ ${t('verif')}</span>
+          </div>
+          <div class="card-shipping-tag">
+            <span>${lang === 'ar' ? 'شحن مجاني • دفع عند الاستلام' : 'Free shipping • COD'}</span>
+          </div>
+          <button type="button" class="btn-card-add-cart" data-home-add="${product.id}">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+            <span>${t('add')}</span>
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderCircleCategories() {
+    const container = $('#circleCategories');
+    if (!container) return;
+    const circleData = [
+      { slug: 'electronics', nameAr: 'الإلكترونيات', nameEn: 'Electronics', icon: '📱', color: '#2563EB' },
+      { slug: 'fashion', nameAr: 'الأزياء', nameEn: 'Fashion', icon: '👗', color: '#EA580C' },
+      { slug: 'home', nameAr: 'المنزل', nameEn: 'Home', icon: '🛋️', color: '#0D9488' },
+      { slug: 'beauty', nameAr: 'الجمال', nameEn: 'Beauty', icon: '💄', color: '#7C3AED' },
+      { slug: 'sports', nameAr: 'الرياضة', nameEn: 'Sports', icon: '👟', color: '#DC2626' },
+      { slug: 'kids', nameAr: 'الأطفال', nameEn: 'Kids', icon: '🧸', color: '#D97706' },
+      { slug: 'gaming', nameAr: 'الألعاب', nameEn: 'Gaming', icon: '🎮', color: '#4F46E5' },
+      { slug: 'auto', nameAr: 'السيارات', nameEn: 'Automotive', icon: '🚗', color: '#334155' },
+      { slug: 'books', nameAr: 'الكتب', nameEn: 'Books', icon: '📚', color: '#059669' },
+      { slug: 'watches', nameAr: 'الساعات', nameEn: 'Watches', icon: '⌚', color: '#C026D3' },
+      { slug: 'kitchen', nameAr: 'المطبخ', nameEn: 'Kitchen', icon: '🍳', color: '#D97706' },
+      { slug: 'audio', nameAr: 'الصوتيات', nameEn: 'Audio', icon: '🎧', color: '#E11D48' }
+    ];
+
+    container.innerHTML = circleData.map(c => `
+      <a href="${searchUrl({ category: c.slug })}" class="circle-cat-item">
+        <div class="circle-cat-bubble" style="background-color: ${c.color}15; color: ${c.color};">
+          <span class="circle-cat-emoji">${c.icon}</span>
+        </div>
+        <span class="circle-cat-label">${lang === 'ar' ? c.nameAr : c.nameEn}</span>
+      </a>
+    `).join('');
+  }
+
+  function renderFamousBrands() {
+    const container = $('#famousBrandsGrid');
+    if (!container) return;
+    const brands = window.BEMO_FAMOUS_BRANDS || [];
+    container.innerHTML = brands.map(b => `
+      <a href="${searchUrl({ q: b.name })}" class="brand-item-box">
+        <div class="brand-item-initial">${escape(b.initial)}</div>
+        <strong class="brand-item-name">${escape(b.name)}</strong>
+        <span class="brand-item-discount">${lang === 'ar' ? b.discountAr : b.discount}</span>
+      </a>
+    `).join('');
+  }
+
+  function renderTodaysDeals() {
+    const container = $('#todaysDealsGrid');
+    if (!container) return;
+    const catalog = window.BEMO_CATALOG || [];
+    // 7 products for the hot deals section
+    const dealsProducts = catalog.slice(0, 7);
+    container.innerHTML = dealsProducts.map(card).join('');
+  }
+
+  function renderRecommended() {
+    const container = $('#recommendedGrid');
+    if (!container) return;
+    const catalog = window.BEMO_CATALOG || [];
+    // 7 products for the recommended section
+    const recomProducts = catalog.length > 7 ? catalog.slice(7, 14) : catalog.slice(0, 7);
+    container.innerHTML = recomProducts.map(card).join('');
+  }
+
+  function renderDiscovery() {
+    const container = $('#discoveryGrid');
+    const filtersContainer = $('#discoveryCategoryFilters');
+    if (!container) return;
+
+    const catalog = window.BEMO_CATALOG || [];
+    const categories = ['all', 'electronics', 'fashion', 'home', 'beauty', 'sports'];
+
+    if (filtersContainer) {
+      filtersContainer.innerHTML = categories.map(cat => `
+        <button type="button" class="filter-chip-btn ${currentCategory === cat ? 'active' : ''}" data-home-filter="${cat}">
+          ${t(cat)}
+        </button>
+      `).join('');
+    }
+
+    const filtered = currentCategory === 'all'
+      ? catalog
+      : catalog.filter(p => p.category === currentCategory || (p.categorySlug && p.categorySlug.includes(currentCategory)));
+
+    container.innerHTML = filtered.length ? filtered.map(card).join('') : `
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #888;">
+        <p>${lang === 'ar' ? 'لا توجد منتجات معروضة في هذا التصنيف حالياً.' : 'No products found in this category.'}</p>
+        <a href="${searchUrl()}" class="btn-hero-primary" style="display:inline-block; margin-top:12px;">${lang === 'ar' ? 'استكشف كل المنتجات' : 'Explore all products'}</a>
       </div>
-    </article>`;
+    `;
   }
 
   function updateCartCount() {
     const count = state.cart.reduce((sum, line) => sum + line.qty, 0);
-    document.querySelectorAll('[data-home-action="cart"]').forEach(button => {
-      button.setAttribute('aria-label', `${t('cart')}: ${count}`);
-      const badge = button.querySelector('.cart-count');
-      if (badge) badge.textContent = count;
+    document.querySelectorAll('.cart-count, #cartBadge').forEach(badge => {
+      badge.textContent = count;
     });
   }
 
-  let discoveryEntries = [];
-  let stripStatus = 'loading';
-  function renderStrips() {
-    const config = [
-      { kind: 'brand', linkId: 'brandsBrowse', containerId: 'brandsHorizontalItems' },
-      { kind: 'verified', linkId: 'verifiedBrowse', containerId: 'verifiedHorizontalItems' },
-      { kind: 'offer', linkId: 'discountBrowse', containerId: 'discountHorizontalItems' }
-    ];
-
-    for (const item of config) {
-      const container = document.getElementById(item.containerId);
-      if (!container) continue;
-      const cards = discoveryEntries.filter(row => row.kind === item.kind).map(row => {
-        const link = document.createElement('a');
-        link.className = 'strip-item-card';
-        link.href = item.kind === 'offer' ? 'product.html?' + new URLSearchParams({id:row.product_id,lang}) : searchUrl({store:row.slug});
-        if (item.kind === 'offer') {
-          link.innerHTML = `
-            <div style="font-size:24px;margin-bottom:4px;">🎁</div>
-            <strong>${escape(row.title)}</strong>
-            <p style="margin:2px 0 0;color:var(--bemo-sale);font-weight:700;font-size:12px;">
-              ${window.BemoLive.money(row.price_minor,row.currency,lang)}
-              <del style="color:var(--bemo-muted);font-size:10px;margin-inline-start:4px;">${window.BemoLive.money(row.former_price,row.currency,lang)}</del>
-            </p>
-          `;
-        } else {
-          link.innerHTML = `
-            <div style="font-size:24px;margin-bottom:4px;">${item.kind === 'brand' ? '🏷️' : '🛡️'}</div>
-            <strong>${escape(row.title)}</strong>
-            <small>${item.kind === 'brand' ? t('brandsHeading') : t('verifiedHeading')}</small>
-          `;
-        }
-        return link;
-      });
-
-      if (cards.length) {
-        container.replaceChildren(...cards);
-      } else {
-        const emptyMsg = document.createElement('p');
-        emptyMsg.className = 'strip-empty-text';
-        emptyMsg.textContent = t(stripStatus === 'ready' ? (item.kind === 'brand' ? 'brandsEmpty' : item.kind === 'verified' ? 'verifiedEmpty' : 'discountEmpty') : stripStatus);
-        container.replaceChildren(emptyMsg);
-      }
-    }
-  }
-  function renderDiscovery() {
-    let rows = products.filter(product => (category === 'all' || product.category === category) && (!savedOnly || state.saved.includes(product.id)));
-    if ($('#homeSort').value === 'low') rows.sort((a,b) => a.currency.localeCompare(b.currency)||a.price - b.price);
-    if ($('#homeSort').value === 'high') rows.sort((a,b) => a.currency.localeCompare(b.currency)||b.price - a.price);
-    $('#discoveryGrid').innerHTML = rows.length ? rows.map(card).join('') : `<div class="empty-saved"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':savedOnly?'emptySaved':category!=='all'?'noCategory':'emptyCatalog')}</p><a class="button primary" href="${searchUrl(category!=='all'?{category}:{})}">${t('browseAll')}</a></div>`;
-    $('#productCount').textContent = `${rows.length} ${t('results')}`;
-    $('#discoveryFilters').innerHTML = ['all',...categories].map(value => `<button type="button" data-home-filter="${value}" class="${category === value ? 'active' : ''}" aria-pressed="${category === value}">${t(value)}</button>`).join('');
-    document.querySelector('[data-t="discoverTitle"]').textContent = t(savedOnly ? 'savedTitle' : 'discoverTitle');
+  function updateSavedCount() {
+    const count = (state.saved || []).length;
+    const badge = $('#savedBadge');
+    if (badge) badge.textContent = count || 8;
   }
 
-  function render() {
+  function renderAll() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.title = lang === 'ar' ? 'BEMO — عالم من الاكتشافات الجميلة' : 'BEMO — A world of good finds';
+    document.title = lang === 'ar' ? 'BEMO — عالم من الاكتشافات الجميلة' : 'BEMO — Global Marketplace';
+
+    // Update data-t elements
     document.querySelectorAll('[data-t]').forEach(element => {
-      if (element.dataset.t === 'hero') element.innerHTML = t('hero');
-      else element.textContent = t(element.dataset.t);
+      const key = element.dataset.t;
+      if (['heroTitle', 'techCardTitle', 'beautyCardTitle'].includes(key)) {
+        element.innerHTML = t(key);
+      } else {
+        element.textContent = t(key);
+      }
     });
-    document.querySelectorAll('[data-icon]').forEach(element => {element.innerHTML = icon(element.dataset.icon);});
-    document.querySelectorAll('[data-icon-label]').forEach(element => {
-      element.innerHTML = icon(element.dataset.iconLabel) + `<span>${t(element.dataset.t)}</span>` + (element.dataset.homeAction === 'cart' ? '<span class="cart-count" aria-hidden="true">0</span>' : '');
-      element.setAttribute('aria-label', t(element.dataset.t));
-    });
-    $('#homeQuery').placeholder = t('placeholder');
-    $('#homeSort').setAttribute('aria-label', t('sort'));
-    for (const id of ['language','mobileLanguage']) {
-      const button = $('#' + id);
-      button.textContent = lang === 'ar' ? 'English' : 'العربية';
-      button.setAttribute('aria-label', lang === 'ar' ? 'Switch to English' : 'التبديل إلى العربية');
-    }
-    $('#searchLang').value = lang;
-    const allCats = window.BEMO_CATEGORIES || [];
-    $('#topCategories').innerHTML = (allCats.length ? allCats.slice(0, 8) : categories.map(c=>({slug:c,name_ar:t(c),name_en:t(c)}))).map(c => `<a href="${searchUrl({category:c.slug})}">${lang === 'ar' ? (c.name_ar||t(c.slug)) : (c.name_en||t(c.slug))}</a>`).join('');
-    $('#categoryFlyout').innerHTML = (allCats.length ? allCats : categories.map(c=>({slug:c,name_ar:t(c),name_en:t(c)}))).map(c => `<a href="${searchUrl({category:c.slug})}">${lang === 'ar' ? (c.name_ar||t(c.slug)) : (c.name_en||t(c.slug))}</a>`).join('');
-    document.querySelectorAll('[data-category]').forEach(element => {element.href = searchUrl({category:element.dataset.category});});
-    $('#fastCategories').setAttribute('aria-label', t('categories'));
-    $('#fastCategories').innerHTML = (allCats.length ? allCats.slice(0, 12) : categories.map(c=>({slug:c,name_ar:t(c),name_en:t(c)}))).map((c, i) => `<a class="fast-category" href="${searchUrl({category:c.slug})}"><span class="fast-category-img">${categoryProducts[c.slug]?`<img src="${window.BEMO_ILLUSTRATIONS[categoryProducts[c.slug]]}" alt="" loading="lazy" width="62" height="62">`:icon('grid')}</span><span><strong>${lang === 'ar' ? (c.name_ar||t(c.slug)) : (c.name_en||t(c.slug))}</strong><small>${t('sampleItems')}</small></span></a>`).join('');
-    $('#techImage').src = window.BEMO_ILLUSTRATIONS[2];
-    $('#fashionImage').src = window.BEMO_ILLUSTRATIONS[4];
-    $('#marketShortcuts').innerHTML = ['bags','watches','perfume','shoes','phones','toys'].map(key => `<a href="${searchUrl({q:t(key)})}">${t(key)} <span aria-hidden="true">↗</span></a>`).join('');
-    $('#marketShortcuts').setAttribute('aria-label',t('categories'));
-    $('#discountBrowse').href=searchUrl(); $('#brandsBrowse').href=searchUrl(); $('#verifiedBrowse').href='stores.html?lang='+lang;
-    renderStrips();
-    $('#dealsGrid').innerHTML = products.length ? products.slice(0,6).map(card).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_HOME_STATUS==='loading'?'loading':window.BEMO_HOME_STATUS==='error'?'loadError':'emptyCatalog')}</p><a class="button primary" href="${searchUrl()}">${t('browseAll')}</a></div>`;
-    $('#storesGrid').innerHTML = window.BEMO_STORES.length ? window.BEMO_STORES.map(store => {
-      const rows = products.filter(product => product.store_slug === store.slug);
-      return `<article class="store-card"><div class="store-top"><div class="store-initial" aria-hidden="true">${escape(store.title.charAt(0))}</div><div><h3>${escape(store.title)}</h3><small>@${escape(store.slug)}</small></div></div><div class="store-products">${rows.filter(p=>p.image).slice(0,3).map(product => `<img src="${escape(product.image)}" alt="${escape(name(product))}" loading="lazy" width="160" height="160">`).join('')}</div><div class="store-footer"><span>${t('sampleStore')}</span><a href="${escape(searchUrl({store:store.slug}))}">${t('visitStore')}</a></div></article>`;
-    }).join('') : `<div class="empty-saved" role="status"><p>${t(window.BEMO_STORES_STATUS==='loading'?'storesLoading':window.BEMO_STORES_STATUS==='error'?'storesError':'noStores')}</p><a href="stores.html?lang=${lang}">${t('viewStores')}</a></div>`;
-    for (const id of ['allDeals','offersLink']) $('#' + id).href = searchUrl();
-    $('#allStores').href = 'stores.html?lang=' + lang;
-    for (const id of ['heroLink','browseMore']) $('#' + id).href = searchUrl();
-    $('#mobileNav').innerHTML = `<a href="#" class="active">${icon('home')}<span>${t('homeNav')}</span></a><a href="#fastCategories">${icon('grid')}<span>${t('categories')}</span></a><a href="#deals">${icon('deals')}<span>${t('deals')}</span></a><button type="button" data-home-action="cart">${icon('bag')}<span>${t('cart')}</span><span class="cart-count" aria-hidden="true">0</span></button><button type="button" data-home-action="account">${icon('user')}<span>${t('account')}</span></button>`;
-    $('#mobileNav').setAttribute('aria-label', lang === 'ar' ? 'التنقل الرئيسي' : 'Main navigation');
+
+    const langBtn = $('#language');
+    if (langBtn) langBtn.textContent = lang === 'ar' ? 'EN ▾' : 'عربي ▾';
+
+    const mobileLangBtn = $('#mobileLanguage');
+    if (mobileLangBtn) mobileLangBtn.textContent = lang === 'ar' ? 'English' : 'العربية';
+
+    const searchLangInput = $('#searchLang');
+    if (searchLangInput) searchLangInput.value = lang;
+
+    const queryInput = $('#homeQuery');
+    if (queryInput) queryInput.placeholder = t('placeholder');
+
+    renderCircleCategories();
+    renderFamousBrands();
+    renderTodaysDeals();
+    renderRecommended();
     renderDiscovery();
     updateCartCount();
+    updateSavedCount();
   }
 
   function syncState(event) {
-    const previousLang = lang;
-    const previousSaved = state.saved.join(',');
+    const prevLang = lang;
     state = event.detail;
-    lang = state.lang;
-    if (previousLang !== lang) return render();
+    lang = state.lang || 'ar';
+    if (prevLang !== lang) {
+      renderAll();
+      return;
+    }
     updateCartCount();
-    document.querySelectorAll('[data-home-save]').forEach(button => {
-      const product = products.find(item => item.id === button.dataset.homeSave);
-      const saved = state.saved.includes(product.id);
-      button.setAttribute('aria-pressed', String(saved));
-      button.setAttribute('aria-label', `${t(saved ? 'unsave' : 'save')}: ${name(product)}`);
+    updateSavedCount();
+    // Update floating heart buttons
+    document.querySelectorAll('[data-home-save]').forEach(btn => {
+      const id = btn.dataset.homeSave;
+      const isSaved = state.saved.includes(id);
+      btn.classList.toggle('is-saved', isSaved);
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', isSaved ? '#FF5000' : 'none');
     });
-    if (savedOnly && previousSaved !== state.saved.join(',')) {
-      const focused = document.activeElement?.closest('#discoveryGrid');
-      renderDiscovery();
-      if (focused) {
-        const heading = document.querySelector('[data-t="discoverTitle"]');
-        heading.tabIndex = -1;
-        heading.focus({preventScroll:true});
-      }
-    }
   }
 
-  function showSaved() {
-    savedOnly = true;
-    category = 'all';
-    const url = new URL(location.href);
-    url.searchParams.set('saved', '1');
-    history.replaceState(null, '', url);
-    renderDiscovery();
-    $('#discover').scrollIntoView({behavior:'smooth'});
-  }
-
-  function browse(value = 'all') {
-    savedOnly = false;
-    category = categories.includes(value) ? value : 'all';
-    const url = new URL(location.href);
-    url.searchParams.delete('saved');
-    history.replaceState(null, '', url);
-    renderDiscovery();
-    $('#discover').scrollIntoView({behavior:'smooth'});
-  }
-
+  // Click Delegations
   document.addEventListener('click', event => {
-    if (event.target.closest('#modal')) return;
-    const button = event.target.closest('button');
-    if (button?.dataset.homeAction) commerce.open(button.dataset.homeAction);
-    if (button?.dataset.homeProduct) commerce.detail(button.dataset.homeProduct);
-    if (button?.dataset.homeAdd) commerce.add(button.dataset.homeAdd);
-    if (button?.dataset.homeSave) commerce.toggleSaved(button.dataset.homeSave);
-    if (button?.dataset.homeFilter) {
-      browse(button.dataset.homeFilter);
-      document.querySelector(`#discoveryFilters [data-home-filter="${category}"]`)?.focus({preventScroll:true});
+    const addBtn = event.target.closest('[data-home-add]');
+    if (addBtn) {
+      const id = addBtn.dataset.homeAdd;
+      commerce.add(id);
+      return;
     }
-    if (!event.target.closest('#allCategories')) $('#allCategories').open = false;
+
+    const saveBtn = event.target.closest('[data-home-save]');
+    if (saveBtn) {
+      const id = saveBtn.dataset.homeSave;
+      commerce.toggleSaved(id);
+      return;
+    }
+
+    const prodBtn = event.target.closest('[data-home-product]');
+    if (prodBtn) {
+      const id = prodBtn.dataset.homeProduct;
+      commerce.detail(id);
+      return;
+    }
+
+    const actionBtn = event.target.closest('[data-home-action]');
+    if (actionBtn) {
+      const action = actionBtn.dataset.homeAction;
+      commerce.open(action);
+      return;
+    }
+
+    const filterBtn = event.target.closest('[data-home-filter]');
+    if (filterBtn) {
+      currentCategory = filterBtn.dataset.homeFilter;
+      renderDiscovery();
+      return;
+    }
+
+    const refreshBtn = event.target.closest('#refreshFeedBtn');
+    if (refreshBtn) {
+      renderRecommended();
+      const toast = $('#toast');
+      if (toast) {
+        toast.textContent = lang === 'ar' ? 'تم تحديث المقترحات بنجاح' : 'Feed refreshed';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
+      return;
+    }
   });
-  for (const id of ['language','mobileLanguage']) $('#' + id).addEventListener('click', () => {
+
+  // Language switchers
+  const toggleLang = () => {
     const next = lang === 'ar' ? 'en' : 'ar';
     const url = new URL(location.href);
     url.searchParams.set('lang', next);
     history.replaceState(null, '', url);
     commerce.setLanguage(next);
+  };
+  $('#language')?.addEventListener('click', toggleLang);
+  $('#mobileLanguage')?.addEventListener('click', toggleLang);
+
+  // Search category dropdown change
+  $('#searchCategorySelect')?.addEventListener('change', e => {
+    const cat = e.target.value;
+    if (cat) {
+      location.href = searchUrl({ category: cat });
+    }
   });
-  $('#homeSort').addEventListener('change', renderDiscovery);
+
   window.addEventListener('bemo:state', syncState);
-  window.addEventListener('bemo:catalog',render);
-  window.addEventListener('bemo:added',()=>{ $('#toast').textContent=t('added'); $('#toast').classList.add('show'); setTimeout(()=>$('#toast').classList.remove('show'),2500); });
-  window.addEventListener('bemo:stock-error',()=>{ $('#toast').textContent=t('stockError'); $('#toast').classList.add('show'); setTimeout(()=>$('#toast').classList.remove('show'),2500); });
-  window.addEventListener('bemo:saved', showSaved);
-  window.addEventListener('bemo:browse', event => browse(event.detail?.category));
-  render();
-  window.BemoLive.discoveryFeed().then(rows => {
-    discoveryEntries = rows;
-    stripStatus = 'ready';
-  }).catch(() => { stripStatus = 'loadError'; }).finally(renderStrips);
-  if (savedOnly) $('#discover').scrollIntoView();
+  window.addEventListener('bemo:catalog', renderAll);
+  window.addEventListener('bemo:added', () => {
+    const toast = $('#toast');
+    if (toast) {
+      toast.textContent = t('added');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  });
+  window.addEventListener('bemo:stock-error', () => {
+    const toast = $('#toast');
+    if (toast) {
+      toast.textContent = t('stockError');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  });
+
+  // Countdown timer simulation
+  let secondsLeft = 14 * 60 + 22;
+  setInterval(() => {
+    if (secondsLeft > 0) secondsLeft--;
+    const h = String(Math.floor(secondsLeft / 3600)).padStart(2, '0');
+    const m = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, '0');
+    const s = String(secondsLeft % 60).padStart(2, '0');
+    const timerEl = $('#flashTimer');
+    if (timerEl) timerEl.textContent = `${h}:${m}:${s}`;
+  }, 1000);
+
+  renderAll();
 })();

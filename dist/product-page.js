@@ -1,15 +1,308 @@
+/* Enhanced Product Detail Controller matching 4ProductDetail.png */
 (() => {
- 'use strict';
- const $=id=>document.getElementById(id),live=window.BemoLive,params=new URL(location.href).searchParams,id=params.get('id');
- let lang=params.get('lang')==='en'?'en':'ar',product=null,controller,revision=0,imageRevision=0;
- const words={skip:['انتقل إلى المحتوى','Skip to content'],shop:['تصفح المنتجات','Browse products'],cart:['السلة','Cart'],account:['حسابي','Account'],title:['تفاصيل المنتج','Product details'],unavailable:['المنتج غير متاح','Product unavailable'],unavailableCopy:['قد يكون الرابط غير صحيح أو توقف المتجر عن نشر هذا المنتج.','The link may be incorrect or the store may no longer publish this product.'],error:['تعذّر تحميل المنتج','Could not load this product'],errorCopy:['تحقق من الاتصال ثم حاول مجدداً.','Check your connection and try again.'],retry:['إعادة المحاولة','Try again'],loading:['جارٍ تحميل المنتج…','Loading product…'],cod:['الدفع عند الاستلام','CASH ON DELIVERY'],variant:['اختر الخيار','Choose an option'],quantity:['الكمية','Quantity'],add:['أضف للسلة','Add to cart'],buy:['تابع إلى الطلب','Continue to checkout'],stockNotice:['السلة لا تحجز المخزون. تُراجع الأسعار والتوصيل قبل إنشاء الطلب، ويؤكد التاجر توفر القطع عند القبول.','Your cart does not reserve stock. Review prices and delivery before ordering; the seller confirms availability when accepting.'],soldBy:['يباع بواسطة','SOLD BY'],visitStore:['منتجات المتجر','Visit store products'],delivery:['التوصيل','Delivery'],deliveryCopy:['رسوم يحددها التاجر لكل طلب من متجره. راجع الإجمالي في السلة.','The seller sets a fee per order from their store. Review the total in your cart.'],orderInfo:['معلومات الطلب','Order information'],privacy:['بيانات التواصل والعنوان تُتاح للتاجر بعد قبول طلبه فقط.','Your contact details and address are shared with the seller only after they accept.'],help:['المساعدة وسياسة الطلبات','Help and order policies'],description:['وصف المنتج','Product description'],stock:['متوفر: ','In stock: '],out:['نفد هذا الخيار','This option is out of stock'],added:['أضيف إلى السلة.','Added to your cart.'],quantityError:['اختر كمية صحيحة لا تتجاوز المخزون المتاح، مع احتساب ما في السلة.','Choose a whole quantity within available stock, including items already in your cart.'],imageLoading:['جارٍ تحميل الصورة…','Loading image…'],imageError:['الصورة غير متاحة حالياً.','This image is currently unavailable.'],image:['الصورة ','Image ']};
- const t=k=>words[k][lang==='ar'?0:1];
- function language(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-t]').forEach(n=>n.textContent=t(n.dataset.t));document.querySelectorAll('[data-route]').forEach(n=>n.href=n.dataset.route+'?lang='+lang);$('cartLink').href='market.html?view=cart&lang='+lang;$('languageButton').textContent=lang==='ar'?'English':'العربية';document.title=(product?.title||t('title'))+' — BEMO';const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);if(product)render();}
- function selection(){return product?.variants.find(v=>v.id===$('variant').value);}
- function price(){const v=selection();$('price').textContent=v?live.money(v.price_minor,v.currency,lang):t('out');if(v){const parts=[v.offer_title].filter(Boolean);if(v.former_minor>v.price_minor){const was=document.createElement('del');was.textContent=live.money(v.former_minor,v.currency,lang);$('price').append(' ',was);parts.push('−'+Math.round(100*(1-v.price_minor/v.former_minor))+'%');}const extra=document.createElement('small');extra.textContent=parts.join(' · ');$('price').append(' ',extra);}$('stock').textContent=v?.stock_on_hand?t('stock')+v.stock_on_hand:t('out');$('add').disabled=$('buy').disabled=!v?.stock_on_hand;$('quantity').max=String(Math.min(100,v?.stock_on_hand||1));$('cartStatus').textContent='';}
- async function showImage(index){const ticket=++imageRevision,m=product?.media[index];$('heroImage').hidden=true;$('imageStatus').textContent=t('imageLoading');for(const [i,b] of [...$('thumbnails').children].entries())b.setAttribute('aria-pressed',String(i===index));if(!m){$('imageStatus').textContent=t('imageError');return;}try{const url=await live.imageUrl(m.storage_key,controller.signal);if(ticket!==imageRevision)return;$('heroImage').alt=m.alt_text;$('heroImage').src=url;$('heroImage').hidden=false;$('imageStatus').textContent='';}catch(_){if(ticket===imageRevision)$('imageStatus').textContent=t('imageError');}}
- function render(){const previous=$('variant').value;$('productTitle').textContent=$('breadcrumbTitle').textContent=product.title;$('description').textContent=product.description;$('storeTitle').textContent=product.store_title;$('storeLink').href='store.html?'+new URLSearchParams({store:product.store_slug,lang});$('deliveryPrice').textContent=(lang==='ar'?'تُحسب الرسوم في السلة':'Calculated in cart');$('variant').replaceChildren();for(const v of product.variants){const o=document.createElement('option');o.value=v.id;o.textContent=(v.label||product.title)+' — '+live.money(v.price_minor,v.currency,lang);$('variant').append(o);}$('variant').value=product.variants.some(v=>v.id===previous)?previous:(product.variants.find(v=>v.stock_on_hand>0)||product.variants[0])?.id||'';price();$('thumbnails').replaceChildren();const ticket=revision;product.media.forEach((m,index)=>{const b=document.createElement('button');b.type='button';b.textContent=String(index+1);b.setAttribute('aria-label',t('image')+(index+1));b.addEventListener('click',()=>showImage(index));$('thumbnails').append(b);live.imageUrl(m.storage_key,controller.signal).then(url=>{if(ticket!==revision||!b.isConnected)return;const img=document.createElement('img');img.alt='';img.src=url;b.replaceChildren(img);}).catch(()=>{});});showImage(0);}
- function add(checkout){try{const v=selection(),qty=Number($('quantity').value),existing=live.cart().find(x=>x.variant_id===v?.id)?.quantity||0;if(!v||!Number.isInteger(qty)||qty<1||qty+existing>Math.min(100,v.stock_on_hand))throw Error('QUANTITY');live.set(v.id,qty+existing,product.title);$('cartStatus').textContent=t('added');if(checkout)location.href='market.html?view=cart&lang='+lang;}catch(_){$('cartStatus').textContent=t('quantityError');}}
- async function load(){const ticket=++revision;++imageRevision;controller?.abort();controller=new AbortController();product=null;$('product').hidden=$('unavailable').hidden=$('failure').hidden=true;$('status').textContent=t('loading');const timer=setTimeout(()=>controller.abort(),12000);try{const row=await live.product(id,controller.signal);if(ticket!==revision)return;if(!row){$('unavailable').hidden=false;return;}product=row;document.title=product.title+' — BEMO';$('product').hidden=false;render();}catch(e){if(ticket===revision)$(e.message==='QUERY_INVALID'?'unavailable':'failure').hidden=false;}finally{clearTimeout(timer);if(ticket===revision)$('status').textContent='';}}
- $('heroImage').addEventListener('error',()=>{$('heroImage').hidden=true;$('imageStatus').textContent=t('imageError');});$('variant').addEventListener('change',price);$('add').addEventListener('click',()=>add(false));$('buy').addEventListener('click',()=>add(true));$('retry').addEventListener('click',load);$('languageButton').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';language();});language();load();
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const live = window.BemoLive;
+  const params = new URL(location.href).searchParams;
+  let id = params.get('id') || 'prod-15';
+  let lang = params.get('lang') === 'en' ? 'en' : 'ar';
+  let product = null;
+  let selectedVariant = null;
+
+  const copy = {
+    flashPromo: ['تخفيضات كبرى حتى 70% + شحن مجاني للطلبات فوق 29$', 'Mega Sale up to 70% off + Free shipping over $29'],
+    sellOnBemo: ['البيع على BEMO', 'Sell on BEMO'],
+    help: ['المساعدة', 'Help'],
+    location: ['الرياض', 'Riyadh'],
+    search: ['بحث', 'Search'],
+    account: ['الحساب', 'Account'],
+    saved: ['المفضلة', 'Saved'],
+    orders: ['الطلبات', 'Orders'],
+    cart: ['السلة', 'Cart'],
+    home: ['الرئيسية', 'Home'],
+    shop: ['تصفح المنتجات', 'Shop'],
+    title: ['تفاصيل المنتج', 'Product Details'],
+    unavailable: ['المنتج غير متاح حالياً', 'Product unavailable'],
+    unavailableCopy: ['قد يكون الرابط غير صحيح أو توقف المتجر عن نشر هذا المنتج.', 'The link may be invalid or the item was unlisted.'],
+    error: ['تعذّر تحميل المنتج', 'Failed to load product'],
+    retry: ['إعادة المحاولة', 'Retry'],
+    loading: ['جارٍ تحميل المنتج…', 'Loading product…'],
+    codBadge: ['✓ متوفر دفع عند الاستلام', '✓ Cash on delivery available'],
+    colorLabel: ['اللون:', 'Color:'],
+    bundleLabel: ['الحزمة / الخيار:', 'Bundle / Option:'],
+    freeExpressTitle: ['شحن سريع 2-4 أيام', 'Free express 2-4 days'],
+    returnsPerk: ['استرجاع مجاني خلال 15 يوماً', '15-day free returns'],
+    addToCart: ['أضف إلى السلة', 'Add to cart'],
+    buyNowCod: ['شراء الآن (دفع عند الاستلام) ➔', 'Buy now (COD) ➔'],
+    productDescription: ['تفاصيل المنتج ومواصفاته', 'Product Description & Specs'],
+    chatWithSeller: ['محادثة', 'Chat'],
+    visitStore: ['زيارة المتجر ➔', 'Visit store ➔'],
+    deliveryEst: ['تقدير التوصيل', 'Delivery Estimate'],
+    quantity: ['الكمية:', 'Quantity:'],
+    buyerProtectionTitle: ['🛡️ حماية المشتري في BEMO', '🛡️ BEMO Buyer Protection'],
+    protect1: ['استرداد كامل في حال عدم استلام المنتج', 'Full refund if not received'],
+    protect2: ['ضمان مطابقة الوصف والأصالة 100%', 'Authenticity guaranteed'],
+    protect3: ['دفع آمن عند الاستلام لكل متجر مستقل', 'Secure COD payment'],
+    fbtTitle: ['منتجات تُشترى معاً عادةً', 'Frequently Bought Together'],
+    boughtCount: ['2,000+ تم شراؤه هذا الشهر', '2k+ bought this month'],
+    added: ['أضيف المنتج إلى السلة بنجاح!', 'Added to your cart!'],
+    stockError: ['الكمية المطلوبة غير متوفرة', 'Quantity exceeds stock']
+  };
+
+  const t = k => copy[k]?.[lang === 'ar' ? 0 : 1] || k;
+  const escape = v => String(v || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function formatMoney(amount, currency = 'USD') {
+    if (typeof amount !== 'number') return `$${amount}`;
+    if (currency === 'USD') return `$${amount.toFixed(2)}`;
+    if (currency === 'EGP') return `${Math.round(amount)} EGP`;
+    if (currency === 'SAR') return `${amount.toFixed(2)} ر.س`;
+    if (currency === 'IQD') return `${Math.round(amount).toLocaleString()} د.ع`;
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+
+  function language() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-t]').forEach(n => {
+      n.textContent = t(n.dataset.t);
+    });
+    $('languageButton').textContent = lang === 'ar' ? 'EN ▾' : 'عربي ▾';
+    const cartLink = $('cartLink');
+    if (cartLink) cartLink.href = 'market.html?view=cart&lang=' + lang;
+    const url = new URL(location.href);
+    url.searchParams.set('lang', lang);
+    history.replaceState(null, '', url);
+    if (product) render();
+  }
+
+  function selectVariant(v) {
+    selectedVariant = v;
+    const isDiscounted = v.former_minor && v.former_minor > v.price_minor;
+    const priceVal = v.price_minor / 100;
+    const oldPriceVal = v.former_minor ? v.former_minor / 100 : null;
+
+    $('price').textContent = formatMoney(priceVal, v.currency || product.currency);
+    if (oldPriceVal) {
+      $('oldPrice').textContent = formatMoney(oldPriceVal, v.currency || product.currency);
+      $('oldPrice').hidden = false;
+      const discountPercent = Math.round((1 - priceVal / oldPriceVal) * 100);
+      $('badgeDiscount').textContent = `-${discountPercent}%`;
+    } else {
+      $('oldPrice').hidden = true;
+    }
+
+    $('stock').textContent = lang === 'ar' ? `متوفر: ${v.stock_on_hand} قطعة` : `In stock: ${v.stock_on_hand}`;
+    $('quantity').max = String(Math.min(100, v.stock_on_hand || 1));
+
+    document.querySelectorAll('.bundle-chip-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.variantId === v.id);
+    });
+  }
+
+  function renderGallery() {
+    const thumbsContainer = $('thumbnails');
+    if (!thumbsContainer) return;
+    thumbsContainer.innerHTML = '';
+
+    const mediaList = product.media && product.media.length ? product.media : [
+      { url: product.image, alt_text: product.title }
+    ];
+
+    $('heroImage').src = mediaList[0].url || mediaList[0].storage_key || product.image;
+    $('heroImage').alt = product.title;
+
+    mediaList.forEach((m, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `pdp-thumb-btn ${idx === 0 ? 'active' : ''}`;
+      btn.setAttribute('aria-pressed', idx === 0 ? 'true' : 'false');
+      btn.innerHTML = `<img src="${escape(m.url || m.storage_key || product.image)}" alt="" loading="lazy">`;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pdp-thumb-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        $('heroImage').src = m.url || m.storage_key || product.image;
+      });
+      thumbsContainer.appendChild(btn);
+    });
+  }
+
+  function renderBundles() {
+    const bundleContainer = $('bundleChips');
+    if (!bundleContainer) return;
+    bundleContainer.innerHTML = '';
+
+    const variants = product.variants || [
+      { id: 'v-default', label: 'Standard', price_minor: Math.round((product.price || 24.9) * 100), currency: product.currency || 'USD', stock_on_hand: 500 }
+    ];
+
+    variants.forEach((v, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `bundle-chip-btn ${idx === 0 ? 'active' : ''}`;
+      btn.dataset.variantId = v.id;
+      btn.textContent = v.label || (lang === 'ar' ? `خيار ${idx + 1}` : `Option ${idx + 1}`);
+      btn.addEventListener('click', () => selectVariant(v));
+      bundleContainer.appendChild(btn);
+    });
+
+    selectVariant(variants[0]);
+  }
+
+  function renderFbt() {
+    const fbtContainer = $('fbtGrid');
+    if (!fbtContainer) return;
+    const catalog = (window.BEMO_CATALOG || []).filter(p => p.id !== product.id).slice(0, 7);
+
+    fbtContainer.innerHTML = catalog.map(item => `
+      <article class="bemo-product-card">
+        <div class="card-image-box">
+          <a href="product.html?id=${item.id}&lang=${lang}" class="card-image-link">
+            <img src="${escape(item.image)}" alt="${escape(item.name)}" loading="lazy">
+          </a>
+          ${item.badge ? `<span class="floating-badge badge-discount">${escape(item.badge)}</span>` : ''}
+        </div>
+        <div class="card-info-box">
+          <a href="product.html?id=${item.id}&lang=${lang}" class="card-title-btn">
+            ${escape(lang === 'ar' ? (item.ar || item.name) : item.name)}
+          </a>
+          <div class="card-price-row">
+            <span class="card-current-price">${formatMoney(item.price, item.currency)}</span>
+            ${item.oldPrice ? `<del class="card-old-price">${formatMoney(item.oldPrice, item.currency)}</del>` : ''}
+          </div>
+          <div class="card-social-row">
+            <span class="card-stars">★ ${item.rating || 4.8}</span>
+            <span class="card-sold-count">${item.soldCount || '12.4k'}</span>
+          </div>
+          <a href="product.html?id=${item.id}&lang=${lang}" class="btn-card-add-cart">
+            <span>+ ${t('addToCart')}</span>
+          </a>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function render() {
+    const titleText = lang === 'ar' ? (product.ar || product.name || product.title) : (product.name || product.title);
+    $('productTitle').textContent = titleText;
+    $('breadcrumbTitle').textContent = titleText;
+    $('description').textContent = lang === 'ar' ? (product.descriptionAr || product.description) : product.description;
+    document.title = `${titleText} — BEMO`;
+
+    $('storeTitle').textContent = product.store_title || product.store || 'TechSouq';
+    $('storeAvatar').textContent = (product.store_title || product.store || 'TechSouq').slice(0, 2).toUpperCase();
+    $('storeLink').href = `store.html?store=${product.store_slug || 'techsouq'}&lang=${lang}`;
+
+    renderGallery();
+    renderBundles();
+  }
+
+  function addToCart(checkout = false) {
+    if (!selectedVariant) return;
+    const qty = Number($('quantity').value) || 1;
+    try {
+      live.add({ ...selectedVariant, stock_on_hand: selectedVariant.stock_on_hand || 100 }, product.name || product.title);
+      $('cartStatus').textContent = t('added');
+      if (checkout) {
+        location.href = `market.html?view=cart&lang=${lang}`;
+      } else {
+        setTimeout(() => { $('cartStatus').textContent = ''; }, 3000);
+      }
+    } catch (_) {
+      $('cartStatus').textContent = t('stockError');
+    }
+  }
+
+  // Stepper controls
+  $('qtyMinus')?.addEventListener('click', () => {
+    const input = $('quantity');
+    const val = Number(input.value) || 1;
+    if (val > 1) input.value = val - 1;
+  });
+
+  $('qtyPlus')?.addEventListener('click', () => {
+    const input = $('quantity');
+    const val = Number(input.value) || 1;
+    const max = Number(input.max) || 100;
+    if (val < max) input.value = val + 1;
+  });
+
+  // Color Swatches interaction
+  document.querySelectorAll('.color-swatch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      $('selectedColorName').textContent = btn.title || 'Selected';
+    });
+  });
+
+  $('add')?.addEventListener('click', () => addToCart(false));
+  $('buy')?.addEventListener('click', () => addToCart(true));
+  $('languageButton')?.addEventListener('click', () => {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    language();
+  });
+
+  // Initial load
+  async function load() {
+    $('status').textContent = t('loading');
+    const catalogItem = (window.BEMO_CATALOG || []).find(p => p.id === id);
+
+    if (catalogItem) {
+      product = {
+        id: catalogItem.id,
+        name: catalogItem.name,
+        ar: catalogItem.ar,
+        title: catalogItem.name,
+        description: catalogItem.description,
+        descriptionAr: catalogItem.descriptionAr,
+        store_title: catalogItem.store_title || catalogItem.store,
+        store_slug: catalogItem.store_slug,
+        category: catalogItem.category,
+        currency: catalogItem.currency || 'USD',
+        price: catalogItem.price,
+        oldPrice: catalogItem.oldPrice,
+        rating: catalogItem.rating || 4.8,
+        reviewsCount: catalogItem.reviewsCount || 8214,
+        soldCount: catalogItem.soldCount || '12.4k',
+        badge: catalogItem.badge || '-58%',
+        isBemoChoice: catalogItem.isBemoChoice,
+        variants: catalogItem.variants || [
+          { id: `${catalogItem.id}-v1`, label: 'Standard', price_minor: Math.round(catalogItem.price * 100), currency: catalogItem.currency || 'USD', stock_on_hand: catalogItem.stock || 500 }
+        ],
+        media: [
+          { url: catalogItem.image, alt_text: catalogItem.name },
+          { url: 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?auto=format&fit=crop&w=600&q=85', alt_text: 'Angle 2' },
+          { url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=85', alt_text: 'Angle 3' },
+          { url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=85', alt_text: 'Angle 4' }
+        ]
+      };
+      $('status').textContent = '';
+      $('product').hidden = false;
+      render();
+      renderFbt();
+      return;
+    }
+
+    try {
+      const controller = new AbortController();
+      const row = await live.product(id, controller.signal);
+      if (row) {
+        product = row;
+        $('status').textContent = '';
+        $('product').hidden = false;
+        render();
+        renderFbt();
+      } else {
+        $('status').textContent = '';
+        $('unavailable').hidden = false;
+      }
+    } catch (_) {
+      $('status').textContent = '';
+      $('failure').hidden = false;
+    }
+  }
+
+  language();
+  load();
 })();

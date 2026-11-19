@@ -1,84 +1,350 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="description" content="اكتشف منتجات ومتاجر متنوعة على BEMO. منتجات ينشرها التجار، وسلة متعددة المتاجر مع الدفع عند الاستلام."><title>BEMO — عالم من الاكتشافات الجميلة</title><link rel="stylesheet" href="bemo-tokens.css"><link rel="stylesheet" href="storefront.css"><link rel="stylesheet" href="commerce.css"><link rel="stylesheet" href="bemo-ui.css"><script src="categories-data.js"></script><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="اكتشف منتجات ومتاجر متنوعة على BEMO. منتجات ينشرها التجار، وسلة متعددة المتاجر مع الدفع عند الاستلام.">
+  <title>BEMO — Global Marketplace</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="commerce.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="categories-data.js"></script>
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+</head>
 <body data-bemo-shell="modern">
-<div class="review-strip"><span data-t="review"></span><button type="button" data-home-action="about" data-t="aboutPreview"></button></div>
-<div class="utility"><div class="container utility-inner"><span data-t="destination"></span><div><button type="button" data-home-action="help" data-t="help"></button><button id="language">English</button></div></div></div>
-<header class="main-header"><div class="container header-inner"><a class="preview-logo" href="index.html" aria-label="BEMO">BEMO<span>●</span></a>
-  <div class="search-and-trending">
-    <form class="search-form" action="market.html" role="search">
-      <label class="sr-only" for="homeQuery" data-t="search"></label>
-      <input id="homeQuery" name="q" type="search" data-placeholder="placeholder">
-      <input name="lang" id="searchLang" type="hidden" value="ar">
-      <button type="submit"><span data-icon="search"></span><span data-t="search"></span></button>
-    </form>
-    <div class="trending-keywords" aria-label="الكلمات الرائجة">
-      <span>🔥 الأكثر بحثاً:</span>
-      <a href="market.html?q=سماعات">سماعات لاسلكية</a>
-      <a href="market.html?q=ساعات">ساعات ذكية</a>
-      <a href="market.html?q=أحذية">أحذية رياضية</a>
-      <a href="market.html?q=حقائب">حقائب جلدية</a>
-      <a href="market.html?q=عطور">عطور فاخرة</a>
+
+<!-- 1. Top Announcement Bar (matching 1HomepageDesktop.png) -->
+<div class="top-announcement-bar">
+  <div class="container announcement-inner">
+    <div class="announcement-left">
+      <span class="flash-tag">FLASH</span>
+      <span class="flash-text" data-t="flashPromo">تخفيضات كبرى حتى 70% + شحن مجاني للطلبات فوق 29$</span>
+      <span class="flash-timer" id="flashTimer">00:14:22</span>
+    </div>
+    <div class="announcement-right">
+      <a href="seller.html" class="top-link" data-t="sellOnBemo">البيع على BEMO</a>
+      <span class="top-sep">|</span>
+      <a href="help.html" class="top-link" data-t="help">المساعدة</a>
+      <span class="top-sep">|</span>
+      <button type="button" id="language" class="top-lang-btn">EN ▾</button>
+      <span class="top-sep">|</span>
+      <span class="top-location">📍 <span data-t="location">الرياض</span></span>
     </div>
   </div>
-  <nav class="header-actions">
-    <button type="button" id="mobileLanguage" class="mobile-language" aria-label="Switch to English">English</button>
-    <button type="button" data-home-action="account" data-icon-label="user" data-t="account"></button>
-    <button type="button" id="savedButton" data-home-action="saved" data-icon-label="heart" data-t="saved"></button>
-    <button type="button" data-home-action="orders" data-icon-label="package" data-t="orders"></button>
-    <button type="button" class="cart-link" data-home-action="cart" data-icon-label="bag" data-t="cart"></button>
+</div>
+
+<!-- 2. Main Header (matching 1HomepageDesktop.png) -->
+<header class="main-header">
+  <div class="container header-inner">
+    <!-- Brand Logo -->
+    <a class="bemo-brand" href="index.html" aria-label="BEMO">
+      <div class="brand-square">B</div>
+      <div class="brand-text">
+        <span class="brand-name">BEMO</span>
+        <span class="brand-sub">Global Marketplace</span>
+      </div>
+    </a>
+
+    <!-- Unified Search Pill Bar -->
+    <div class="search-container">
+      <form class="search-form-pill" action="market.html" role="search">
+        <div class="search-category-select">
+          <select id="searchCategorySelect" aria-label="اختر القسم">
+            <option value="" data-t="allCategoriesSelect">كل التصنيفات ▾</option>
+            <option value="electronics">الإلكترونيات</option>
+            <option value="fashion">الأزياء</option>
+            <option value="home">المنزل</option>
+            <option value="beauty">الجمال</option>
+            <option value="sports">الرياضة</option>
+          </select>
+        </div>
+        <div class="search-divider"></div>
+        <input id="homeQuery" name="q" type="search" placeholder="ابحث عن هواتف، عبايات، قلايات هوائية، أحذية رياضية..." data-placeholder="placeholder">
+        <input name="lang" id="searchLang" type="hidden" value="ar">
+        <button type="submit" class="search-submit-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+          <span data-t="search">بحث</span>
+        </button>
+      </form>
+      <div class="trending-keywords" aria-label="الكلمات الأكثر بحثاً">
+        <span>🔥 <strong data-t="trendingLabel">الأكثر بحثاً:</strong></span>
+        <a href="market.html?q=سماعات">سماعات لاسلكية</a>
+        <a href="market.html?q=عباية">عبايات فاخرة</a>
+        <a href="market.html?q=ساعة">ساعات ذكية</a>
+        <a href="market.html?q=حذاء">أحذية رياضية</a>
+        <a href="market.html?q=عطر">عطور ملكية</a>
+      </div>
+    </div>
+
+    <!-- Header Actions (Account, Saved, Orders, Cart) -->
+    <nav class="header-actions">
+      <button type="button" id="mobileLanguage" class="mobile-language">English</button>
+      <button type="button" class="header-action-btn" data-home-action="account">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+        <span data-t="account">الحساب</span>
+      </button>
+      <button type="button" class="header-action-btn" id="savedButton" data-home-action="saved">
+        <div class="action-icon-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
+          <span class="action-badge" id="savedBadge">8</span>
+        </div>
+        <span data-t="saved">المفضلة</span>
+      </button>
+      <button type="button" class="header-action-btn" data-home-action="orders">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11M7.5 4.5l9 5v5"/></svg>
+        <span data-t="orders">الطلبات</span>
+      </button>
+      <button type="button" class="header-action-btn cart-btn" data-home-action="cart">
+        <div class="action-icon-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          <span class="action-badge cart-count" id="cartBadge">3</span>
+        </div>
+        <span data-t="cart">السلة</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- 3. Category Nav Bar (matching 1HomepageDesktop.png) -->
+<div class="nav-shell">
+  <nav class="container category-nav">
+    <div class="all-categories-menu" id="allCategoriesBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <span data-t="allCategories">كل التصنيفات</span>
+    </div>
+    <div class="top-nav-links" id="topNavLinks">
+      <a href="market.html?category=electronics" data-t="electronics">الإلكترونيات</a>
+      <a href="market.html?category=fashion" data-t="fashion">الأزياء</a>
+      <a href="market.html?category=home" data-t="home">المنزل والمعيشة</a>
+      <a href="market.html?offer=1" class="highlight-link" data-t="dealsToday">عروض اليوم 🔥</a>
+      <a href="stores.html" data-t="brands">الماركات والمتاجر</a>
+      <a href="market.html?sort=newest" data-t="newArrivals">وصل حديثاً</a>
+      <a href="seller.html" class="merchant-link" data-t="sellerCenter">مركز التاجر</a>
+    </div>
+    <div class="nav-right-badge">
+      <span>🚚 <strong data-t="freeExpress">شحن مباشر وسريع</strong></span>
+    </div>
   </nav>
 </div>
-<div class="temu-features-banner">
-  <div class="container temu-features-inner">
-    <span>🛡️ <strong>دفع عند الاستلام</strong> لجميع الطلبات</span>
-    <span>🚚 <strong>شحن مباشر وسريع</strong> من المتاجر</span>
-    <span>⚡ <strong>عروض يومية حصرية</strong> تصل حتى 70%</span>
-    <span>🔒 <strong>ضمان استلام الطلب</strong> أو استرداده</span>
-  </div>
-</div>
-</header>
-<div class="nav-shell"><nav class="container category-nav"><details id="allCategories"><summary><span data-icon="menu"></span><span data-t="allCategories"></span></summary><div id="categoryFlyout"></div></details><div id="topCategories"></div><a class="nav-offer" id="offersLink" href="search.html?offer=1" data-t="deals"></a><a class="merchant-link" href="seller.html" data-t="merchant">المتجر</a></nav></div>
-<main class="container">
-<section class="campaigns" aria-labelledby="campaignHeading"><aside id="homeCategoryRail" class="category-rail"></aside><div class="main-campaign"><div class="campaign-copy"><span class="sample-pill" data-t="campaignSample"></span><h1 id="campaignHeading" data-t="hero"></h1><p data-t="heroCopy"></p><a class="button primary" id="heroLink" href="search.html"><span data-t="explore"></span><span class="direction-arrow">←</span></a></div><div class="campaign-photo"><img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=85" alt="" fetchpriority="high"><span class="photo-note" data-t="illustrative"></span></div></div><div class="side-campaigns"><a class="mini-campaign tech-campaign" data-category="electronics"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="techTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="techImage" alt=""></a><a class="mini-campaign fashion-campaign" data-category="fashion"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="fashionTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="fashionImage" alt=""></a></div></section>
-<section class="fast-categories" aria-label="Categories" id="fastCategories"></section>
-<section class="module deals-module" id="deals"><div class="module-heading"><div><p class="eyebrow" data-t="dealsEyebrow"></p><h2 data-t="dealsTitle"></h2></div><a class="see-all" id="allDeals" href="search.html?offer=1" data-t="viewOffers"></a></div><p class="module-note" data-t="priceNote"></p><div class="product-grid" id="dealsGrid"></div></section>
-<section class="module" id="stores"><div class="module-heading"><div><p class="eyebrow" data-t="storesEyebrow"></p><h2 data-t="storesTitle"></h2></div><a class="see-all" id="allStores" href="stores.html" data-t="viewStores"></a></div><div class="store-grid" id="storesGrid"></div></section>
-<section class="market-shortcuts" aria-label="التصنيفات" id="marketShortcuts"></section>
-<!-- Mandatory Layout: Three separate full-width horizontal sections stacked vertically -->
-<div class="homepage-discovery-sections">
-  <section class="homepage-discovery-section brands-panel">
-    <div class="discovery-section-header">
-      <h2><span>🏷️</span> <span data-t="brandsHeading">الماركات</span></h2>
-      <a id="brandsBrowse" data-t="browseAll">عرض الكل ←</a>
+
+<!-- 4. Main Body Content -->
+<main class="container main-content-wrap">
+
+  <!-- Hero Row: Category Rail + Big Hero Banner + 2 Promo Cards -->
+  <section class="hero-grid-section">
+    <!-- Left Category Rail -->
+    <aside class="hero-category-rail" id="heroCategoryRail">
+      <div class="rail-header">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span data-t="shopByCategory">تسوق حسب التصنيف</span>
+      </div>
+      <div class="rail-list" id="railList">
+        <a href="market.html?category=electronics" class="rail-item"><span class="rail-icon icon-blue">📱</span><span class="rail-name" data-t="catElectronics">الإلكترونيات</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=fashion" class="rail-item"><span class="rail-icon icon-orange">👗</span><span class="rail-name" data-t="catFashion">الأزياء والموضة</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=home" class="rail-item"><span class="rail-icon icon-teal">🛋️</span><span class="rail-name" data-t="catHome">المنزل والديكور</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=beauty" class="rail-item"><span class="rail-icon icon-purple">💄</span><span class="rail-name" data-t="catBeauty">الجمال والعناية</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=sports" class="rail-item"><span class="rail-icon icon-red">👟</span><span class="rail-name" data-t="catSports">الرياضة واللياقة</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=kids" class="rail-item"><span class="rail-icon icon-amber">🧸</span><span class="rail-name" data-t="catKids">الأطفال والألعاب</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=gaming" class="rail-item"><span class="rail-icon icon-indigo">🎮</span><span class="rail-name" data-t="catGaming">الألعاب وملحقاتها</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=auto" class="rail-item"><span class="rail-icon icon-slate">🚗</span><span class="rail-name" data-t="catAuto">السيارات ولوازمها</span><span class="rail-arrow">›</span></a>
+        <a href="market.html?category=books" class="rail-item"><span class="rail-icon icon-green">📚</span><span class="rail-name" data-t="catBooks">الكتب والقرطاسية</span><span class="rail-arrow">›</span></a>
+      </div>
+    </aside>
+
+    <!-- Main High-Impact Campaign Banner -->
+    <div class="main-hero-banner">
+      <div class="banner-overlay-content">
+        <span class="campaign-pill">11.11 GLOBAL SALE</span>
+        <h1 class="banner-title" data-t="heroTitle">عروض الإلكترونيات والأزياء<br>أحدث المنتجات بأفضل الأسعار</h1>
+        <div class="discount-callout">
+          <span class="discount-badge" data-t="heroDiscount">خصم يصل إلى 70%</span>
+        </div>
+        <p class="banner-perks" data-t="heroPerks">شحن سريع ومجاني • دفع عند الاستلام لجميع الطلبات • استرجاع سهل خلال 15 يوماً</p>
+        <div class="banner-btn-group">
+          <a href="market.html?offer=1" class="btn-hero-primary" data-t="shopNow">تسوق الآن ➔</a>
+          <a href="stores.html" class="btn-hero-secondary" data-t="topBrands">أفضل الماركات</a>
+        </div>
+      </div>
     </div>
-    <div class="horizontal-items" id="brandsHorizontalItems">
-      <p data-t="brandsEmpty" class="strip-empty-text"></p>
+
+    <!-- Right Side 2 Stacked Cards -->
+    <div class="hero-side-cards">
+      <div class="side-promo-card card-tech">
+        <div class="side-card-content">
+          <span class="card-badge" data-t="techWeekBadge">أسبوع التقنية</span>
+          <h3 data-t="techCardTitle">خصم حتى 40%<br>على أجهزة Anker وXiaomi</h3>
+          <a href="market.html?category=electronics" class="btn-side-card" data-t="grabDeals">اقتنص العروض ➔</a>
+        </div>
+      </div>
+      <div class="side-promo-card card-beauty">
+        <div class="side-card-content">
+          <span class="card-badge badge-gold" data-t="beautyBadge">يوم الجمال الذهبي</span>
+          <h3 data-t="beautyCardTitle">عطور ومنتجات مختارة<br>تبدأ من 4.99$ فقط</h3>
+          <a href="market.html?category=beauty" class="btn-side-card" data-t="exploreBeauty">استكشف المجموعة ➔</a>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="homepage-discovery-section verified-panel">
-    <div class="discovery-section-header">
-      <h2><span>🛡️</span> <span data-t="verifiedHeading">المتاجر الموثوقة</span></h2>
-      <a id="verifiedBrowse" data-t="viewStores">استكشف المتاجر ←</a>
+  <!-- 5. Horizontal 12 Circular Category Badges -->
+  <section class="circle-categories-strip" id="circleCategories">
+    <!-- Populated dynamically with 12 colorful circular cards -->
+  </section>
+
+  <!-- 6. Flash Deals Ticker Bar -->
+  <section class="flash-deals-bar">
+    <div class="flash-deals-left">
+      <div class="flash-deals-heading">
+        <span class="lightning-icon">⚡</span>
+        <strong data-t="flashDealsHeading">عروض خاطفة</strong>
+        <span class="countdown-badge">ينتهي خلال: 04:12:33</span>
+      </div>
+      <div class="flash-filter-chips">
+        <a href="market.html?q=سماعات" class="chip">-62% سماعات</a>
+        <a href="market.html?q=عباية" class="chip">9.9$ عبايات</a>
+        <a href="market.html?q=حذاء" class="chip">-45% أحذية رياضية</a>
+      </div>
     </div>
-    <div class="horizontal-items" id="verifiedHorizontalItems">
-      <p data-t="verifiedEmpty" class="strip-empty-text"></p>
+    <a href="market.html?offer=1" class="btn-flash-all" data-t="shopAll">عرض كل الصفقات ➔</a>
+  </section>
+
+  <!-- 7. Section: Famous Brands & Popular Stores (20 official stores) -->
+  <section class="home-section brands-section">
+    <div class="section-header-row">
+      <div class="header-left">
+        <span class="section-tag-trusted">TRUSTED</span>
+        <h2><span data-t="famousBrandsTitle">الماركات الشهيرة والمتاجر المعتمدة</span> <small>— 20 متجراً رسمياً</small></h2>
+      </div>
+      <a href="stores.html" class="section-view-all" data-t="viewAll">عرض الكل ←</a>
+    </div>
+    <div class="brands-20-grid" id="famousBrandsGrid">
+      <!-- 20 brand cards populated dynamically -->
     </div>
   </section>
 
-  <section class="homepage-discovery-section discount-panel">
-    <div class="discovery-section-header">
-      <h2><span>🔥</span> <span data-t="discountHeading">الخصومات والعروض</span></h2>
-      <a id="discountBrowse" data-t="browseAll">تصفح التخفيضات ←</a>
+  <!-- 8. Section: Today's Deals — Verified discounts (7-card high density grid) -->
+  <section class="home-section deals-section">
+    <div class="section-header-row">
+      <div class="header-left">
+        <span class="section-tag-hot">HOT</span>
+        <h2><span data-t="todaysDealsTitle">عروض اليوم — تخفيضات موثقة</span></h2>
+      </div>
+      <a href="market.html?offer=1" class="section-view-all" data-t="viewAll">عرض الكل ←</a>
     </div>
-    <div class="horizontal-items" id="discountHorizontalItems">
-      <p data-t="discountEmpty" class="strip-empty-text"></p>
+    <div class="product-grid-density-7" id="todaysDealsGrid">
+      <!-- 7 high-density product cards populated dynamically -->
     </div>
   </section>
-</div>
-<section class="module" id="discover"><div class="module-heading"><div><p class="eyebrow" data-t="discoverEyebrow"></p><h2 data-t="discoverTitle"></h2></div><label class="sort-label"><span data-t="sort"></span><select id="homeSort"><option value="featured" data-t="featured"></option><option value="low" data-t="low"></option><option value="high" data-t="high"></option></select></label></div><div class="discovery-toolbar"><div class="filter-pills" id="discoveryFilters"></div><span id="productCount" aria-live="polite"></span></div><div class="product-grid" id="discoveryGrid"></div><a class="browse-more" id="browseMore" href="search.html" data-t="advancedSearch"></a></section>
-<section class="review-notes" id="reviewNotes"><div><h2 data-t="reviewTitle"></h2><p data-t="reviewCopy"></p></div><button type="button" class="review-help" data-home-action="help" data-t="help"></button></section>
+
+  <!-- 9. Mid Double Promotional Banners -->
+  <section class="mid-banners-row">
+    <div class="mid-banner banner-arrivals">
+      <div class="mid-banner-text">
+        <h3 data-t="arrivalsTitle">وصل حديثاً يومياً</h3>
+        <p data-t="arrivalsSub">+2,400 تشكيلة ومنتج عصري جديد كل يوم</p>
+      </div>
+      <a href="market.html?sort=newest" class="btn-mid-banner" data-t="discoverArrivals">اكتشف الآن ➔</a>
+    </div>
+    <div class="mid-banner banner-recommended">
+      <div class="mid-banner-text">
+        <h3 data-t="recomTitle">موصى به خصيصاً لك</h3>
+        <p data-t="recomSub">مبني على المنتجات والاهتمامات الأكثر رواجاً</p>
+      </div>
+      <button type="button" class="btn-mid-banner" id="refreshFeedBtn" data-t="refreshFeed">تحديث المقترحات ⟳</button>
+    </div>
+  </section>
+
+  <!-- 10. Section: Recommended For You — High-density discovery (7-card grid) -->
+  <section class="home-section recommended-section">
+    <div class="section-header-row">
+      <div class="header-left">
+        <span class="section-tag-for-you">FOR YOU</span>
+        <h2><span data-t="recommendedTitle">مقترحات مميزة لك — اكتشاف عالي الكثافة</span></h2>
+      </div>
+      <a href="market.html" class="section-view-all" data-t="viewAll">عرض الكل ←</a>
+    </div>
+    <div class="product-grid-density-7" id="recommendedGrid">
+      <!-- 7 high-density product cards populated dynamically -->
+    </div>
+  </section>
+
+  <!-- 11. Discovery By Category Section -->
+  <section class="home-section browse-category-section">
+    <div class="section-header-row">
+      <div class="header-left">
+        <h2><span data-t="browseCatalogTitle">تصفح المنتجات حسب الفئة</span></h2>
+      </div>
+      <div class="filter-pills-row" id="discoveryCategoryFilters">
+        <!-- Category filter pills -->
+      </div>
+    </div>
+    <div class="product-grid-density-7" id="discoveryGrid">
+      <!-- Dynamic category products -->
+    </div>
+  </section>
+
 </main>
-<footer><div class="container footer-main"><div><a class="preview-logo" href="index.html">BEMO<span>●</span></a><p data-t="footerTagline"></p></div><div><h3 data-t="discoverFooter"></h3><a href="#fastCategories" data-t="categories"></a><a href="#deals" data-t="deals"></a><a href="#stores" data-t="stores"></a></div><div><h3 data-t="yourBemo"></h3><button type="button" data-home-action="orders" data-t="orders"></button><button type="button" data-home-action="account" data-t="account"></button><button type="button" data-home-action="sell" data-t="merchant"></button></div><div><h3 data-t="aboutPreview"></h3><button type="button" data-home-action="about" data-t="aboutPreview"></button><span data-t="policiesPending"></span></div></div><div class="container footer-bottom"><span data-t="copyright"></span><span data-t="noOrders"></span></div></footer>
-<nav class="mobile-bottom" id="mobileNav" aria-label="التنقل الرئيسي"></nav><dialog id="modal" aria-labelledby="modalTitle"><div id="modalContent"></div></dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="backend-config.js"></script><script src="live-commerce.js"></script><script src="store-directory.js"></script><script src="catalog.js"></script><script src="home-live.js"></script><script src="storefront.js"></script></body></html>
+
+<!-- Footer -->
+<footer class="main-footer">
+  <div class="container footer-grid">
+    <div class="footer-col brand-col">
+      <a class="bemo-brand" href="index.html">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Global Marketplace</span>
+        </div>
+      </a>
+      <p class="footer-desc" data-t="footerDesc">سوق تجاري متعدد التجار يجمع آلاف المنتجات والعروض مع الدفع عند الاستلام وضمان استلام الطلبات.</p>
+      <div class="footer-trust-chips">
+        <span>🛡️ دفع عند الاستلام</span>
+        <span>🚚 شحن سريع</span>
+        <span>🔒 أمان كامل</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4 data-t="quickLinks">روابط سريعة</h4>
+      <a href="market.html" data-t="allProducts">كل المنتجات</a>
+      <a href="stores.html" data-t="storesList">قائمة المتاجر</a>
+      <a href="market.html?offer=1" data-t="specialOffers">العروض الخاصة</a>
+      <a href="seller.html" data-t="sellWithUs">انضم كتاجر</a>
+    </div>
+    <div class="footer-col">
+      <h4 data-t="customerCare">خدمة العملاء</h4>
+      <a href="orders.html" data-t="trackOrders">متابعة الطلبات</a>
+      <a href="account.html" data-t="profileSettings">إعدادات الحساب</a>
+      <a href="help.html" data-t="helpCenter">مركز المساعدة</a>
+      <a href="help.html#policies" data-t="privacyTerms">الشروط والسياسات</a>
+    </div>
+    <div class="footer-col">
+      <h4 data-t="contactUs">تواصل معنا</h4>
+      <p data-t="supportHours">فريق الدعم الفني متاح على مدار الساعة لمساعدتك والتنسيق مع المتاجر.</p>
+      <a href="help.html" class="btn-footer-support" data-t="openTicket">فتح تذكرة دعم فني</a>
+    </div>
+  </div>
+  <div class="container footer-bottom-bar">
+    <span>© 2026 BEMO — جميع الحقوق محفوظة</span>
+    <span>الدفع عند الاستلام · عمولة منصة 0% للمتاجر في الإصدار الأول</span>
+  </div>
+</footer>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-bottom" id="mobileNav" aria-label="التنقل الرئيسي"></nav>
+
+<!-- Modal & Toast -->
+<dialog id="modal" aria-labelledby="modalTitle"><div id="modalContent"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Scripts -->
+<script src="backend-config.js"></script>
+<script src="live-commerce.js"></script>
+<script src="store-directory.js"></script>
+<script src="catalog.js"></script>
+<script src="home-live.js"></script>
+<script src="storefront.js"></script>
+</body>
+</html>
