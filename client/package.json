@@ -1,0 +1,7 @@
+{
+  "name": "bemo-browser-dependencies",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pinned official browser SDK used by the existing buildless BEMO storefront.",
+  "dependencies": { "@supabase/supabase-js": "2.118.0" }
+}

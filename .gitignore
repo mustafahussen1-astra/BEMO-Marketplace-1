@@ -1,0 +1,9 @@
+supabase/.temp/
+client/node_modules/
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.dump

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="description" content="اكتشف منتجات ومتاجر متنوعة على BEMO. منتجات ينشرها التجار، وسلة متعددة المتاجر مع الدفع عند الاستلام."><title>BEMO — عالم من الاكتشافات الجميلة</title><link rel="stylesheet" href="bemo-tokens.css"><link rel="stylesheet" href="storefront.css"><link rel="stylesheet" href="commerce.css"><link rel="stylesheet" href="bemo-ui.css"><script src="categories-data.js"></script><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head>
+<body data-bemo-shell="modern">
+<div class="review-strip"><span data-t="review"></span><button type="button" data-home-action="about" data-t="aboutPreview"></button></div>
+<div class="utility"><div class="container utility-inner"><span data-t="destination"></span><div><button type="button" data-home-action="help" data-t="help"></button><button id="language">English</button></div></div></div>
+<header class="main-header"><div class="container header-inner"><a class="preview-logo" href="index.html" aria-label="BEMO">BEMO<span>●</span></a><form class="search-form" action="market.html" role="search"><label class="sr-only" for="homeQuery" data-t="search"></label><input id="homeQuery" name="q" type="search" data-placeholder="placeholder"><input name="lang" id="searchLang" type="hidden" value="ar"><button type="submit"><span data-icon="search"></span><span data-t="search"></span></button></form><nav class="header-actions"><button type="button" id="mobileLanguage" class="mobile-language" aria-label="Switch to English">English</button><button type="button" data-home-action="account" data-icon-label="user" data-t="account"></button><button type="button" id="savedButton" data-home-action="saved" data-icon-label="heart" data-t="saved"></button><button type="button" data-home-action="orders" data-icon-label="package" data-t="orders"></button><button type="button" class="cart-link" data-home-action="cart" data-icon-label="bag" data-t="cart"></button></nav></div></header>
+<div class="nav-shell"><nav class="container category-nav"><details id="allCategories"><summary><span data-icon="menu"></span><span data-t="allCategories"></span></summary><div id="categoryFlyout"></div></details><div id="topCategories"></div><a class="nav-offer" id="offersLink" href="search.html?offer=1" data-t="deals"></a><a class="merchant-link" href="seller.html" data-t="merchant">المتجر</a></nav></div>
+<main class="container">
+<section class="campaigns" aria-labelledby="campaignHeading"><aside id="homeCategoryRail" class="category-rail"></aside><div class="main-campaign"><div class="campaign-copy"><span class="sample-pill" data-t="campaignSample"></span><h1 id="campaignHeading" data-t="hero"></h1><p data-t="heroCopy"></p><a class="button primary" id="heroLink" href="search.html"><span data-t="explore"></span><span class="direction-arrow">←</span></a></div><div class="campaign-photo"><img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=85" alt="" fetchpriority="high"><span class="photo-note" data-t="illustrative"></span></div></div><div class="side-campaigns"><a class="mini-campaign tech-campaign" data-category="electronics"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="techTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="techImage" alt=""></a><a class="mini-campaign fashion-campaign" data-category="fashion"><div><span class="sample-pill" data-t="layoutSample"></span><h2 data-t="fashionTitle"></h2><span class="mini-cta" data-t="seeCollection"></span></div><img id="fashionImage" alt=""></a></div></section>
+<section class="fast-categories" aria-label="Categories" id="fastCategories"></section>
+<section class="module deals-module" id="deals"><div class="module-heading"><div><p class="eyebrow" data-t="dealsEyebrow"></p><h2 data-t="dealsTitle"></h2></div><a class="see-all" id="allDeals" href="search.html?offer=1" data-t="viewOffers"></a></div><p class="module-note" data-t="priceNote"></p><div class="product-grid" id="dealsGrid"></div></section>
+<section class="module" id="stores"><div class="module-heading"><div><p class="eyebrow" data-t="storesEyebrow"></p><h2 data-t="storesTitle"></h2></div><a class="see-all" id="allStores" href="stores.html" data-t="viewStores"></a></div><div class="store-grid" id="storesGrid"></div></section>
+<section class="market-shortcuts" aria-label="التصنيفات" id="marketShortcuts"></section>
+<!-- Mandatory Layout: Three separate full-width horizontal sections stacked vertically -->
+<div class="homepage-discovery-sections">
+  <section class="homepage-discovery-section brands-panel">
+    <div class="discovery-section-header">
+      <h2><span>🏷️</span> <span data-t="brandsHeading">الماركات</span></h2>
+      <a id="brandsBrowse" data-t="browseAll">عرض الكل ←</a>
+    </div>
+    <div class="horizontal-items" id="brandsHorizontalItems">
+      <p data-t="brandsEmpty" class="strip-empty-text"></p>
+    </div>
+  </section>
+
+  <section class="homepage-discovery-section verified-panel">
+    <div class="discovery-section-header">
+      <h2><span>🛡️</span> <span data-t="verifiedHeading">المتاجر الموثوقة</span></h2>
+      <a id="verifiedBrowse" data-t="viewStores">استكشف المتاجر ←</a>
+    </div>
+    <div class="horizontal-items" id="verifiedHorizontalItems">
+      <p data-t="verifiedEmpty" class="strip-empty-text"></p>
+    </div>
+  </section>
+
+  <section class="homepage-discovery-section discount-panel">
+    <div class="discovery-section-header">
+      <h2><span>🔥</span> <span data-t="discountHeading">الخصومات والعروض</span></h2>
+      <a id="discountBrowse" data-t="browseAll">تصفح التخفيضات ←</a>
+    </div>
+    <div class="horizontal-items" id="discountHorizontalItems">
+      <p data-t="discountEmpty" class="strip-empty-text"></p>
+    </div>
+  </section>
+</div>
+<section class="module" id="discover"><div class="module-heading"><div><p class="eyebrow" data-t="discoverEyebrow"></p><h2 data-t="discoverTitle"></h2></div><label class="sort-label"><span data-t="sort"></span><select id="homeSort"><option value="featured" data-t="featured"></option><option value="low" data-t="low"></option><option value="high" data-t="high"></option></select></label></div><div class="discovery-toolbar"><div class="filter-pills" id="discoveryFilters"></div><span id="productCount" aria-live="polite"></span></div><div class="product-grid" id="discoveryGrid"></div><a class="browse-more" id="browseMore" href="search.html" data-t="advancedSearch"></a></section>
+<section class="review-notes" id="reviewNotes"><div><h2 data-t="reviewTitle"></h2><p data-t="reviewCopy"></p></div><button type="button" class="review-help" data-home-action="help" data-t="help"></button></section>
+</main>
+<footer><div class="container footer-main"><div><a class="preview-logo" href="index.html">BEMO<span>●</span></a><p data-t="footerTagline"></p></div><div><h3 data-t="discoverFooter"></h3><a href="#fastCategories" data-t="categories"></a><a href="#deals" data-t="deals"></a><a href="#stores" data-t="stores"></a></div><div><h3 data-t="yourBemo"></h3><button type="button" data-home-action="orders" data-t="orders"></button><button type="button" data-home-action="account" data-t="account"></button><button type="button" data-home-action="sell" data-t="merchant"></button></div><div><h3 data-t="aboutPreview"></h3><button type="button" data-home-action="about" data-t="aboutPreview"></button><span data-t="policiesPending"></span></div></div><div class="container footer-bottom"><span data-t="copyright"></span><span data-t="noOrders"></span></div></footer>
+<nav class="mobile-bottom" id="mobileNav" aria-label="التنقل الرئيسي"></nav><dialog id="modal" aria-labelledby="modalTitle"><div id="modalContent"></div></dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="backend-config.js"></script><script src="live-commerce.js"></script><script src="store-directory.js"></script><script src="catalog.js"></script><script src="home-live.js"></script><script src="storefront.js"></script></body></html>
