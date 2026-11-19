@@ -753,3 +753,12 @@ test('admin console enforces roles, handles moderation and sends notifications o
  await op('broadcast',null);await op('account_suspend',account.id);await op('account_restore',account.id);
  assert.equal((await directory('log')).rows.length,10);
 });
+
+test('store branding publication is owner-scoped and atomic with profile edits',async()=>{
+ await onboard();await createStore();const shop=await call('bemo_store_workspace');
+ const args=['Updated shop','Description','','',shop.profile_version];
+ await assert.rejects(()=>call('bemo_publish_store_profile',[...args,{cover:'foreign/path.png'}]),/MEDIA_INVALID/);
+ const next=await call('bemo_publish_store_profile',[...args,{logo:null}]);
+ assert.equal(next.title,'Updated shop');assert.equal(next.logo_path,null);
+ await assert.rejects(()=>call('bemo_publish_store_profile',[...args,{}]),/VERSION_CONFLICT/);
+});
