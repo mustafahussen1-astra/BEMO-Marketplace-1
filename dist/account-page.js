@@ -138,6 +138,7 @@
           const savedProf = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
           if ($('profilePhone')) $('profilePhone').value = profile.phone || savedProf.phone || '';
           if ($('profileCity')) $('profileCity').value = savedProf.city || '';
+          if ($('profileCountry') && savedProf.country) $('profileCountry').value = savedProf.country;
           if ($('profileAddress')) $('profileAddress').value = savedProf.address || '';
         } catch (_) {}
         profileSeededFor = profile.id;
@@ -207,9 +208,26 @@
       try {
         const phone = form.elements.phone?.value?.trim() || '';
         const city = form.elements.city?.value?.trim() || '';
+        const country = form.elements.country?.value?.trim() || 'العراق (Iraq)';
         const address = form.elements.address?.value?.trim() || '';
+        const recipient = name.value.trim();
         const cur = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
-        localStorage.setItem('bemo-profile-defaults', JSON.stringify({...cur, phone, city, address}));
+        localStorage.setItem('bemo-profile-defaults', JSON.stringify({...cur, recipient, phone, country, city, address}));
+        // Sync default address
+        try {
+          const addrs = JSON.parse(localStorage.getItem('bemo-user-addresses') || '[]');
+          if (address && phone) {
+            const newAddr = {
+              id: 'addr-profile-default',
+              version: 1,
+              label: 'العنوان الأساسي للطلب',
+              delivery: { recipient, phone, country, region: city, city, address, note: '' }
+            };
+            const filtered = addrs.filter(a => a.id !== 'addr-profile-default');
+            filtered.unshift(newAddr);
+            localStorage.setItem('bemo-user-addresses', JSON.stringify(filtered));
+          }
+        } catch (_) {}
       } catch (_) {}
       runAction(() => api.saveProfile(input), 'profileSaved', formId === 'onboardingForm' ? $('profileTitle') : form.querySelector('[type=submit]'), result => result.profile?.display_name === input.display_name && result.profile?.locale === input.locale);
     });

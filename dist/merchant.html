@@ -1,16 +1,377 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><title>إدارة متجري — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body>
-<a class="skip-link" href="#merchantMain" data-t="skip">انتقل إلى المحتوى</a><div class="development-note" data-t="development">منتجاتك ومخزونك · تابع الطلبات من مساحة الطلبات.</div>
-<header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html" aria-label="BEMO">BEMO<span>●</span></a><nav><a class="browse-link" href="seller.html">المتجر / Dashboard</a><a class="browse-link" href="orders.html?view=seller&amp;lang=ar">الطلبات / Orders</a><a class="browse-link" href="search.html?lang=ar">المنتجات / Products</a><a class="browse-link" href="account.html" id="accountLink" data-t="account">حسابي</a><button id="languageButton" class="language-button" type="button">English</button></nav></div></header>
-<div class="account-container seller-layout"><aside id="sellerNavigation" class="seller-sidebar"></aside><main class="merchant-main" id="merchantMain"><div class="merchant-heading"><div><span class="section-kicker" data-t="kicker">مساحة البائع</span><h1 data-t="title">إدارة متجري</h1><p id="shopName" class="section-copy"></p></div><button class="secondary-button" id="refreshButton" data-t="refresh" hidden>تحديث البيانات</button></div>
-<p id="merchantStatus" role="status" aria-live="polite"></p><div id="merchantError" class="error-banner" role="alert" tabindex="-1" hidden></div>
-<section id="merchantGate" class="account-card" hidden><h2 data-t="gateTitle">ابدأ بحسابك ومتجرك</h2><p class="section-copy" data-t="gateCopy">سجّل الدخول وأكمل ملفك وأنشئ متجرك لتتمكن من إدارة المنتجات.</p><a class="primary-button" id="gateLink" href="account.html#store" data-t="account">حسابي</a></section>
-<div id="merchantWorkspace" hidden>
-<section class="account-card" id="sellerDelivery"><h2 data-t="deliveryTitle">سعر توصيل متجرك</h2><p class="section-copy" data-t="deliveryCopy">يُضاف هذا المبلغ مرة واحدة إلى طلب العميل من متجرك. ضع صفراً للتوصيل المجاني. تُثبّت العملة بعد إضافة أول متغير منتج.</p><form id="settingsForm" class="merchant-form"><div class="field-pair"><label><span data-t="currency">العملة</span><select name="currency" id="currency" required></select></label><label><span data-t="deliveryFee">سعر التوصيل</span><input name="fee" id="deliveryFee" type="text" inputmode="decimal" required maxlength="18" dir="ltr"></label></div><button type="submit" class="primary-button" data-t="saveDelivery">حفظ سعر التوصيل</button></form><a id="regionsLink" class="secondary-button" href="regions.html" data-t="regions">مناطق التوصيل ورسومها</a></section>
-<section class="account-card" id="sellerProducts"><div class="section-heading"><h2 data-t="products">منتجاتي</h2><button type="button" class="primary-button" id="newProduct" data-t="newProduct">إضافة منتج</button></div><p id="productCount" class="section-copy"></p><div id="merchantProducts" class="merchant-products"></div><div class="merchant-pages"><button id="previousProducts" class="secondary-button" data-t="previous">السابق</button><span id="productPage"></span><button id="nextProducts" class="secondary-button" data-t="next">التالي</button></div></section>
-<section class="account-card" id="productEditor" hidden><h2 id="editorTitle" tabindex="-1" data-t="editProduct">تفاصيل المنتج</h2><form id="productForm" class="merchant-form"><label><span data-t="productTitle">اسم المنتج</span><input name="title" minlength="5" maxlength="160" required></label><label><span data-t="description">وصف المنتج</span><textarea name="description" minlength="20" maxlength="8000" rows="5" required></textarea></label><label><span data-t="category">التصنيف</span><select name="category"><option value="home" data-t="home">المنزل</option><option value="fashion" data-t="fashion">الأزياء</option><option value="electronics" data-t="electronics">الإلكترونيات</option><option value="beauty" data-t="beauty">الجمال</option><option value="sports" data-t="sports">الرياضة</option><option value="other" data-t="other">أخرى</option></select></label><fieldset id="listingDetails" class="merchant-form"><legend data-t="listingDetails"></legend><label><span data-t="imageFile"></span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label><div class="field-pair"><label><span data-t="sku"></span><input name="initialSku" required maxlength="64"></label><label><span data-t="initialQty"></span><input name="initialQty" type="number" required min="0" max="1000000000" value="1"></label></div><div class="field-pair"><label><span data-t="salePrice"></span><input name="salePrice" required inputmode="decimal"></label><label><span data-t="former"></span><input name="former" inputmode="decimal"></label><label><span data-t="offer"></span><input name="offer" maxlength="100"></label></div></fieldset><p id="listingBaseFee"></p><a href="regions.html" data-t="listingDelivery"></a><button id="createAndPublish" class="primary-button" type="submit" data-t="createAndPublish">حفظ ونشر المنتج</button><button class="secondary-button" type="submit" data-t="saveProduct">حفظ تفاصيل المنتج</button></form>
-<div id="savedProductTools" hidden><div class="merchant-subsection"><h3 data-t="variants">الخيارات والأسعار</h3><p class="section-copy" data-t="variantCopy">أضف خياراً أساسياً للمنتج أو خيارات مثل اللون والمقاس. لكل خيار رمز مختلف داخل متجرك.</p><div id="variantList"></div><form id="variantForm" class="merchant-form"><div class="field-pair"><label><span data-t="sku">رمز SKU</span><input name="sku" maxlength="64" required dir="ltr"></label><label><span data-t="variantLabel">الخيار (مثال: أحمر / كبير)</span><input name="label" maxlength="120"></label></div><div class="field-pair"><label><span data-t="price">السعر</span><input name="price" type="text" inputmode="decimal" required maxlength="18" dir="ltr"></label><label class="check-label"><input name="active" type="checkbox" checked><span data-t="variantEnabled">الخيار متاح للبيع</span></label></div><div class="form-actions"><label><span data-t="former"></span><input name="former" inputmode="decimal"></label><label><span data-t="offer"></span><input name="offer" maxlength="100"></label><button class="primary-button" type="submit" data-t="saveVariant">حفظ الخيار</button><button class="secondary-button" id="clearVariant" type="button" data-t="addVariant">خيار جديد</button></div></form></div>
-<div class="merchant-subsection"><h3 data-t="stockTitle">تعديل المخزون</h3><form id="stockForm" class="merchant-form"><label><span data-t="variant">الخيار</span><select name="variant" id="stockVariant" required></select></label><div class="field-pair"><label><span data-t="adjustment">التغيير في الكمية (+ إضافة / − إزالة)</span><input name="delta" type="number" min="-1000000000" max="1000000000" step="1" required dir="ltr"></label><label><span data-t="reason">سبب التعديل</span><input name="reason" minlength="3" maxlength="500" required></label></div><button type="submit" class="primary-button" data-t="saveStock">حفظ حركة المخزون</button></form></div>
-<div class="merchant-subsection"><h3 data-t="photos">صور المنتج</h3><p class="section-copy" data-t="photoCopy">حتى 10 صور. اختر JPEG أو PNG أو WebP بحجم لا يتجاوز 10 ميغابايت. تُجهّز الصورة قبل رفعها.</p><div id="mediaList" class="merchant-media"></div><form id="mediaForm" class="merchant-form"><label><span data-t="imageFile">الصورة</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required></label><label><span data-t="altText">وصف الصورة</span><input name="alt" maxlength="240" required></label><button type="submit" class="primary-button" data-t="upload">رفع الصورة</button></form></div>
-<div class="merchant-subsection"><h3 data-t="publication">ظهور المنتج</h3><p class="section-copy" data-t="publishCopy">احفظ خياراً بسعر وصورة واحدة على الأقل قبل النشر. الأرشفة توقف ظهور المنتج وتحتفظ بسجلاته.</p><div class="form-actions"><button id="publishProduct" class="primary-button" type="button" data-t="publish">نشر المنتج</button><button id="hideProduct" class="secondary-button" type="button" data-t="hide">إخفاء المنتج</button><button id="archiveProduct" class="secondary-button" type="button" data-t="archive">أرشفة المنتج</button></div></div></div></section>
-</div></main></div><footer class="account-container account-footer"><span>© 2026 BEMO</span><span data-t="footer">عالم من الاكتشافات الجميلة.</span></footer>
-<script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="merchant-page.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>إدارة المنتجات والمخزون — BEMO Seller Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .seller-shell-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .seller-modern-sidebar {
+      background: #0F1E36;
+      border-radius: 12px;
+      padding: 16px 12px;
+      color: #FFFFFF;
+      position: sticky;
+      top: 20px;
+    }
+    .seller-modern-sidebar p {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 8px;
+    }
+    .seller-modern-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #E2E8F0;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .seller-modern-sidebar a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+    .seller-modern-sidebar a[aria-current="page"] {
+      background: #FF5000;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    @media(max-width: 900px) {
+      .seller-shell-layout { grid-template-columns: 1fr; }
+      .seller-modern-sidebar { position: static; }
+    }
+  </style>
+</head>
+<body data-page="merchant">
+  <a class="skip-link" href="#merchantMain" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">CATALOG & INVENTORY</span>
+        <span>إدارة المنتجات، الأسعار، صور العرض، وخيارات المتغيرات والمخزون</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">لوحة المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="orders.html?view=seller" class="top-link">طلبات المتجر</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="seller.html" aria-label="BEMO Seller Center">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Seller Center · المنتجات والمخزون</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 440px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في السوق..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>السوق</span>
+        </a>
+        <a href="orders.html?view=seller" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلبات المتجر</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Workspace Shell -->
+  <div class="container seller-shell-layout">
+    <!-- Dark Navy Seller Navigation Sidebar -->
+    <aside class="seller-modern-sidebar" id="sellerNavigation"></aside>
+
+    <!-- Main Workspace Content -->
+    <main class="merchant-main" id="merchantMain">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <span class="section-kicker" data-t="kicker" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مساحة البائع / الكتالوج</span>
+          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">المنتجات والمخزون</h1>
+          <p id="shopName" class="section-copy" style="font-size:13px;color:#64748B;margin:4px 0 0;"></p>
+        </div>
+
+        <button class="secondary-button" id="refreshButton" data-t="refresh" hidden style="padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <span>🔄</span> <span>تحديث البيانات</span>
+        </button>
+      </div>
+
+      <!-- Alerts -->
+      <p id="merchantStatus" role="status" aria-live="polite" class="bemo-live-status"></p>
+      <div id="merchantError" class="error-banner" role="alert" tabindex="-1" hidden style="margin-bottom:16px;"></div>
+
+      <!-- Gate View -->
+      <section id="merchantGate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
+        <div style="font-size:42px;margin-bottom:12px;">🏪</div>
+        <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول لإدارة المنتجات</h2>
+        <p class="section-copy" data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">سجّل الدخول وأكمل ملفك وأنشئ متجرك لتتمكن من إضافة المنتجات وإدارة المخزون.</p>
+        <a class="primary-button" id="gateLink" href="seller.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل متجر جديد</a>
+      </section>
+
+      <!-- Active Workspace -->
+      <div id="merchantWorkspace" hidden>
+        <!-- Store Delivery Baseline Section -->
+        <section class="account-card" id="sellerDelivery" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <h2 data-t="deliveryTitle" style="font-size:16px;font-weight:800;margin:0 0 6px;color:#0F172A;">سعر توصيل متجرك الأساسي</h2>
+          <p class="section-copy" data-t="deliveryCopy" style="font-size:12px;color:#64748B;margin:0 0 14px;">يُضاف هذا المبلغ مرة واحدة إلى طلب العميل من متجرك. ضع صفراً للتوصيل المجاني. تُثبّت العملة بعد إضافة أول خيار منتج.</p>
+          <form id="settingsForm" class="merchant-form" style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+            <div class="field-pair" style="display:flex;gap:12px;flex:1;min-width:260px;">
+              <label style="flex:1;">
+                <span data-t="currency" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">العملة</span>
+                <select name="currency" id="currency" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;"></select>
+              </label>
+              <label style="flex:1;">
+                <span data-t="deliveryFee" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">سعر التوصيل</span>
+                <input name="fee" id="deliveryFee" type="text" inputmode="decimal" required maxlength="18" dir="ltr" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </label>
+            </div>
+            <button type="submit" class="primary-button" data-t="saveDelivery" style="background:#FF5000;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;">حفظ سعر التوصيل</button>
+            <a id="regionsLink" class="secondary-button" href="regions.html" data-t="regions" style="padding:8px 14px;border-radius:6px;font-size:12px;text-decoration:none;">مناطق التوصيل ورسومها ➔</a>
+          </form>
+        </section>
+
+        <!-- Products List Header & Grid -->
+        <section class="account-card" id="sellerProducts" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F5F9;padding-bottom:12px;margin-bottom:14px;">
+            <div>
+              <h2 data-t="products" style="font-size:18px;font-weight:800;margin:0;color:#0F172A;">قائمة منتجات المتجر</h2>
+              <p id="productCount" class="section-copy" style="font-size:12px;color:#64748B;margin:2px 0 0;"></p>
+            </div>
+            <button type="button" class="primary-button" id="newProduct" data-t="newProduct" style="background:#FF5000;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;">
+              ➕ إضافة منتج جديد
+            </button>
+          </div>
+
+          <div id="merchantProducts" class="merchant-products" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;"></div>
+
+          <div class="merchant-pages" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px;">
+            <button id="previousProducts" class="secondary-button" data-t="previous" style="padding:6px 14px;border-radius:6px;font-size:12px;">السابق</button>
+            <span id="productPage" style="font-weight:700;font-size:12px;">1</span>
+            <button id="nextProducts" class="secondary-button" data-t="next" style="padding:6px 14px;border-radius:6px;font-size:12px;">التالي</button>
+          </div>
+        </section>
+
+        <!-- Product Editor Modal / Form -->
+        <section class="account-card" id="productEditor" hidden style="background:#FFF;border:2px solid #FF5000;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 8px 24px rgba(255,80,0,0.06);">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:12px;margin-bottom:16px;">
+            <h2 id="editorTitle" tabindex="-1" data-t="editProduct" style="font-size:18px;font-weight:800;margin:0;color:#0F172A;">تفاصيل وبيانات المنتج</h2>
+            <button type="button" onclick="document.getElementById('productEditor').hidden=true" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94A3B8;">✕</button>
+          </div>
+
+          <form id="productForm" class="merchant-form" style="display:grid;gap:14px;">
+            <label>
+              <span data-t="productTitle" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">اسم المنتج وعنوان العرض *</span>
+              <input name="title" minlength="5" maxlength="160" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;">
+            </label>
+
+            <label>
+              <span data-t="description" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">وصف تفصيلي للمنتج ومواصفاته *</span>
+              <textarea name="description" minlength="20" maxlength="8000" rows="4" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-family:inherit;"></textarea>
+            </label>
+
+            <label>
+              <span data-t="category" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">التصنيف الرئيسي</span>
+              <select name="category" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:8px;">
+                <option value="electronics" data-t="electronics">الإلكترونيات والتقنية</option>
+                <option value="fashion" data-t="fashion">الأزياء والموضة</option>
+                <option value="home" data-t="home">المنزل والمعيشة</option>
+                <option value="beauty" data-t="beauty">الجمال والعناية</option>
+                <option value="sports" data-t="sports">الرياضة واللياقة</option>
+                <option value="other" data-t="other">أخرى</option>
+              </select>
+            </label>
+
+            <fieldset id="listingDetails" class="merchant-form" style="border:1px solid #E2E8F0;border-radius:8px;padding:16px;background:#F8FAFC;">
+              <legend data-t="listingDetails" style="font-weight:700;font-size:13px;padding:0 8px;color:#0F172A;">الخيار السريع المبدئي للمنتج</legend>
+              <label style="display:block;margin-bottom:10px;">
+                <span data-t="imageFile" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">الصورة الأساسية</span>
+                <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" style="font-size:12px;">
+              </label>
+              <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+                <label>
+                  <span data-t="sku" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">رمز التخزين SKU</span>
+                  <input name="initialSku" required maxlength="64" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+                <label>
+                  <span data-t="initialQty" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">الكمية المتاحة في المخزون</span>
+                  <input name="initialQty" type="number" required min="0" max="1000000000" value="10" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+              </div>
+              <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>
+                  <span data-t="salePrice" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">سعر البيع الفعلي *</span>
+                  <input name="salePrice" required inputmode="decimal" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+                <label>
+                  <span data-t="former" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">السعر السابق قبل الخصم</span>
+                  <input name="former" inputmode="decimal" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+                <label>
+                  <span data-t="offer" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">شارة العرض (مثال: -25%)</span>
+                  <input name="offer" maxlength="100" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+              </div>
+            </fieldset>
+
+            <p id="listingBaseFee" style="font-size:12px;color:#64748B;margin:0;"></p>
+            <a href="regions.html" data-t="listingDelivery" style="font-size:12px;color:#2563EB;">إعدادات وتفاصيل التوصيل</a>
+
+            <div style="display:flex;gap:12px;margin-top:10px;">
+              <button id="createAndPublish" class="primary-button" type="submit" data-t="createAndPublish" style="background:#FF5000;padding:10px 22px;border-radius:8px;font-weight:700;font-size:13px;">حفظ ونشر المنتج فوراً</button>
+              <button class="secondary-button" type="submit" data-t="saveProduct" style="padding:10px 18px;border-radius:8px;font-size:13px;">حفظ كمسودة دون نشر</button>
+            </div>
+          </form>
+
+          <!-- Saved Product Variants & Photos Subsections -->
+          <div id="savedProductTools" hidden style="margin-top:24px;padding-top:20px;border-top:1px solid #E2E8F0;">
+            <div class="merchant-subsection" style="margin-bottom:20px;">
+              <h3 data-t="variants" style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 4px;">الخيارات والمتغيرات والأسعار (Variants)</h3>
+              <p class="section-copy" data-t="variantCopy" style="font-size:12px;color:#64748B;margin:0 0 12px;">أضف خيارات متعددة مثل الألوان والمقاسات، مع رمز SKU وسعر مخصص لكل خيار.</p>
+              <div id="variantList" style="margin-bottom:12px;"></div>
+              <form id="variantForm" class="merchant-form" style="display:grid;gap:10px;background:#F8FAFC;padding:14px;border-radius:8px;border:1px solid #E2E8F0;">
+                <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>
+                    <span data-t="sku" style="font-size:12px;font-weight:700;">رمز SKU</span>
+                    <input name="sku" maxlength="64" required dir="ltr" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                  </label>
+                  <label>
+                    <span data-t="variantLabel" style="font-size:12px;font-weight:700;">الخيار (مثال: أسود / XL)</span>
+                    <input name="label" maxlength="120" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                  </label>
+                </div>
+                <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>
+                    <span data-t="price" style="font-size:12px;font-weight:700;">السعر</span>
+                    <input name="price" type="text" inputmode="decimal" required maxlength="18" dir="ltr" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                  </label>
+                  <label class="check-label" style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:20px;">
+                    <input name="active" type="checkbox" checked>
+                    <span data-t="variantEnabled">متاح للطلب</span>
+                  </label>
+                </div>
+                <div class="form-actions" style="display:flex;gap:10px;margin-top:6px;">
+                  <button class="primary-button" type="submit" data-t="saveVariant" style="background:#0F1E36;padding:6px 14px;border-radius:6px;font-size:12px;">حفظ الخيار</button>
+                  <button class="secondary-button" id="clearVariant" type="button" data-t="addVariant" style="padding:6px 12px;border-radius:6px;font-size:12px;">خيار جديد</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Stock Adjustments -->
+            <div class="merchant-subsection" style="margin-bottom:20px;">
+              <h3 data-t="stockTitle" style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 10px;">تعديل وتحديث المخزون</h3>
+              <form id="stockForm" class="merchant-form" style="display:grid;gap:10px;background:#F8FAFC;padding:14px;border-radius:8px;border:1px solid #E2E8F0;">
+                <label>
+                  <span data-t="variant" style="font-size:12px;font-weight:700;">الخيار المستهدف:</span>
+                  <select name="variant" id="stockVariant" required style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;"></select>
+                </label>
+                <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>
+                    <span data-t="adjustment" style="font-size:12px;font-weight:700;">التغيير في الكمية (+ أو −)</span>
+                    <input name="delta" type="number" min="-1000000000" max="1000000000" step="1" required dir="ltr" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                  </label>
+                  <label>
+                    <span data-t="reason" style="font-size:12px;font-weight:700;">سبب التعديل</span>
+                    <input name="reason" minlength="3" maxlength="500" required placeholder="مثال: توريد جديد من المصنع" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                  </label>
+                </div>
+                <button type="submit" class="primary-button" data-t="saveStock" style="background:#15803D;padding:6px 16px;border-radius:6px;font-size:12px;width:fit-content;">حفظ حركة المخزون</button>
+              </form>
+            </div>
+
+            <!-- Media Photos -->
+            <div class="merchant-subsection" style="margin-bottom:20px;">
+              <h3 data-t="photos" style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 4px;">معرض صور المنتج (حتى 10 صور)</h3>
+              <p class="section-copy" data-t="photoCopy" style="font-size:12px;color:#64748B;margin:0 0 10px;">صور واضحة بدقة عالية للمنتج من زوايا مختلفة.</p>
+              <div id="mediaList" class="merchant-media" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"></div>
+              <form id="mediaForm" class="merchant-form" style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">
+                <label style="flex:1;min-width:200px;">
+                  <span data-t="imageFile" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">اختر الصورة</span>
+                  <input name="file" type="file" accept="image/jpeg,image/png,image/webp" required style="font-size:12px;">
+                </label>
+                <label style="flex:1;min-width:200px;">
+                  <span data-t="altText" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">وصف الصورة (Alt Text)</span>
+                  <input name="alt" maxlength="240" required placeholder="مثال: الواجهة الأمامية باللون الأسود" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                </label>
+                <button type="submit" class="primary-button" data-t="upload" style="background:#0F1E36;padding:7px 16px;border-radius:6px;font-size:12px;">رفع الصورة</button>
+              </form>
+            </div>
+
+            <!-- Product Status Toggles -->
+            <div class="merchant-subsection">
+              <h3 data-t="publication" style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 4px;">حالة نشر وظهور المنتج</h3>
+              <p class="section-copy" data-t="publishCopy" style="font-size:12px;color:#64748B;margin:0 0 10px;">التحكم بظهور المنتج أمام المشترين في المتجر العام ومحرك البحث.</p>
+              <div class="form-actions" style="display:flex;gap:10px;">
+                <button id="publishProduct" class="primary-button" type="button" data-t="publish" style="background:#15803D;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:700;">نشر المنتج في السوق</button>
+                <button id="hideProduct" class="secondary-button" type="button" data-t="hide" style="padding:8px 14px;border-radius:6px;font-size:12px;">إخفاء مؤقت</button>
+                <button id="archiveProduct" class="secondary-button" type="button" data-t="archive" style="padding:8px 14px;border-radius:6px;font-size:12px;color:#DC2626;">أرشفة وحذف</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;margin-top:40px;">
+    <span>© 2026 BEMO Seller Center. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="merchant-page.js"></script>
+</body>
+</html>

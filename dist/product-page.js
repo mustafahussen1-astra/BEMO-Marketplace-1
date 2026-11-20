@@ -53,6 +53,9 @@
   const escape = v => String(v || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function formatMoney(amount, currency = 'USD') {
+    if (window.BemoRegion && typeof amount === 'number') {
+      return window.BemoRegion.formatMoney(amount, lang !== 'en');
+    }
     if (typeof amount !== 'number') return `$${amount}`;
     if (currency === 'USD') return `$${amount.toFixed(2)}`;
     if (currency === 'EGP') return `${Math.round(amount)} EGP`;
@@ -316,6 +319,13 @@
       $('failure').hidden = false;
     }
   }
+
+  window.addEventListener('bemo:region-change', () => {
+    if (product) {
+      render();
+      renderFbt();
+    }
+  });
 
   language();
   load();

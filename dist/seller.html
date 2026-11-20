@@ -57,8 +57,9 @@
     <div style="font-size:40px;margin-bottom:12px;">🏪</div>
     <h2 id="gateTitle" data-t="gateTitle">سجّل الدخول للوصول إلى مساحة التاجر</h2>
     <p id="gateCopy" data-t="gateCopy" style="color:#737373;margin-bottom:20px;">افتح حسابك وسجّل بيانات متجرك المستقل في BEMO.</p>
-    <div style="display:flex;gap:12px;justify-content:center;">
-      <a class="primary-button" data-route="account.html" href="account.html" data-t="account">تسجيل الدخول / فتح الحساب</a>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button type="button" id="openWizardBtn" class="primary-button" style="background:#FF5000;font-weight:700;">تسجيل متجر جديد (3 خطوات)</button>
+      <a class="secondary-button" data-route="account.html" href="account.html" data-t="account">تسجيل الدخول للمتجر</a>
       <button type="button" id="demoSellerBtn" class="secondary-button">معاينة لوحة تاجر تجريبية</button>
     </div>
   </section>
@@ -391,6 +392,7 @@
   <script src="account-session.js"></script>
   <script src="live-commerce.js"></script>
   <script src="workspace-private.js"></script>
+  <script src="bemo-region.js"></script>
   <script src="seller-page.js"></script>
 </body>
 </html>

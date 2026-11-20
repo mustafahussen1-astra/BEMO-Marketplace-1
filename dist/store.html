@@ -1,1 +1,260 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>المتجر — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="search.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a href="seller.html">المتجر</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><main id="main" class="account-container live-main"><nav class="product-breadcrumb"><a data-route="stores.html" data-t="stores">المتاجر</a><span aria-hidden="true">/</span><span data-t="title">صفحة المتجر</span></nav><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="unavailable" class="account-card" hidden><h1 data-t="unavailable">المتجر غير متاح</h1><a data-route="stores.html" class="primary-button" data-t="stores">المتاجر</a></section><button id="retry" class="secondary-button" hidden data-t="retry">إعادة المحاولة</button><div id="storeContent" hidden><section class="store-hero"><div class="store-avatar" id="storeMark" aria-hidden="true">B</div><div class="store-hero-copy"><p id="storeHeadline"></p><h1 id="storeName"></h1><p id="storeSlug" dir="ltr"></p></div><a id="storeBrowse" class="store-hero-action" href="#storeProducts" data-t="allProducts">جميع المنتجات</a></section><div class="store-layout"><aside class="account-card store-about"><h2 data-t="about">عن المتجر</h2><p id="description"></p><p id="storeLocation"></p><div class="store-facts"><div><strong id="productCount"></strong><span data-t="published">منتج منشور</span></div><div><strong>COD</strong><span data-t="cod">الدفع عند الاستلام</span></div></div><p id="storeDelivery"></p><a class="secondary-button" data-route="help.html" data-t="help">المساعدة</a></aside><section id="storeProducts"><div id="categories" class="category-tabs" role="group"></div><form id="searchForm" class="live-search" role="search"><label for="query" class="sr-only" data-t="search">بحث داخل المتجر</label><input id="query" type="search" maxlength="120"><button class="primary-button" data-t="search">بحث داخل المتجر</button><div id="catalogFilters" class="catalog-filter-tools"></div></form><p id="productStatus" role="status"></p><div id="products" class="live-grid"></div><nav class="workspace-pagination"><button id="previous" class="secondary-button" data-t="previous">السابق</button><span id="page"></span><button id="next" class="secondary-button" data-t="next">التالي</button></nav></section></div></div></main><footer class="account-container account-footer">© 2026 BEMO</footer><script src="backend-config.js"></script><script src="live-commerce.js"></script><script src="catalog-filters.js"></script><script src="store-page.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>المتجر — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .store-profile-header {
+      background: linear-gradient(135deg, #0F1E36 0%, #1E3A8A 60%, #FF5000 130%);
+      color: #FFFFFF;
+      border-radius: 16px;
+      padding: 32px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .store-avatar-box {
+      width: 90px;
+      height: 90px;
+      border-radius: 18px;
+      background: #FFFFFF;
+      color: #FF5000;
+      font-size: 42px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .store-info-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .store-title-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .store-title-badge h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0;
+      color: #FFFFFF;
+    }
+    .verified-pill {
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .store-layout-grid {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    @media(max-width: 900px) {
+      .store-profile-header { flex-direction: column; text-align: center; }
+      .store-title-badge { justify-content: center; }
+      .store-layout-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-page="store-front">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">OFFICIAL STORE</span>
+        <span>متجر معتمد على منصة BEMO • شحن مباشر ودفع عند الاستلام كاش</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">البيع كتاجر</a>
+        <span class="top-sep">|</span>
+        <a href="help.html" class="top-link">المساعدة</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Storefront</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 480px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في جميع المتاجر والمنتجات..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Header Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>الرئيسية</span>
+        </a>
+        <a href="orders.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلباتي</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+        <a href="market.html?view=cart" id="cartLink" class="header-action-btn cart-btn">
+          <div class="action-icon-wrap">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          </div>
+          <span data-t="cart">السلة</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main id="main" class="container" style="max-width: 1320px; margin: 24px auto; padding: 0 16px 60px;">
+    <!-- Breadcrumb -->
+    <nav class="product-breadcrumb" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#64748B;margin-bottom:16px;">
+      <a data-route="index.html" href="index.html">الرئيسية</a>
+      <span>/</span>
+      <a data-route="search.html?tab=stores" href="search.html?tab=stores" data-t="stores">المتاجر</a>
+      <span>/</span>
+      <span data-t="title" style="color:#0F172A;font-weight:700;">واجهة المتجر</span>
+    </nav>
+
+    <!-- Alerts -->
+    <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+    <div id="error" class="message error-message" role="alert" hidden style="margin-bottom:16px;"></div>
+
+    <!-- Unavailable view -->
+    <section id="unavailable" class="account-card" hidden style="max-width:500px;margin:40px auto;text-align:center;padding:32px;">
+      <div style="font-size:42px;margin-bottom:12px;">🔍</div>
+      <h1 data-t="unavailable" style="font-size:20px;font-weight:800;margin-bottom:12px;">المتجر غير متاح حالياً</h1>
+      <a data-route="search.html" href="search.html" class="primary-button" data-t="stores" style="background:#FF5000;text-decoration:none;padding:8px 20px;border-radius:6px;">استكشاف باقي المتاجر</a>
+    </section>
+
+    <button id="retry" class="secondary-button" hidden data-t="retry" style="margin:20px auto;display:block;">إعادة المحاولة</button>
+
+    <!-- Active Store Front Content -->
+    <div id="storeContent">
+      <!-- Store Hero Banner -->
+      <section class="store-profile-header">
+        <div class="store-avatar-box" id="storeMark" aria-hidden="true">B</div>
+        <div class="store-info-details">
+          <p id="storeHeadline" style="font-size:12px;color:#CBD5E1;margin:0 0 6px;font-weight:600;"></p>
+          <div class="store-title-badge">
+            <h1 id="storeName">اسم المتجر</h1>
+            <span class="verified-pill">✔ متجر موثق</span>
+            <span style="font-size:12px;color:#FEF08A;font-weight:700;">★ 4.9 (1.8K تقييم)</span>
+          </div>
+          <p id="storeSlug" dir="ltr" style="font-size:13px;color:#94A3B8;margin:6px 0 0;"></p>
+        </div>
+        <a id="storeBrowse" class="primary-button" href="#storeProducts" data-t="allProducts" style="background:#FFFFFF;color:#0F1E36;padding:10px 20px;border-radius:8px;font-weight:800;font-size:13px;text-decoration:none;align-self:center;">
+          تصفح منتجات المتجر ➔
+        </a>
+      </section>
+
+      <!-- Store Body Layout: Sidebar + Catalog Grid -->
+      <div class="store-layout-grid">
+        <!-- Sidebar Info Card -->
+        <aside class="account-card store-about" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
+          <h2 data-t="about" style="font-size:16px;font-weight:800;margin:0 0 10px;color:#0F172A;">عن المتجر والضمان</h2>
+          <p id="description" style="font-size:13px;color:#64748B;line-height:1.6;margin:0 0 14px;"></p>
+          
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#2563EB;margin-bottom:14px;">
+            <span>📍</span> <span id="storeLocation">الموقع</span>
+          </div>
+
+          <div class="store-facts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#F8FAFC;padding:12px;border-radius:8px;text-align:center;margin-bottom:14px;">
+            <div>
+              <strong id="productCount" style="display:block;font-size:18px;font-weight:800;color:#0F172A;">—</strong>
+              <span data-t="published" style="font-size:11px;color:#64748B;">منتج متاح</span>
+            </div>
+            <div>
+              <strong style="display:block;font-size:18px;font-weight:800;color:#15803D;">COD</strong>
+              <span data-t="cod" style="font-size:11px;color:#64748B;">دفع عند الاستلام</span>
+            </div>
+          </div>
+
+          <p id="storeDelivery" style="font-size:12px;color:#475569;margin:0 0 14px;line-height:1.4;"></p>
+
+          <a class="secondary-button" data-route="help.html" href="help.html" data-t="help" style="display:block;text-align:center;padding:8px;border-radius:6px;font-size:12px;text-decoration:none;">
+            سياسة الشحن والإرجاع
+          </a>
+        </aside>
+
+        <!-- Right: Store Products Catalog -->
+        <section id="storeProducts">
+          <div id="categories" class="category-tabs" role="group" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;"></div>
+
+          <form id="searchForm" class="live-search" role="search" style="display:flex;gap:8px;margin-bottom:16px;">
+            <label for="query" class="sr-only" data-t="search">بحث داخل المتجر</label>
+            <input id="query" type="search" placeholder="ابحث داخل هذا المتجر..." maxlength="120" style="flex:1;padding:10px 14px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            <button class="primary-button" data-t="search" style="background:#FF5000;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;">بحث</button>
+            <div id="catalogFilters" class="catalog-filter-tools"></div>
+          </form>
+
+          <p id="productStatus" role="status" class="bemo-live-status"></p>
+
+          <!-- High Density Products Grid -->
+          <div id="products" class="product-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:12px;"></div>
+
+          <!-- Pagination -->
+          <nav class="workspace-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:24px;">
+            <button id="previous" class="secondary-button" data-t="previous" style="padding:6px 14px;border-radius:6px;font-size:12px;">السابق</button>
+            <span id="page" style="font-weight:700;font-size:12px;">1</span>
+            <button id="next" class="secondary-button" data-t="next" style="padding:6px 14px;border-radius:6px;font-size:12px;">التالي</button>
+          </nav>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;">
+    <span>© 2026 BEMO. منصة التجارة والتسوق المستقلة.</span>
+  </footer>
+
+  <script src="backend-config.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="catalog-filters.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="store-page.js"></script>
+</body>
+</html>

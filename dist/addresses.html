@@ -1,1 +1,313 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>عناويني — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="search.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a href="seller.html">المتجر</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><main id="main" class="account-container live-main"><div class="workspace-heading"><div><span class="section-kicker" data-t="buyer">مركز المشتري</span><h1 data-t="title">عناويني</h1></div><button id="newAddress" class="primary-button" type="button" data-t="newAddress">إضافة عنوان</button></div><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="gate" class="account-card" hidden><h2 data-t="gateTitle">سجّل الدخول للمتابعة</h2><p data-t="gateCopy">افتح حسابك وأكمل بياناتك.</p><a class="primary-button" data-route="account.html" data-t="account">حسابي</a></section><div id="workspace" hidden><div id="addressList" class="address-grid"></div><section id="addressEditor" class="account-card" hidden><h2 data-t="editTitle">بيانات العنوان</h2><form id="addressForm" class="merchant-form" autocomplete="off"><label><span data-t="label">اسم العنوان</span><input id="label" required maxlength="60"></label><div class="field-pair"><label><span data-t="recipient">اسم المستلم</span><input id="recipient" type="text" required maxlength="120" ></label><label><span data-t="phone">رقم الهاتف</span><input id="phone" type="tel" required maxlength="25" dir="ltr"></label><label><span data-t="country">الدولة</span><input id="country" type="text" required maxlength="80" ></label><label><span data-t="region">المنطقة</span><input id="region" type="text" required maxlength="120" ></label><label><span data-t="city">المدينة</span><input id="city" type="text" required maxlength="120" ></label></div><label><span data-t="address">العنوان التفصيلي</span><textarea id="address" required minlength="8" maxlength="600"></textarea></label><label><span data-t="note">ملاحظة التوصيل</span><textarea id="note" maxlength="1000"></textarea></label><div class="form-actions"><button class="primary-button" type="submit" id="saveAddress" data-t="save">حفظ العنوان</button><button class="secondary-button" type="button" id="cancel" data-t="cancel">إلغاء</button></div></form></section><a class="secondary-button" id="checkoutLink" href="market.html?view=cart" data-t="backCart">العودة للسلة</a></div></main><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="addresses-page.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>عناوين التوصيل — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .address-card-modern {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .address-card-modern:hover {
+      border-color: #FF5000;
+      box-shadow: 0 6px 16px rgba(255,80,0,0.08);
+      transform: translateY(-2px);
+    }
+    .address-card-modern.is-default {
+      border: 2px solid #FF5000;
+      background: #FFFBF9;
+    }
+    .address-badge-default {
+      position: absolute;
+      top: 14px;
+      inset-inline-end: 14px;
+      background: #FF5000;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .address-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .address-label-pill {
+      background: #F1F5F9;
+      color: #0F172A;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .address-info-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .address-info-line strong {
+      color: #0F172A;
+    }
+    .address-action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #F1F5F9;
+    }
+    .btn-edit-addr {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      color: #1E293B;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-edit-addr:hover {
+      background: #EDF2F7;
+      border-color: #94A3B8;
+    }
+    .btn-del-addr {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #DC2626;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-inline-start: auto;
+    }
+    .btn-del-addr:hover {
+      background: #FEE2E2;
+      border-color: #F87171;
+    }
+    .editor-modal-wrap {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body data-page="addresses">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">BEMO</span>
+        <span>عناوين التوصيل المعتمدة • خصوصية تامة ولا تُشارك إلا عند قبول الطلب</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="help.html" class="top-link">المساعدة</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Delivery Addresses</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 480px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث عن منتجات، متاجر..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Header Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>الرئيسية</span>
+        </a>
+        <a href="orders.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلباتي</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+        <a href="market.html?view=cart" id="cartLink" class="header-action-btn cart-btn">
+          <div class="action-icon-wrap">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          </div>
+          <span data-t="cart">السلة</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="main" class="container" style="max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px;">
+    <!-- Page Title & Header Toolbar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #E5E5E5;">
+      <div>
+        <span class="section-kicker" data-t="buyer" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز المشتري / عناوين الشحن</span>
+        <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#171717;">عناوين التوصيل والاستلام</h1>
+        <p style="font-size:13px;color:#64748B;margin:4px 0 0;">احفظ عناوينك لتطبيقها تلقائياً عند الدفع عند الاستلام بضغطة زر واحدة.</p>
+      </div>
+
+      <button id="newAddress" class="primary-button" type="button" data-t="newAddress" style="background:#FF5000;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px;">
+        <span>➕</span> <span>إضافة عنوان جديد</span>
+      </button>
+    </div>
+
+    <!-- Status & Error Alerts -->
+    <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+    <div id="error" class="message error-message" role="alert" hidden style="margin-bottom:16px;"></div>
+
+    <!-- Gate Section (Shown if unauthenticated) -->
+    <section id="gate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
+      <div style="font-size:42px;margin-bottom:12px;">📍</div>
+      <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول لعرض وإدارة عناويني</h2>
+      <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وثبت بياناتك الشخصية لتفعيل الحفظ التلقائي لعناوين التوصيل.</p>
+      <a class="primary-button" data-route="account.html" href="account.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل الدخول / فتح الحساب</a>
+    </section>
+
+    <!-- Workspace Body (Active addresses list) -->
+    <div id="workspace">
+      <!-- Address Cards Grid -->
+      <div id="addressList" class="address-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:16px;margin-bottom:24px;"></div>
+
+      <!-- Address Editor Card (Modal / Inline Form) -->
+      <section id="addressEditor" class="editor-modal-wrap" hidden>
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:14px;margin-bottom:20px;">
+          <h2 data-t="editTitle" style="font-size:18px;font-weight:800;margin:0;color:#0F172A;display:flex;align-items:center;gap:8px;">
+            <span>📍</span> <span>بيانات العنوان التفصيلي</span>
+          </h2>
+          <button type="button" id="closeEditorBtn" onclick="document.getElementById('addressEditor').hidden=true" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94A3B8;">✕</button>
+        </div>
+
+        <form id="addressForm" class="merchant-form" autocomplete="off">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;">
+            <label>
+              <span data-t="label" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">اسم العنوان / التسمية (المنزل، العمل، الشقة...) *</span>
+              <input id="label" required maxlength="60" placeholder="مثال: المنزل الرئيسي، مكتب الشركة" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+
+            <label>
+              <span data-t="recipient" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">اسم المستلم الكامل *</span>
+              <input id="recipient" type="text" required maxlength="120" placeholder="مثال: أحمد عبد الله حسين" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+
+            <label>
+              <span data-t="phone" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">رقم الهاتف للتواصل والتسليم *</span>
+              <input id="phone" type="tel" required maxlength="25" dir="ltr" placeholder="+964 770 123 4567" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+
+            <label>
+              <span data-t="country" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">الدولة *</span>
+              <input id="country" type="text" required maxlength="80" value="العراق (Iraq)" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+
+            <label>
+              <span data-t="region" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">المحافظة / المنطقة *</span>
+              <input id="region" type="text" required maxlength="120" placeholder="مثال: بغداد، الرصافة" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+
+            <label>
+              <span data-t="city" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">المدينة / الحي *</span>
+              <input id="city" type="text" required maxlength="120" placeholder="مثال: الكرادة، المنصور، الجادرية" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;">
+            </label>
+          </div>
+
+          <label style="display:block;margin-top:16px;">
+            <span data-t="address" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">العنوان التفصيلي (الشارع، رقم المبنى، أقرب نقطة دالة) *</span>
+            <textarea id="address" required minlength="8" maxlength="600" rows="3" placeholder="الشارع العام، عمارة 14، الشقة 3، قرب صيدلية السلام" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:inherit;"></textarea>
+          </label>
+
+          <label style="display:block;margin-top:16px;">
+            <span data-t="note" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">ملاحظات التسليم لمندوب الشحن (اختياري)</span>
+            <textarea id="note" maxlength="1000" rows="2" placeholder="مثال: الاتصال قبل الوصول بنصف ساعة، تسليم عند الحارس..." style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:inherit;"></textarea>
+          </label>
+
+          <div class="form-actions" style="display:flex;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid #E2E8F0;">
+            <button class="primary-button" type="submit" id="saveAddress" data-t="save" style="background:#FF5000;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;">حفظ وتثبيت العنوان</button>
+            <button class="secondary-button" type="button" id="cancel" data-t="cancel" style="padding:10px 20px;border-radius:8px;font-size:13px;">إلغاء</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Return to Cart Action Link -->
+      <div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;padding:16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;">
+        <span style="font-size:13px;color:#64748B;">هل انتهيت من ضبط عناوينك؟ يمكنك العودة لإتمام طلب الشراء والدفع عند الاستلام.</span>
+        <a class="primary-button" id="checkoutLink" href="market.html?view=cart" data-t="backCart" style="background:#0F1E36;text-decoration:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;">
+          العودة لسلة التسوق 🛒
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;">
+    <span>© 2026 BEMO. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="addresses-page.js"></script>
+</body>
+</html>

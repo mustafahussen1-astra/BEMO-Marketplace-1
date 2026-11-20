@@ -1,1 +1,297 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>محرر المتجر — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="search.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a href="seller.html">المتجر</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><div class="account-container seller-layout"><aside class="seller-sidebar" id="sellerNavigation"></aside><main id="main" class="merchant-main"><div class="workspace-heading"><div><span class="section-kicker" data-t="seller">مركز البائع</span><h1 data-t="title">محرر المتجر</h1></div><a id="publicLink" class="secondary-button" hidden data-t="visit">زيارة المتجر</a></div><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="gate" class="account-card" hidden><h2 data-t="gateTitle">سجّل الدخول للمتابعة</h2><p data-t="gateCopy">افتح حسابك وأكمل بياناتك.</p><a class="primary-button" data-route="account.html" data-t="account">حسابي</a></section><div id="workspace" hidden><div class="editor-layout"><section class="account-card"><form id="profileForm" class="merchant-form"><div class="field-pair"><label><span data-t="name">اسم المتجر</span><input id="storeTitle" required minlength="2" maxlength="80"></label><label><span data-t="slug">معرّف المتجر</span><input id="slug" readonly dir="ltr"></label></div><label><span data-t="headline">عنوان البانر</span><input id="headline" maxlength="160"></label><label><span data-t="description">وصف المتجر</span><textarea id="description" maxlength="2000" rows="5"></textarea></label><label><span data-t="location">الموقع العام (مدينة، دولة)</span><input id="locationLabel" maxlength="160"></label><div class="field-pair"><div><label><span data-t="logo"></span><input type="file" id="logoFile" accept="image/png,image/jpeg"></label><label><input type="checkbox" id="logoRemove"><span data-t="remove"></span></label></div><div><label><span data-t="cover"></span><input type="file" id="coverFile" accept="image/png,image/jpeg"></label><label><input type="checkbox" id="coverRemove"><span data-t="remove"></span></label></div></div><div class="form-actions"><button type="submit" class="primary-button" id="save" data-t="save">حفظ ونشر البيانات</button><button type="button" class="secondary-button" id="reload" data-t="reload">استعادة المحفوظ</button></div></form></section><aside class="editor-preview"><span class="section-kicker" data-t="preview">معاينة التغييرات</span><section class="store-hero"><div class="store-avatar" id="storeMark" aria-hidden="true">B</div><div class="store-hero-copy"><p id="storeHeadline"></p><h1 id="storeName"></h1><p id="storeSlug" dir="ltr"></p></div><a id="storeBrowse" class="store-hero-action" href="merchant.html" data-route="merchant.html" data-t="allProducts">جميع المنتجات</a></section><div class="account-card"><p id="previewDescription"></p><p id="previewLocation"></p></div><p class="live-note" data-t="previewNote">تظهر التغييرات للزوار بعد الحفظ.</p></aside></div><div class="workspace-shortcuts"><a class="account-card" data-route="merchant.html" data-t="products">المنتجات والصور والمخزون</a><a class="account-card" href="merchant.html#sellerDelivery" id="deliveryLink" data-t="delivery">إعدادات التوصيل</a></div></div></main></div><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="store-brand.js"></script><script src="store-editor.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>محرر وتخصيص المتجر — BEMO Seller Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .seller-shell-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .seller-modern-sidebar {
+      background: #0F1E36;
+      border-radius: 12px;
+      padding: 16px 12px;
+      color: #FFFFFF;
+      position: sticky;
+      top: 20px;
+    }
+    .seller-modern-sidebar p {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 8px;
+    }
+    .seller-modern-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #E2E8F0;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .seller-modern-sidebar a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+    .seller-modern-sidebar a[aria-current="page"] {
+      background: #FF5000;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    .editor-grid-modern {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+      gap: 20px;
+    }
+    @media(max-width: 960px) {
+      .seller-shell-layout { grid-template-columns: 1fr; }
+      .editor-grid-modern { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-page="store-editor">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">STORE IDENTITY</span>
+        <span>تخصيص هوية المتجر، الشعار، البانر، والنبذة التعريفية للمشترين</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">لوحة المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="orders.html?view=seller" class="top-link">طلبات المتجر</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="seller.html" aria-label="BEMO Seller Center">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Seller Center · محرر المتجر</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 440px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في السوق..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>السوق</span>
+        </a>
+        <a href="orders.html?view=seller" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلبات المتجر</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Workspace Shell -->
+  <div class="container seller-shell-layout">
+    <!-- Dark Navy Seller Navigation Sidebar -->
+    <aside class="seller-modern-sidebar" id="sellerNavigation"></aside>
+
+    <!-- Main Workspace Content -->
+    <main id="main" class="merchant-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <span class="section-kicker" data-t="seller" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز التاجر / الهوية</span>
+          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">محرر واجهة المتجر</h1>
+          <p style="font-size:13px;color:#64748B;margin:4px 0 0;">اضبط اسم المتجر، الشعار، غلاف الواجهة، والوصف التعريفي للظهور باحترافية أمام آلاف المشترين.</p>
+        </div>
+
+        <a id="publicLink" class="primary-button" hidden data-t="visit" style="background:#0F1E36;padding:8px 16px;border-radius:8px;font-size:13px;text-decoration:none;">
+          زيارة المتجر العام ↗
+        </a>
+      </div>
+
+      <!-- Status & Error -->
+      <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+      <div id="error" class="message error-message" role="alert" hidden style="margin-bottom:16px;"></div>
+
+      <!-- Gate View -->
+      <section id="gate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
+        <div style="font-size:42px;margin-bottom:12px;">🏪</div>
+        <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول لتعديل هوية متجرك</h2>
+        <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وأكمل متجرك للبدء في رفع الشعار والبانر.</p>
+        <a class="primary-button" data-route="account.html" href="account.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل الدخول / فتح المتجر</a>
+      </section>
+
+      <!-- Active Workspace -->
+      <div id="workspace">
+        <div class="editor-grid-modern">
+          <!-- Left: Edit Form Card -->
+          <section class="account-card" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:24px;">
+            <form id="profileForm" class="merchant-form" style="display:grid;gap:16px;">
+              <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>
+                  <span data-t="name" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">اسم المتجر التجاري *</span>
+                  <input id="storeTitle" required minlength="2" maxlength="80" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;">
+                </label>
+                <label>
+                  <span data-t="slug" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">معرّف الرابط (اليوزر) @</span>
+                  <input id="slug" readonly dir="ltr" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;background:#F8FAFC;color:#64748B;">
+                </label>
+              </div>
+
+              <label>
+                <span data-t="headline" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">عنوان البانر الرئيسي (شعار جذاب)</span>
+                <input id="headline" maxlength="160" placeholder="مثال: متجرك الأول للأزياء العصرية والعبايات الفاخرة" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;">
+              </label>
+
+              <label>
+                <span data-t="description" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">نبذة تعريفية عن المتجر وتاريخه</span>
+                <textarea id="description" maxlength="2000" rows="4" placeholder="اكتب نبذة عن المنتجات، الجودة، وسرعة التوصيل..." style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-family:inherit;"></textarea>
+              </label>
+
+              <label>
+                <span data-t="location" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">المقر والموقع الجغرافي (مدينة، دولة)</span>
+                <input id="locationLabel" maxlength="160" placeholder="مثال: بغداد، الكرادة — العراق" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;">
+              </label>
+
+              <!-- Upload Logo & Cover -->
+              <div class="field-pair" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid #F1F5F9;">
+                <div style="background:#F8FAFC;padding:12px;border-radius:8px;border:1px dashed #CBD5E1;">
+                  <label style="display:block;margin-bottom:6px;">
+                    <span data-t="logo" style="font-weight:700;font-size:12px;display:block;">شعار المتجر (Logo)</span>
+                    <input type="file" id="logoFile" accept="image/png,image/jpeg" style="margin-top:4px;font-size:11px;">
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#DC2626;margin-top:6px;">
+                    <input type="checkbox" id="logoRemove">
+                    <span data-t="remove">إزالة الشعار الحالي</span>
+                  </label>
+                </div>
+
+                <div style="background:#F8FAFC;padding:12px;border-radius:8px;border:1px dashed #CBD5E1;">
+                  <label style="display:block;margin-bottom:6px;">
+                    <span data-t="cover" style="font-weight:700;font-size:12px;display:block;">صورة الغلاف (Cover Banner)</span>
+                    <input type="file" id="coverFile" accept="image/png,image/jpeg" style="margin-top:4px;font-size:11px;">
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#DC2626;margin-top:6px;">
+                    <input type="checkbox" id="coverRemove">
+                    <span data-t="remove">إزالة الغلاف الحالي</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-actions" style="display:flex;gap:12px;margin-top:14px;">
+                <button type="submit" class="primary-button" id="save" data-t="save" style="background:#FF5000;padding:10px 24px;border-radius:8px;font-weight:700;font-size:13px;">حفظ ونشر التعديلات</button>
+                <button type="button" class="secondary-button" id="reload" data-t="reload" style="padding:10px 16px;border-radius:8px;font-size:13px;">استعادة المحفوظ</button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Right: Live Storefront Card Preview -->
+          <aside class="editor-preview" style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="section-kicker" data-t="preview" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;">معاينة بطاقة المتجر</span>
+              <span style="font-size:11px;color:#64748B;">تظهر هكذا للزبائن</span>
+            </div>
+
+            <section class="store-hero" style="background:linear-gradient(135deg, #0F1E36 0%, #1E3A8A 100%);color:#FFFFFF;border-radius:12px;padding:24px;position:relative;overflow:hidden;">
+              <div class="store-avatar" id="storeMark" aria-hidden="true" style="width:64px;height:64px;border-radius:12px;background:#FF5000;color:#FFF;font-size:28px;font-weight:800;display:grid;place-items:center;margin-bottom:12px;">B</div>
+              <div class="store-hero-copy">
+                <p id="storeHeadline" style="font-size:12px;color:#CBD5E1;margin:0 0 4px;"></p>
+                <h1 id="storeName" style="font-size:20px;font-weight:800;margin:0 0 4px;color:#FFFFFF;">اسم المتجر</h1>
+                <p id="storeSlug" dir="ltr" style="font-size:12px;color:#94A3B8;margin:0;"></p>
+              </div>
+              <a id="storeBrowse" class="store-hero-action" href="merchant.html" data-route="merchant.html" data-t="allProducts" style="display:inline-block;margin-top:16px;background:rgba(255,255,255,0.15);color:#FFF;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;">
+                استعراض المنتجات ➔
+              </a>
+            </section>
+
+            <div class="account-card" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
+              <strong style="display:block;font-size:13px;color:#0F172A;margin-bottom:6px;">عن المتجر:</strong>
+              <p id="previewDescription" style="font-size:12px;color:#64748B;line-height:1.5;margin:0 0 10px;"></p>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#2563EB;">
+                <span>📍</span> <span id="previewLocation"></span>
+              </div>
+            </div>
+
+            <p class="live-note" data-t="previewNote" style="font-size:11px;color:#64748B;margin:0;">تظهر التغييرات للمشترين في المتجر العام فور حفظ البيانات بنجاح.</p>
+          </aside>
+        </div>
+
+        <!-- Quick Shortcuts -->
+        <div class="workspace-shortcuts" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;">
+          <a class="account-card" data-route="merchant.html" href="merchant.html" data-t="products" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:28px;">📦</span>
+            <div>
+              <strong style="display:block;font-size:14px;color:#0F172A;">المنتجات والصور والمخزون</strong>
+              <small style="color:#64748B;">إضافة المنتجات والخيارات والأسعار</small>
+            </div>
+          </a>
+          <a class="account-card" href="regions.html" id="deliveryLink" data-t="delivery" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:28px;">🚚</span>
+            <div>
+              <strong style="display:block;font-size:14px;color:#0F172A;">إعدادات وأسعار التوصيل</strong>
+              <small style="color:#64748B;">تحديد المحافظات والمدن المشمولة</small>
+            </div>
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;margin-top:40px;">
+    <span>© 2026 BEMO Seller Center. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="store-brand.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="store-editor.js"></script>
+</body>
+</html>

@@ -82,6 +82,9 @@
   }
 
   function formatMoney(amount, currency = 'USD') {
+    if (window.BemoRegion && typeof amount === 'number') {
+      return window.BemoRegion.formatMoney(amount, lang !== 'en');
+    }
     if (typeof amount !== 'number') return `$${amount}`;
     if (currency === 'USD') return `$${amount.toFixed(2)}`;
     if (currency === 'EGP') return `${Math.round(amount)} EGP`;
@@ -373,6 +376,7 @@
 
   window.addEventListener('bemo:state', syncState);
   window.addEventListener('bemo:catalog', renderAll);
+  window.addEventListener('bemo:region-change', renderAll);
   window.addEventListener('bemo:added', () => {
     const toast = $('#toast');
     if (toast) {

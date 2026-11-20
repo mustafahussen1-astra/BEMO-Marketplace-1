@@ -1,18 +1,131 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>إدارة BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script defer src="action-feedback.js"></script></head>
-<body><header class="account-header"><div class="account-container"><a href="index.html" id="cartLink">BEMO</a> <button id="languageButton">English</button></div></header>
-<main class="account-container"><h1 data-t="title">مركز الإدارة</h1><p id="status" role="status"></p><p id="error" role="alert" hidden></p>
-<section id="gate"><a data-route="account.html" data-t="signin"></a></section>
-<div id="workspace" hidden><section id="adminControls" class="account-card" hidden>
-<nav><a data-route="balance.html" data-t="finance"></a> · <a id="supportLink" data-t="support"></a></nav>
-<section id="directory"></section><h2 data-t="discovery"></h2><form id="entry" class="account-form">
-<label><span data-t="section"></span><select name="kind"><option value="brand" data-t="brand"></option><option value="verified" data-t="verified"></option><option value="offer" data-t="offer"></option></select></label>
-<label><span id="targetLabel"></span><input name="target" required dir="ltr" pattern="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"></label>
-<label id="brandField"><span data-t="brandName"></span><input name="label" maxlength="100"></label>
-<div id="offerFields" hidden><label><span data-t="former"></span><input name="former" inputmode="decimal"></label>
-<label><span data-t="currency"></span><select name="currency"></select></label></div>
-<label><span data-t="position"></span><input name="position" type="number" value="0" required></label>
-<label><input type="checkbox" name="enabled" checked><span data-t="visible"></span></label>
-<button class="primary-button" data-t="save"></button></form></section></div></main>
-<script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="admin-page.js"></script></body></html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>مركز الإدارة والرقابة — BEMO Admin</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script defer src="action-feedback.js"></script>
+</head>
+<body data-page="admin">
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge" style="background:#DC2626;">STAFF ADMIN</span>
+        <span>بوابة الرقابة الإدارية، مراجعة الحسابات، وقوائم التوثيق والعروض</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="index.html" class="top-link">السوق</a>
+        <span class="top-sep">|</span>
+        <a href="balance.html" class="top-link">المالية</a>
+        <span class="top-sep">|</span>
+        <button id="languageButton" class="top-lang-btn" type="button">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" id="cartLink">
+        <div class="brand-square" style="background:#0F1E36;">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Admin Console</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container" style="max-width: 1000px; margin: 30px auto; padding: 0 16px 60px;">
+    <div style="margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #E2E8F0;">
+      <span class="section-kicker" style="color:#DC2626;font-size:11px;font-weight:700;">لوحة التحكم الإدارية</span>
+      <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">مركز إدارة المنصة</h1>
+    </div>
+
+    <p id="status" role="status" class="bemo-live-status"></p>
+    <div id="error" role="alert" class="message error-message" hidden style="margin-bottom:16px;"></div>
+
+    <section id="gate" class="account-card" style="text-align:center;padding:32px;background:#FFF;border:1px solid #E2E8F0;border-radius:12px;">
+      <h2 style="font-size:18px;font-weight:800;margin-bottom:8px;">يلزم تسجيل الدخول بصلاحيات إدارة</h2>
+      <a data-route="account.html" href="account.html" data-t="signin" class="primary-button" style="background:#0F1E36;padding:8px 20px;border-radius:6px;text-decoration:none;">تسجيل الدخول</a>
+    </section>
+
+    <div id="workspace" hidden>
+      <section id="adminControls" class="account-card" hidden style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:24px;">
+        <nav style="display:flex;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #F1F5F9;">
+          <a data-route="balance.html" href="balance.html" data-t="finance" style="color:#2563EB;font-weight:700;text-decoration:none;">المالية والشحن اليدوي ➔</a>
+          <span>·</span>
+          <a id="supportLink" data-t="support" style="color:#2563EB;font-weight:700;text-decoration:none;">حالات الدعم والشكاوى ➔</a>
+        </nav>
+
+        <section id="directory" style="margin-bottom:24px;"></section>
+
+        <h2 data-t="discovery" style="font-size:16px;font-weight:800;margin:0 0 14px;color:#0F172A;">إدارة عناصر الظهور والترويج</h2>
+
+        <form id="entry" class="account-form" style="display:grid;gap:14px;background:#F8FAFC;padding:16px;border-radius:8px;border:1px solid #E2E8F0;">
+          <label>
+            <span data-t="section" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">نوع الإدخال:</span>
+            <select name="kind" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              <option value="brand" data-t="brand">علامة تجارية</option>
+              <option value="verified" data-t="verified">متجر موثق</option>
+              <option value="offer" data-t="offer">عرض خاص</option>
+            </select>
+          </label>
+
+          <label>
+            <span id="targetLabel" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">معرّف الهدف (UUID):</span>
+            <input name="target" required dir="ltr" pattern="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+          </label>
+
+          <label id="brandField">
+            <span data-t="brandName" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">اسم العلامة:</span>
+            <input name="label" maxlength="100" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+          </label>
+
+          <div id="offerFields" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <label>
+              <span data-t="former" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">السعر السابق:</span>
+              <input name="former" inputmode="decimal" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+            </label>
+            <label>
+              <span data-t="currency" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">العملة:</span>
+              <select name="currency" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;"></select>
+            </label>
+          </div>
+
+          <label>
+            <span data-t="position" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">الترتيب:</span>
+            <input name="position" type="number" value="0" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+          </label>
+
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+            <input type="checkbox" name="enabled" checked>
+            <span data-t="visible">مفعّل وظاهر في الصفحة</span>
+          </label>
+
+          <button class="primary-button" data-t="save" style="background:#0F1E36;padding:8px 20px;border-radius:6px;font-weight:700;width:fit-content;">حفظ وتطبيق</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;">
+    <span>© 2026 BEMO Administration</span>
+  </footer>
+
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="admin-page.js"></script>
+</body>
+</html>

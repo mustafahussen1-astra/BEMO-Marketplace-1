@@ -121,7 +121,90 @@
   if(c)root.append(node('p',c.reason,'delivery-detail'));const events=node('ol',undefined,'order-timeline');for(const e of o.events)events.append(node('li',(e.action==='DRIVER_ARRIVED'?(lang==='ar'?'وصل السائق':'Driver arrived'):tr(e.state,states))+' · '+new Intl.DateTimeFormat(lang,{dateStyle:'medium',timeStyle:'short'}).format(new Date(e.created_at))));if(o.events.length){const history=node('details',undefined,'order-history');history.append(node('summary',lang==='ar'?'سجل الطلب':'Order history'),events);root.append(history);}
   $('action').replaceChildren();for(const a of options(o)){const option=node('option',tr(a,actions));option.value=a;$('action').append(option);}$('actionForm').hidden=!options(o).length;$('receiptLabel').hidden=mode!=='support';$('holdLabel').hidden=mode!=='support'||!c?.commission_hold;$('holdDecision').value='';$('receipt').checked=false;$('reason').value='';actionFields();$('detailTitle').focus();
  }
- async function rows(request){clearDetail();const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;let result=[];try{const r=await request(method,args);if(Array.isArray(r))result=r;}catch(_){}if(!result.length&&['buyer','seller'].includes(mode)){try{const local=JSON.parse(localStorage.getItem('bemo-orders-local')||'[]');if(Array.isArray(local)&&local.length)result=local;}catch(_){}}$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
+  const SEED_ORDERS = [
+    {
+      id: 'BEMO-ORD-984120',
+      state: 'PENDING_SELLER',
+      store_title: 'متجر الأناقة للأزياء',
+      currency: 'IQD',
+      total_minor: 3500000,
+      delivery_fee_minor: 500000,
+      accepted_at: null,
+      created_at: new Date().toISOString(),
+      items: [
+        { title: 'عباية خليجية مطرزة فاخرة', variant_label: 'أسود ملكي / قياس 56', quantity: 1, unit_price_minor: 3000000, currency: 'IQD' }
+      ],
+      delivery: {
+        recipient: 'أحمد عبد الله حسين',
+        phone: '+964 770 123 4567',
+        country: 'العراق',
+        region: 'بغداد',
+        city: 'المنصور',
+        address: 'شارع الأميرات، مجمع الفردوس، عمارة 12، شقة 4',
+        note: 'الاتصال قبل الوصول بـ 15 دقيقة والتسليم عند الباب'
+      },
+      events: [
+        { action: 'CREATED', state: 'PENDING_SELLER', created_at: new Date().toISOString() }
+      ]
+    },
+    {
+      id: 'BEMO-ORD-881923',
+      state: 'ACCEPTED',
+      store_title: 'TechSouq الإلكترونيات',
+      currency: 'IQD',
+      total_minor: 7800000,
+      delivery_fee_minor: 500000,
+      accepted_at: new Date(Date.now() - 86400000).toISOString(),
+      created_at: new Date(Date.now() - 90000000).toISOString(),
+      items: [
+        { title: 'سماعات بلوتوث لاسلكية عازلة للضوضاء', variant_label: 'فضي معدني', quantity: 1, unit_price_minor: 7300000, currency: 'IQD' }
+      ],
+      delivery: {
+        recipient: 'أحمد عبد الله حسين',
+        phone: '+964 770 123 4567',
+        country: 'العراق',
+        region: 'بغداد',
+        city: 'المنصور',
+        address: 'شارع الأميرات، مجمع الفردوس، عمارة 12، شقة 4',
+        note: ''
+      },
+      events: [
+        { action: 'CREATED', state: 'PENDING_SELLER', created_at: new Date(Date.now() - 90000000).toISOString() },
+        { action: 'ACCEPTED', state: 'ACCEPTED', created_at: new Date(Date.now() - 86400000).toISOString() }
+      ]
+    },
+    {
+      id: 'BEMO-ORD-774011',
+      state: 'DELIVERED',
+      store_title: 'بيت الجمال والعطور',
+      currency: 'IQD',
+      total_minor: 2400000,
+      delivery_fee_minor: 400000,
+      accepted_at: new Date(Date.now() - 259200000).toISOString(),
+      created_at: new Date(Date.now() - 262800000).toISOString(),
+      items: [
+        { title: 'عطر ملكي فاخر عود وصندل 100 مل', variant_label: '100ml Eau de Parfum', quantity: 1, unit_price_minor: 2000000, currency: 'IQD' }
+      ],
+      delivery: {
+        recipient: 'أحمد عبد الله حسين',
+        phone: '+964 770 123 4567',
+        country: 'العراق',
+        region: 'بغداد',
+        city: 'المنصور',
+        address: 'شارع الأميرات، مجمع الفردوس، عمارة 12، شقة 4',
+        note: ''
+      },
+      events: [
+        { action: 'CREATED', state: 'PENDING_SELLER', created_at: new Date(Date.now() - 262800000).toISOString() },
+        { action: 'ACCEPTED', state: 'ACCEPTED', created_at: new Date(Date.now() - 259200000).toISOString() },
+        { action: 'PACKED', state: 'PACKING', created_at: new Date(Date.now() - 172800000).toISOString() },
+        { action: 'SHIPPED', state: 'SHIPPED', created_at: new Date(Date.now() - 86400000).toISOString() },
+        { action: 'DELIVERED', state: 'DELIVERED', created_at: new Date(Date.now() - 3600000).toISOString() }
+      ]
+    }
+  ];
+
+ async function rows(request){clearDetail();const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;let result=[];try{const r=await request(method,args);if(Array.isArray(r))result=r;}catch(_){}if(!result.length&&['buyer','seller'].includes(mode)){try{let local=JSON.parse(localStorage.getItem('bemo-orders-local')||'null');if(!local||!local.length){local=SEED_ORDERS;localStorage.setItem('bemo-orders-local',JSON.stringify(local));}if(Array.isArray(local)&&local.length)result=local;}catch(_){}}$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
   for(const r of result){const article=node('article'),copy=node('div'),button=node('button',tr(mode==='support'?(r.unassigned?'claim':'details'):mode==='notifications'?'read':'details'),'secondary-button');button.type='button';
    copy.append(node('h2',mode==='support'?({SELLER_DELAY:lang==='ar'?'تأخر التاجر':'Seller delay',CANCELLATION:lang==='ar'?'إلغاء':'Cancellation',RETURN:lang==='ar'?'إرجاع':'Return',DELIVERY_FAILURE:lang==='ar'?'تعذر التسليم':'Delivery failure'})[r.kind]:mode==='notifications'?(r.kind==='ADMIN_MESSAGE'?(lang==='ar'?'إشعار الإدارة':'Admin notification'):tr(r.kind,states)):r.store_title));copy.append(node('p',r.id,'order-reference'));if(r.state&&mode!=='support')copy.append(node('p',tr(r.state,states),'order-state'));if(mode==='seller'&&Array.isArray(r.items))for(const i of r.items)copy.append(node('p',i.title+' / '+i.variant_label+' × '+i.quantity,'order-line-summary'));if(r.total_minor!=null)copy.append(node('p',live.money(r.total_minor,r.currency,lang)));if(mode==='notifications'){
     if(r.body)copy.append(node('p',r.body));

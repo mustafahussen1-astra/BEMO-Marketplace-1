@@ -1,1 +1,393 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>لوحة البائع — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body class="balance-page"><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="search.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a href="seller.html">المتجر</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><div class="account-container seller-layout"><aside class="seller-sidebar" id="sellerNavigation"></aside><main id="main" class="merchant-main"><div class="workspace-heading"><div><span class="section-kicker" data-t="seller">مركز البائع</span><h1 data-t="title">لوحة متجرك</h1></div><button id="refresh" type="button" class="secondary-button" data-t="refresh">تحديث</button></div><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="gate" class="account-card" hidden><h2 data-t="gateTitle">سجّل الدخول للمتابعة</h2><p data-t="gateCopy">افتح حسابك وأكمل بياناتك.</p><a class="primary-button" data-route="account.html" data-t="account">حسابي</a></section><div id="workspace" hidden><section class="seller-welcome"><div><p data-t="ruleTitle">حصة الاستقطاع الأساسية</p><h2 id="baseRate">—</h2><p id="financeState"></p></div></section><p class="live-note" data-t="basis">على قيمة المنتجات بعد الخصم، دون التوصيل. قواعد المنتجات الخاصة تظهر أدناه.</p><div id="balances" class="metric-grid"></div><section class="account-card"><h2 data-t="rulesTitle">قواعد خاصة بالمنتجات</h2><div id="rules"></div></section><section class="account-card"><h2 data-t="history">سجل الرصيد</h2><div id="transactions" class="recent-orders"></div></section><section id="adminRules" class="account-card" hidden><h2 data-t="adminTitle">إعداد حصة الاستقطاع</h2><form id="ruleForm" class="account-form"><div class="balance-field"><label for="productId" data-t="productId">معرّف المنتج — اتركه فارغًا للنسبة العامة</label><input id="productId" maxlength="36"></div><div class="balance-field"><label for="rate" data-t="rateLabel">النسبة %</label><input id="rate" type="number" min="0" max="100" step="0.01" required></div><div class="balance-field"><label for="fixed" data-t="fixedLabel">رسم إضافي لكل قطعة (بالوحدات الصغرى، صفر دون رسم)</label><input id="fixed" type="text" inputmode="decimal" value="0" required></div><div class="balance-field"><label for="currency" data-t="currencyLabel">عملة قاعدة المنتج</label><input id="currency" maxlength="3" placeholder="IQD"></div><div class="balance-field"><label for="ruleReason" data-t="reasonLabel">سبب القاعدة، بما في ذلك العرض أو الخصم</label><textarea id="ruleReason" minlength="20" maxlength="1000" required></textarea></div><button class="primary-button" data-t="saveRule">حفظ القاعدة</button></form><p class="live-note" data-t="futureOnly">تسري التغييرات على الطلبات الجديدة فقط. تعديل النسبة لا يفعّل الشحن أو الاستقطاع.</p></section><section id="manualAdmin" class="account-card" hidden><h2 data-t="manualTitle"></h2><div class="balance-field"><label for="adminStore" data-t="chooseStore"></label><select id="adminStore"></select></div><p id="adminBalance"></p><form id="manualForm" class="account-form"><div class="balance-field"><label for="manualAction" data-t="actionLabel"></label><select id="manualAction"><option value="CREDIT" data-t="credit"></option><option value="ADJUST_DOWN" data-t="debit"></option><option value="FREEZE" data-t="freeze"></option><option value="UNFREEZE" data-t="unfreeze"></option><option value="PAUSE" data-t="pause"></option></select></div><div class="balance-field"><label for="manualAmount" data-t="minorAmount"></label><input id="manualAmount" type="text" inputmode="decimal"></div><div class="balance-field"><label for="manualCurrency" data-t="currencyLabel"></label><input id="manualCurrency" maxlength="3" placeholder="IQD"></div><div class="balance-field"><label for="manualReference" data-t="referenceLabel"></label><input id="manualReference" maxlength="100"></div><div class="balance-field"><label for="manualReason" data-t="reasonLabel"></label><textarea id="manualReason" minlength="20" maxlength="1000" required></textarea></div><button class="primary-button" data-t="applyManual"></button></form><details><summary data-t="bankTitle"></summary><form id="bankForm" class="account-form"><div class="balance-field"><label for="bankName" data-t="bankName"></label><input id="bankName" maxlength="100"></div><div class="balance-field"><label for="beneficiary" data-t="beneficiary"></label><input id="beneficiary" maxlength="160"></div><div class="balance-field"><label for="bankAccount" data-t="bankAccount"></label><input id="bankAccount" maxlength="40" autocomplete="off"></div><div class="balance-field"><label for="iban">IBAN</label><input id="iban" maxlength="34" autocomplete="off"></div><div class="balance-field"><label for="last4" data-t="last4"></label><input id="last4" maxlength="4" pattern="[0-9]{4}" autocomplete="off"></div><div class="balance-field"><label for="bankNotes" data-t="notes"></label><textarea id="bankNotes" maxlength="1000"></textarea></div><div class="balance-field"><label for="bankReason" data-t="reasonLabel"></label><textarea id="bankReason" minlength="20" maxlength="1000" required></textarea></div><button class="secondary-button" data-t="saveRule"></button></form></details><div id="adminHistory"></div></section></div></main></div><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="topup-panel.js"></script><script src="balance-page.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>الرصيد والاستقطاع — BEMO Seller Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    /* Seller Center Modern Workspace Styles */
+    .seller-shell-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .seller-modern-sidebar {
+      background: #0F1E36;
+      border-radius: 12px;
+      padding: 16px 12px;
+      color: #FFFFFF;
+      position: sticky;
+      top: 20px;
+    }
+    .seller-modern-sidebar p {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 8px;
+    }
+    .seller-modern-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #E2E8F0;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .seller-modern-sidebar a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+    .seller-modern-sidebar a[aria-current="page"] {
+      background: #FF5000;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    .seller-cod-note {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      font-size: 11px;
+      color: #CBD5E1;
+      line-height: 1.4;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .balance-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-block: 20px;
+    }
+    .balance-kpi-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      border-top: 4px solid #FF5000;
+      transition: transform 0.15s ease;
+    }
+    .balance-kpi-card:hover {
+      transform: translateY(-2px);
+    }
+    .balance-kpi-card.avail { border-top-color: #15803D; }
+    .balance-kpi-card.reserved { border-top-color: #7C3AED; }
+    .balance-kpi-card.rate { border-top-color: #FF5000; }
+    .balance-kpi-card span {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748B;
+      margin-bottom: 6px;
+    }
+    .balance-kpi-card strong {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+    .topup-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    @media(max-width: 900px) {
+      .seller-shell-layout {
+        grid-template-columns: 1fr;
+      }
+      .seller-modern-sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body class="balance-page" data-page="balance">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">SELLER FINANCES</span>
+        <span>الرصيد والحساب البنكي والشحن اليدوي بالوصل • لا استقطاع تلقائي دون موافقة</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">لوحة المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="orders.html?view=seller" class="top-link">طلبات المتجر</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="seller.html" aria-label="BEMO Seller Center">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Seller Center · المالية والرصيد</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 440px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في السوق..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>السوق</span>
+        </a>
+        <a href="orders.html?view=seller" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلبات المتجر</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Workspace Layout Container -->
+  <div class="container seller-shell-layout">
+    <!-- Dark Navy Seller Navigation Sidebar -->
+    <aside class="seller-modern-sidebar" id="sellerNavigation">
+      <!-- Populated automatically by bemo-ui.js -->
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main id="main" class="merchant-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <span class="section-kicker" data-t="seller" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز التاجر / المالية</span>
+          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">الرصيد والاستقطاع المالي</h1>
+          <p style="font-size:13px;color:#64748B;margin:4px 0 0;">متابعة أرصدة متجرك المتاحة، الحصص المحجوزة، وسجل الشحن والتحويلات اليدوية.</p>
+        </div>
+
+        <button id="refresh" type="button" class="secondary-button" data-t="refresh" style="padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <span>🔄</span> <span>تحديث البيانات</span>
+        </button>
+      </div>
+
+      <!-- Live Status & Errors -->
+      <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+      <div id="error" class="message error-message" role="alert" hidden style="margin-bottom:16px;"></div>
+
+      <!-- Gate View (If not authenticated as seller) -->
+      <section id="gate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
+        <div style="font-size:42px;margin-bottom:12px;">🏪</div>
+        <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول للوصول إلى لوحة الرصيد</h2>
+        <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وسجّل متجرك لعرض حسابك البنكي وسجل المعاملات.</p>
+        <a class="primary-button" data-route="account.html" href="account.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل الدخول / فتح المتجر</a>
+      </section>
+
+      <!-- Active Workspace -->
+      <div id="workspace">
+        <!-- Seller Welcome Strip -->
+        <section class="seller-welcome" style="background:linear-gradient(135deg, #0F1E36 0%, #1E3A8A 100%);color:#FFFFFF;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <p data-t="ruleTitle" style="font-size:12px;color:#CBD5E1;margin:0 0 4px;font-weight:600;">حصة الاستقطاع الأساسية على المتجر</p>
+            <h2 id="baseRate" style="font-size:32px;font-weight:800;margin:0;color:#FFFFFF;">0.00%</h2>
+            <p id="financeState" style="font-size:12px;color:#94A3B8;margin:6px 0 0;"></p>
+          </div>
+          <div style="font-size:12px;background:rgba(255,255,255,0.1);padding:10px 16px;border-radius:8px;max-width:380px;line-height:1.5;">
+            <span data-t="basis">تُحسب على قيمة المنتجات بعد الخصم دون التوصيل. الدفع عند الاستلام كاش للتاجر بالكامل.</span>
+          </div>
+        </section>
+
+        <!-- KPI Metric Cards Container -->
+        <div id="balances" class="metric-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:24px;"></div>
+
+        <!-- Top-up Panel is dynamically inserted here by topup-panel.js -->
+
+        <!-- Product Specific Rules -->
+        <section class="account-card" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F5F9;padding-bottom:10px;margin-bottom:14px;">
+            <h2 data-t="rulesTitle" style="font-size:16px;font-weight:800;margin:0;color:#0F172A;">قواعد الاستقطاع الخاصة بالمنتجات</h2>
+            <span style="font-size:12px;color:#64748B;">خصومات واستثناءات محددة</span>
+          </div>
+          <div id="rules"></div>
+        </section>
+
+        <!-- Balance Transactions History -->
+        <section class="account-card" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F5F9;padding-bottom:10px;margin-bottom:14px;">
+            <div>
+              <h2 data-t="history" style="font-size:16px;font-weight:800;margin:0;color:#0F172A;">سجل الحركات المالية المعتمدة</h2>
+              <small style="color:#64748B;">آخر 100 حركة شحن واستقطاع وتسوية</small>
+            </div>
+            <span style="font-size:18px;">📋</span>
+          </div>
+          <div id="transactions" class="recent-orders" style="display:grid;gap:10px;"></div>
+        </section>
+
+        <!-- Admin Commission Setup (Hidden unless admin) -->
+        <section id="adminRules" class="account-card" hidden style="background:#FFFBF9;border:1px solid #FED7AA;border-radius:12px;padding:20px;margin-bottom:24px;">
+          <h2 data-t="adminTitle" style="font-size:16px;font-weight:800;margin:0 0 14px;color:#9A3412;">إعداد وتعديل حصة الاستقطاع (خاص بالإدارة)</h2>
+          <form id="ruleForm" class="account-form" style="display:grid;gap:12px;">
+            <div class="balance-field">
+              <label for="productId" data-t="productId" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">معرّف المنتج (فارغ للنسبة العامة):</label>
+              <input id="productId" maxlength="36" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div class="balance-field">
+                <label for="rate" data-t="rateLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">النسبة المئوية %:</label>
+                <input id="rate" type="number" min="0" max="100" step="0.01" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+              <div class="balance-field">
+                <label for="fixed" data-t="fixedLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">رسم ثابت إضافي:</label>
+                <input id="fixed" type="text" inputmode="decimal" value="0" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+              <div class="balance-field">
+                <label for="currency" data-t="currencyLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">العملة:</label>
+                <input id="currency" maxlength="3" placeholder="IQD" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+            </div>
+            <div class="balance-field">
+              <label for="ruleReason" data-t="reasonLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">سبب القاعدة وملاحظات التعديل (20 حرفاً على الأقل):</label>
+              <textarea id="ruleReason" minlength="20" maxlength="1000" rows="2" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;font-family:inherit;"></textarea>
+            </div>
+            <button class="primary-button" data-t="saveRule" style="background:#FF5000;padding:8px 18px;border-radius:6px;font-weight:700;width:fit-content;">حفظ القاعدة</button>
+          </form>
+          <p class="live-note" data-t="futureOnly" style="font-size:11px;color:#78350F;margin-top:10px;">تسري التغييرات على الطلبات الجديدة فقط. تعديل النسبة لا يفعّل الشحن أو الاستقطاع التلقائي.</p>
+        </section>
+
+        <!-- Manual Balance Administration (Hidden unless authorized admin) -->
+        <section id="manualAdmin" class="account-card" hidden style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:12px;padding:20px;">
+          <h2 data-t="manualTitle" style="font-size:16px;font-weight:800;margin:0 0 14px;color:#0F172A;">التحكم الإداري بالرصيد والحساب البنكي</h2>
+          <div class="balance-field" style="margin-bottom:12px;">
+            <label for="adminStore" data-t="chooseStore" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">المتجر المستهدف:</label>
+            <select id="adminStore" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;"></select>
+          </div>
+          <p id="adminBalance" style="font-weight:700;color:#2563EB;margin-bottom:16px;font-size:13px;"></p>
+
+          <form id="manualForm" class="account-form" style="display:grid;gap:12px;margin-bottom:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div class="balance-field">
+                <label for="manualAction" data-t="actionLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">الإجراء:</label>
+                <select id="manualAction" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+                  <option value="CREDIT" data-t="credit">إضافة رصيد</option>
+                  <option value="ADJUST_DOWN" data-t="debit">خفض الرصيد المتاح</option>
+                  <option value="FREEZE" data-t="freeze">تجميد الحجز الجديد</option>
+                  <option value="UNFREEZE" data-t="unfreeze">رفع التجميد</option>
+                  <option value="PAUSE" data-t="pause">إيقاف الاستقطاع للجميع</option>
+                </select>
+              </div>
+              <div class="balance-field">
+                <label for="manualAmount" data-t="minorAmount" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">المبلغ:</label>
+                <input id="manualAmount" type="text" inputmode="decimal" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+              <div class="balance-field">
+                <label for="manualCurrency" data-t="currencyLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">العملة:</label>
+                <input id="manualCurrency" maxlength="3" placeholder="IQD" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+            </div>
+            <div class="balance-field">
+              <label for="manualReference" data-t="referenceLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">المرجع الفريد:</label>
+              <input id="manualReference" maxlength="100" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;">
+            </div>
+            <div class="balance-field">
+              <label for="manualReason" data-t="reasonLabel" style="font-weight:700;font-size:12px;display:block;margin-bottom:4px;">السبب الإداري والتفاصيل (20 حرفاً على الأقل):</label>
+              <textarea id="manualReason" minlength="20" maxlength="1000" rows="2" required style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:6px;font-family:inherit;"></textarea>
+            </div>
+            <button class="primary-button" data-t="applyManual" style="background:#0F1E36;padding:8px 18px;border-radius:6px;font-weight:700;width:fit-content;">تنفيذ مع تسجيل السبب</button>
+          </form>
+
+          <!-- Store Bank Details Update Drawer -->
+          <details style="margin-top:16px;background:#FFF;padding:14px;border-radius:8px;border:1px solid #E2E8F0;">
+            <summary data-t="bankTitle" style="font-weight:700;cursor:pointer;color:#0F172A;">بيانات الحساب البنكي، الـ IBAN وبطاقة التحويل</summary>
+            <form id="bankForm" class="account-form" style="display:grid;gap:10px;margin-top:14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="balance-field">
+                  <label for="bankName" data-t="bankName" style="font-size:12px;font-weight:700;">اسم البنك:</label>
+                  <input id="bankName" maxlength="100" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                </div>
+                <div class="balance-field">
+                  <label for="beneficiary" data-t="beneficiary" style="font-size:12px;font-weight:700;">اسم المستفيد:</label>
+                  <input id="beneficiary" maxlength="160" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="balance-field">
+                  <label for="bankAccount" data-t="bankAccount" style="font-size:12px;font-weight:700;">رقم الحساب:</label>
+                  <input id="bankAccount" maxlength="40" autocomplete="off" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                </div>
+                <div class="balance-field">
+                  <label for="iban" style="font-size:12px;font-weight:700;">IBAN:</label>
+                  <input id="iban" maxlength="34" autocomplete="off" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+                </div>
+              </div>
+              <div class="balance-field">
+                <label for="last4" data-t="last4" style="font-size:12px;font-weight:700;">آخر 4 أرقام من البطاقة فقط:</label>
+                <input id="last4" maxlength="4" pattern="[0-9]{4}" autocomplete="off" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;">
+              </div>
+              <div class="balance-field">
+                <label for="bankNotes" data-t="notes" style="font-size:12px;font-weight:700;">ملاحظات التحويل:</label>
+                <textarea id="bankNotes" maxlength="1000" rows="2" style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;"></textarea>
+              </div>
+              <div class="balance-field">
+                <label for="bankReason" data-t="reasonLabel" style="font-size:12px;font-weight:700;">سبب التحديث:</label>
+                <textarea id="bankReason" minlength="20" maxlength="1000" rows="2" required style="width:100%;padding:6px;border:1px solid #CBD5E1;border-radius:6px;"></textarea>
+              </div>
+              <button class="secondary-button" data-t="saveRule" style="width:fit-content;padding:6px 14px;border-radius:6px;">حفظ بيانات البنك</button>
+            </form>
+          </details>
+
+          <div id="adminHistory" style="margin-top:16px;"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;margin-top:40px;">
+    <span>© 2026 BEMO Seller Center. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="topup-panel.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="balance-page.js"></script>
+</body>
+</html>

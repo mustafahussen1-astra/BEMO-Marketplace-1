@@ -64,6 +64,9 @@
   const t = k => words[k]?.[lang === 'ar' ? 0 : 1] || k;
 
   function formatMoney(amount, currency = 'USD') {
+    if (window.BemoRegion && typeof amount === 'number') {
+      return window.BemoRegion.formatMoney(amount, lang !== 'en');
+    }
     if (typeof amount !== 'number') return `$${amount}`;
     if (currency === 'USD') return `$${amount.toFixed(2)}`;
     if (currency === 'EGP') return `${Math.round(amount)} EGP`;
@@ -441,6 +444,7 @@
 
   // Global Cart Event listener
   window.addEventListener('bemo:cart', renderCart);
+  window.addEventListener('bemo:region-change', renderCart);
 
   // Initialize
   loadSavedAddress();

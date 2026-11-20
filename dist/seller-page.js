@@ -47,6 +47,9 @@
     $('sideStoreAvatar').textContent = initials;
     $('publicStorefrontLink').href = `store.html?store=${storeSlug}&lang=${lang}`;
 
+    const cur = window.BemoRegion ? window.BemoRegion.getRegion().currency : 'IQD';
+    const sym = window.BemoRegion ? (lang === 'ar' ? window.BemoRegion.getRegion().symbolAr : window.BemoRegion.getRegion().symbolEn) : 'د.ع';
+
     // Synthetic or DB data
     const data = dashData || {
       products: 18,
@@ -62,21 +65,21 @@
         { day: '13', orders: 45 }, { day: '14', orders: 60 }
       ],
       recent_orders: [
-        { id: 'bemo-ord-894102', state: 'PENDING_SELLER', total_minor: 48000, currency: 'EGP', created_at: new Date().toISOString() },
-        { id: 'bemo-ord-723145', state: 'PENDING_SELLER', total_minor: 72000, currency: 'EGP', created_at: new Date(Date.now() - 3600000).toISOString() },
-        { id: 'bemo-ord-551982', state: 'ACCEPTED', total_minor: 125000, currency: 'EGP', created_at: new Date(Date.now() - 86400000).toISOString() },
-        { id: 'bemo-ord-412891', state: 'SHIPPED', total_minor: 35000, currency: 'EGP', created_at: new Date(Date.now() - 172800000).toISOString() },
-        { id: 'bemo-ord-309182', state: 'DELIVERED', total_minor: 95000, currency: 'EGP', created_at: new Date(Date.now() - 259200000).toISOString() }
+        { id: 'bemo-ord-894102', state: 'PENDING_SELLER', total_minor: 48000, currency: cur, created_at: new Date().toISOString() },
+        { id: 'bemo-ord-723145', state: 'PENDING_SELLER', total_minor: 72000, currency: cur, created_at: new Date(Date.now() - 3600000).toISOString() },
+        { id: 'bemo-ord-551982', state: 'ACCEPTED', total_minor: 125000, currency: cur, created_at: new Date(Date.now() - 86400000).toISOString() },
+        { id: 'bemo-ord-412891', state: 'SHIPPED', total_minor: 35000, currency: cur, created_at: new Date(Date.now() - 172800000).toISOString() },
+        { id: 'bemo-ord-309182', state: 'DELIVERED', total_minor: 95000, currency: cur, created_at: new Date(Date.now() - 259200000).toISOString() }
       ],
       cod_by_currency: [
-        { currency: 'EGP', total_minor: 12450000 }
+        { currency: cur, total_minor: 12450000 }
       ]
     };
 
     // KPIs
-    $('kpiSales').textContent = `${(data.sales_total || 124500).toLocaleString()} EGP`;
-    $('kpiOrders').textContent = `${data.orders || 342} طلب`;
-    $('kpiProducts').textContent = `${data.products || 18} منتج`;
+    $('kpiSales').textContent = `${(data.sales_total || 124500).toLocaleString()} ${sym}`;
+    $('kpiOrders').textContent = `${data.orders || 342} ${lang === 'ar' ? 'طلب' : 'orders'}`;
+    $('kpiProducts').textContent = `${data.products || 18} ${lang === 'ar' ? 'منتج' : 'products'}`;
 
     // 14-day Trend Chart
     const trendEl = $('trend');
@@ -196,6 +199,11 @@
     });
   });
 
+  // Open Wizard directly
+  $('openWizardBtn')?.addEventListener('click', () => {
+    showRegistrationWizard(null);
+  });
+
   // Language button
   $('languageButton')?.addEventListener('click', () => {
     lang = lang === 'ar' ? 'en' : 'ar';
@@ -225,6 +233,10 @@
           showRegistrationWizard(s.profile);
         }
       } else if (['guest', 'blocked', 'error'].includes(s.phase)) {
+        if (new URLSearchParams(location.search).get('step') === 'register') {
+          showRegistrationWizard(null);
+          return;
+        }
         // Check if there is a local store from testing
         try {
           const localStore = JSON.parse(localStorage.getItem('bemo-local-store') || 'null');
@@ -238,6 +250,7 @@
         $('sellerDashboardLayout').hidden = true;
       }
     });
+    window.addEventListener('bemo:region-change', () => renderDashboard());
     api.initialize();
   }
 })();

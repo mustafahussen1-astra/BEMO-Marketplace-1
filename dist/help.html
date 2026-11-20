@@ -1,1 +1,397 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>كيف يعمل BEMO — How BEMO works</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="bemo-ui.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><a class="browse-link" href="market.html">المنتجات / Products</a></div></header><main class="account-container live-main"><h1>كيف يعمل BEMO؟</h1><section class="account-card"><h2>للمشتري</h2><p>يضيف التجار منتجاتهم وأسعارهم ومخزونهم. راجع مبلغ كل متجر وسعر توصيله قبل إرسال الطلب. الدفع عند الاستلام للتاجر أو مندوبه، ورسوم المنصة صفر.</p><p>السلة وإنشاء الطلب لا يحجزان المخزون. عند قبول التاجر تُخصم القطع مرة واحدة، وتُتاح له بيانات التسليم اللازمة لطلبه فقط. قبل القبول يمكنك الإلغاء مباشرة؛ بعده تُرسل طلبات الإلغاء والإرجاع لمراجعة بشرية.</p><p>بعد 24 ساعة دون رد يتلقى التاجر تذكيراً داخل BEMO. بعد 48 ساعة يُحال الطلب للدعم دون إلغاء تلقائي.</p></section><section class="account-card"><h2>للتاجر</h2><p>سجّل بحساب Google وأكمل اسم حسابك، ثم أنشئ متجرك الواحد. أضف العملة وسعر التوصيل، ثم تفاصيل المنتجات والخيارات والأسعار والصور والمخزون. لا يظهر المنتج حتى تنشره.</p><p>وجود متجر في BEMO لا يعني توثيق هويته التجارية أو اعتماده. لا تمنح هذه النسخة شارات اعتماد تلقائية.</p><a class="primary-button" href="merchant.html">إدارة متجري</a><a class="secondary-button" href="orders.html?view=seller">طلبات متجري</a></section><section class="account-card"><h2>حالة هذه النسخة</h2><p>هذه نسخة تطوير خاصة بالمالك. سياسات الخصوصية والشروط ومدد الإرجاع التجارية، والتقييمات والشارات، واختبارات الإطلاق الكاملة ما زالت قيد الاستكمال. شرح التدفق هنا لا يُعد سياسة تجارية معتمدة. لا تُحصّل BEMO أموالاً ولا تدّعي رد مبالغ نقدية لم تحتفظ بها.</p></section><section class="account-card" lang="en" dir="ltr"><h2>How BEMO works</h2><p>Sellers publish their goods and set delivery fees. One checkout creates independent orders for each store. Pay each seller or courier in cash on delivery; platform fees are zero.</p><p>The bag and checkout do not reserve stock. Stock is debited when a seller accepts; only then can that seller read delivery details. Buyers can cancel before acceptance. Later cancellation and return requests require human support review. Unanswered orders generate an in-app reminder after 24 hours and support escalation after 48 hours, without automatic cancellation.</p><p>This owner-private development release still needs commercial policies, return windows, reviews, badges and complete launch testing. Store registration is not business verification. BEMO does not hold or refund COD funds.</p></section></main></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>مركز المساعدة وسياسات BEMO — Help Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .help-hero {
+      background: linear-gradient(135deg, #0F1E36 0%, #1E3A8A 60%, #FF5000 140%);
+      color: #FFFFFF;
+      padding: 48px 20px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .help-hero h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      margin: 0 0 12px;
+      color: #FFFFFF;
+    }
+    .help-hero p {
+      font-size: 14px;
+      color: #E2E8F0;
+      max-width: 650px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+    .help-search-box {
+      max-width: 580px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .help-search-input {
+      width: 100%;
+      padding: 14px 20px 14px 48px;
+      border-radius: 30px;
+      border: none;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-family: inherit;
+    }
+    .help-search-icon {
+      position: absolute;
+      inset-inline-start: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #94A3B8;
+    }
+    .help-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .help-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .help-card:hover {
+      border-color: #FF5000;
+      box-shadow: 0 8px 24px rgba(255,80,0,0.08);
+      transform: translateY(-3px);
+    }
+    .help-card-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+    .help-card h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 10px;
+      color: #0F172A;
+    }
+    .help-card p {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+      margin: 0 0 14px;
+      flex-grow: 1;
+    }
+    .help-card-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border-top: 1px solid #F1F5F9;
+      padding-top: 12px;
+    }
+    .help-card-list li {
+      font-size: 12px;
+      color: #334155;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .help-card-list li::before {
+      content: "•";
+      color: #FF5000;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .faq-section {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+    .faq-item {
+      border-bottom: 1px solid #E2E8F0;
+      padding-block: 16px;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+    .faq-question {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .faq-question::after {
+      content: "▾";
+      font-size: 18px;
+      color: #94A3B8;
+      transition: transform 0.2s ease;
+    }
+    .faq-item[open] .faq-question::after {
+      transform: rotate(180deg);
+      color: #FF5000;
+    }
+    .faq-answer {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+      margin-top: 10px;
+      padding-inline-start: 4px;
+    }
+  </style>
+</head>
+<body data-page="help">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">BEMO GUIDE</span>
+        <span>دليل الاستخدام، حماية المشتري، وسياسات الدفع عند الاستلام والتجار</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="orders.html" class="top-link">طلباتي</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html" aria-label="BEMO">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Help Center</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 480px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في السوق عن منتجات..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Shortcuts -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>الرئيسية</span>
+        </a>
+        <a href="orders.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلباتي</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+        <a href="seller.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 2-6h14l2 6M4 13v8h16v-8M9 21v-7h6v7"/></svg>
+          <span>المتجر</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Help Center Content -->
+  <main class="container" id="main" style="max-width: 1200px; margin: 30px auto; padding: 0 16px 60px;">
+    <!-- Hero Banner -->
+    <section class="help-hero">
+      <span style="background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:12px;">مركز الدعم والمعرفة</span>
+      <h1>كيف يمكننا مساعدتك اليوم في BEMO؟</h1>
+      <p>منصة تجارة إلكترونية متعددة التجار قائمة على الدفع عند الاستلام وحماية حق المعاينة والفحص للمشتري دون عمولات إضافية.</p>
+
+      <div class="help-search-box">
+        <span class="help-search-icon">🔍</span>
+        <input type="search" class="help-search-input" id="helpFilterInput" placeholder="ابحث عن: الدفع عند الاستلام، فحص البضاعة، إرجاع، شحن الرصيد..." oninput="filterHelpTopics(this.value)">
+      </div>
+    </section>
+
+    <!-- 6 Pillar Topic Cards -->
+    <div class="help-grid" id="helpCardsGrid">
+      <!-- Card 1 -->
+      <article class="help-card">
+        <span class="help-card-icon">📦</span>
+        <h2>الدفع عند الاستلام (COD)</h2>
+        <p>نظام دفع كاش عند الاستلام لمندوب التاجر. لا تحتفظ BEMO بأموالك ولا تطلب بطاقتك البنكية للشراء.</p>
+        <ul class="help-card-list">
+          <li>دفع نقدي مباشر عند استلام الشحنة</li>
+          <li>رسوم توصيل واضحة ومستقلة لكل متجر</li>
+          <li>عمولة المنصة صفر على المشتري</li>
+        </ul>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="help-card">
+        <span class="help-card-icon">🛡️</span>
+        <h2>حماية المشتري وحق الفحص</h2>
+        <p>يحق لك فتح الطرد ومعاينة المنتجات والتأكد من مطابقتها التامة قبل تسليم المبلغ المالي للمندوب.</p>
+        <ul class="help-card-list">
+          <li>حق رفض الاستلام الفوري في حال التلف أو الاختلاف</li>
+          <li>رفع بلاغ أو شكوى مباشرة من صفحة الطلبات</li>
+          <li>تدخل فوري من الإدارة للوساطة مع المتجر</li>
+        </ul>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="help-card">
+        <span class="help-card-icon">🏪</span>
+        <h2>دليل التاجر والمتجر المستقل</h2>
+        <p>سجّل متجرك في 3 خطوات بسيطة وابدأ بيع منتجاتك وإدارة مخزونك وأسعارك بحرية تامة.</p>
+        <ul class="help-card-list">
+          <li>عمولة 0% في مرحلة الإطلاق الحالية</li>
+          <li>إشعارات فورية بكل طلب جديد وارد</li>
+          <li>أدوات تسعير وخصومات وعروض 11.11</li>
+        </ul>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="help-card">
+        <span class="help-card-icon">⚖️</span>
+        <h2>الإلغاء والنزاعات والمراجعة</h2>
+        <p>قواعد واضحة للتعامل مع الطلبات: إلغاء مباشر قبل القبول، ومراجعة بشرية للنزاعات بعد القبول.</p>
+        <ul class="help-card-list">
+          <li>إلغاء فوري بضغطة زر قبل قبول التاجر</li>
+          <li>تنبيه تلقائي للتاجر بعد 24 ساعة دون رد</li>
+          <li>إحالة للدعم الإداري بعد 48 ساعة دون إلغاء تعسفي</li>
+        </ul>
+      </article>
+
+      <!-- Card 5 -->
+      <article class="help-card">
+        <span class="help-card-icon">💳</span>
+        <h2>شحن الرصيد اليدوي بالوصل</h2>
+        <p>نظام شحن يدوي آمن للتجار: يقوم التاجر بتحويل المبلغ إلى حساب BEMO ورفع إيصال الحوالة.</p>
+        <ul class="help-card-list">
+          <li>كتابة معرّف المتجر <code>@slug</code> في وصف التحويل</li>
+          <li>مراجعة الوصل يدوياً بواسطة إدارة المنصة</li>
+          <li>إشعار فوري عند إضافة الرصيد وتحديث السجل</li>
+        </ul>
+      </article>
+
+      <!-- Card 6 -->
+      <article class="help-card">
+        <span class="help-card-icon">🔒</span>
+        <h2>خصوصية البيانات وأرقام الهواتف</h2>
+        <p>حماية صارمة لبيانات المشتري: لا يُكشف رقم الهاتف والعنوان التفصيلي للتاجر حتى يضغط "قبول الطلب".</p>
+        <ul class="help-card-list">
+          <li>بيانات المشتري مشفرة ومحجوبة قبل قبول الطلب</li>
+          <li>منع استغلال بيانات العملاء لأغراض تسويقية</li>
+          <li>سجل تدقيق كامل لكل حركة وصول للبيانات</li>
+        </ul>
+      </article>
+    </div>
+
+    <!-- FAQ Accordion -->
+    <section class="faq-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <span style="color:#FF5000;font-weight:700;font-size:11px;letter-spacing:0.05em;display:block;">الأسئلة الشائعة</span>
+          <h2 style="font-size:20px;font-weight:800;margin:4px 0 0;color:#0F172A;">أبرز الاستفسارات المتكررة حول BEMO</h2>
+        </div>
+        <span style="font-size:24px;">💡</span>
+      </div>
+
+      <details class="faq-item" open>
+        <summary class="faq-question">متى يرى التاجر رقم هاتفي وعنواني التفصيلي؟</summary>
+        <div class="faq-answer">
+          تعتمد BEMO سياسة خصوصية صارمة: لا يرى التاجر اسم المستلم ولا رقم هاتفه ولا عنوانه أثناء مرحلة الطلب الأولي؛ بل يرى فقط المنتجات والكميات والمدينة الإجمالية. فقط بعد أن يراجع التاجر مخزونه ويضغط رسمياً على زر <strong>"قبول الطلب"</strong>، تُفك حماية البيانات وتظهر له تفاصيل الشحن لإرسال المندوب.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">هل تحتفظ منصة BEMO بأموالي عند الشراء؟</summary>
+        <div class="faq-answer">
+          كلا! جميع المعاملات في BEMO تتم بنظام <strong>الدفع نقداً عند الاستلام (Cash on Delivery)</strong> مباشرة بين المشتري والتاجر أو مندوب التوصيل المعتمد لديه. لا تقوم BEMO بتحصيل أي مبالغ نقدية مسبقة من المشترين عبر بطاقات ائتمان.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">ماذا أفعل إذا وصلني منتج تالف أو مختلف عن المعروض؟</summary>
+        <div class="faq-answer">
+          يحق لك تماماً فحص الشحنة فور وصول المندوب. إذا لاحظت أي كسر أو اختلاف في القياس أو اللون، يحق لك رفض استلام الشحنة فورياً دون دفع أي مبلغ. أما إذا استلمت الشحنة واكتشفت عيباً مصنعياً لاحقاً، يمكنك التوجه إلى صفحة <strong>طلباتي</strong> والضغط على <strong>"طلب إرجاع / بلاغ"</strong> لفتح تذكرة فحص مع إدارة BEMO والتاجر.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">كيف يمكنني التسجيل كتاجر وفتح متجري الخاص؟</summary>
+        <div class="faq-answer">
+          العملية سهلة ومجانية 100%! انتقل إلى صفحة <strong>مركز التاجر</strong> (<a href="seller.html" style="color:#FF5000;font-weight:700;">من هنا</a>)، وأكمل خطوات التسجيل الثلاث (اسم المتجر، الشعار والغلاف، والبطاقة الشخصية/السجل التجاري). بعدها ستفتح لك لوحة تحكم متقدمة لإضافة منتجاتك والبدء باستقبال الطلبات فوراً.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">كيف يشحن التاجر رصيده داخل منصة BEMO؟</summary>
+        <div class="faq-answer">
+          من خلال صفحة <strong>الرصيد والاستقطاع</strong> في مركز التاجر، يختار التاجر "شحن الرصيد بحوالة بنكية يدوية". يقوم بتحويل المبلغ لحساب المنصة الموضح، مع كتابة يوزر متجره (@slug) في خانة الملاحظات، ثم يرفع صورة الوصل ورقم المرجع. تقوم إدارة BEMO بمراجعة الوصل وإيداع الرصيد في حسابه خلال ساعات العمل.
+        </div>
+      </details>
+    </section>
+
+    <!-- Support Help Box -->
+    <div style="background:#FFF1E8;border:1px solid #FED7AA;border-radius:14px;padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:36px;">🎧</span>
+        <div>
+          <strong style="font-size:16px;color:#9A3412;display:block;">هل تحتاج إلى مساعدة مباشرة في أحد طلباتك؟</strong>
+          <span style="font-size:13px;color:#B45309;">فريق مراجعة الطلبات والشكاوى جاهز لمساعدتك في أي نزاع أو استفسار.</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <a href="orders.html?view=support" class="primary-button" style="background:#FF5000;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;">
+          فتح مساحة الدعم والشكاوى ➔
+        </a>
+        <a href="index.html" class="secondary-button" style="text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px;">
+          العودة للتسوق
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;">
+    <span>© 2026 BEMO. جميع السياسات خاضعة للتحكيم التجاري المعتمد.</span>
+  </footer>
+
+  <script src="bemo-region.js"></script>
+  <script>
+    function filterHelpTopics(query) {
+      const q = (query || '').trim().toLowerCase();
+      const cards = document.querySelectorAll('#helpCardsGrid .help-card');
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

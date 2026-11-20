@@ -1,1 +1,212 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>مناطق التوصيل — BEMO</title><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="live-commerce.css"><link rel="stylesheet" href="merchant.css"><link rel="stylesheet" href="bemo-ui.css"><link rel="stylesheet" href="workspace.css"><script src="bemo-ui.js" defer></script><script defer src="action-feedback.js"></script></head><body><a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a><header class="account-header"><div class="account-container header-row"><a class="brand" href="index.html">BEMO<span>●</span></a><nav><a data-route="search.html" data-t="shop">تسوق</a><a href="market.html?view=cart" id="cartLink" data-t="cart">السلة</a><a href="seller.html">المتجر</a><a data-route="account.html" data-t="account">حسابي</a><button type="button" id="languageButton" class="language-button">English</button></nav></div></header><div class="account-container seller-layout"><aside class="seller-sidebar" id="sellerNavigation"></aside><main id="main" class="merchant-main"><div class="workspace-heading"><div><span class="section-kicker" data-t="seller">مركز البائع</span><h1 data-t="title">مناطق التوصيل</h1></div><a data-route="merchant.html" class="secondary-button" data-t="back"></a></div><p id="status" role="status" aria-live="polite"></p><div id="error" class="message error-message" role="alert" hidden></div><section id="gate" class="account-card" hidden><h2 data-t="gateTitle">سجّل الدخول للمتابعة</h2><p data-t="gateCopy">افتح حسابك وأكمل بياناتك.</p><a class="primary-button" data-route="account.html" data-t="account">حسابي</a></section><div id="workspace" hidden><form id="rulesForm" class="account-card merchant-form"><p id="currencyInfo"></p><p data-t="coverage"></p><div id="rules"></div><div class="form-actions"><button class="secondary-button" id="addRule" type="button" data-t="add"></button><button class="primary-button" type="submit" data-t="save"></button><button class="secondary-button" id="reload" type="button" data-t="reload"></button></div></form></div></main></div><footer class="account-container account-footer">© 2026 BEMO</footer><script src="vendor/supabase-2.118.0.js"></script><script src="backend-config.js"></script><script src="account-session.js"></script><script src="live-commerce.js"></script><script src="workspace-private.js"></script><script src="regions.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>مناطق التوصيل — BEMO Seller Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="live-commerce.css">
+  <link rel="stylesheet" href="merchant.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <style>
+    .seller-shell-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .seller-modern-sidebar {
+      background: #0F1E36;
+      border-radius: 12px;
+      padding: 16px 12px;
+      color: #FFFFFF;
+      position: sticky;
+      top: 20px;
+    }
+    .seller-modern-sidebar p {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 8px;
+    }
+    .seller-modern-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #E2E8F0;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .seller-modern-sidebar a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+    .seller-modern-sidebar a[aria-current="page"] {
+      background: #FF5000;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    .region-rule-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    @media(max-width: 900px) {
+      .seller-shell-layout { grid-template-columns: 1fr; }
+      .region-rule-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-page="regions">
+  <a class="skip-link" href="#main" data-t="skip">انتقل إلى المحتوى</a>
+
+  <!-- Top Flash Bar -->
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">DELIVERY REGIONS</span>
+        <span>تحديد نطاقات الشحن والتوصيل لكل محافظة ومدينة مع تسعيرتها المستقلة</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="seller.html" class="top-link">لوحة المتجر</a>
+        <span class="top-sep">|</span>
+        <a href="orders.html?view=seller" class="top-link">طلبات المتجر</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="seller.html" aria-label="BEMO Seller Center">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Seller Center · مناطق التوصيل</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-container" style="max-width: 440px;">
+        <form class="search-form-pill" action="search.html" role="search">
+          <input name="q" type="search" placeholder="ابحث في السوق..." autocomplete="off">
+          <button type="submit" class="search-submit-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>بحث</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Actions -->
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>السوق</span>
+        </a>
+        <a href="orders.html?view=seller" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11"/></svg>
+          <span>طلبات المتجر</span>
+        </a>
+        <a href="account.html" class="header-action-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
+          <span>حسابي</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Workspace Shell -->
+  <div class="container seller-shell-layout">
+    <!-- Dark Navy Seller Navigation Sidebar -->
+    <aside class="seller-modern-sidebar" id="sellerNavigation"></aside>
+
+    <!-- Main Workspace Content -->
+    <main id="main" class="merchant-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+        <div>
+          <span class="section-kicker" data-t="seller" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز التاجر / اللوجستيات</span>
+          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">مناطق وتكلفة التوصيل</h1>
+          <p style="font-size:13px;color:#64748B;margin:4px 0 0;">حدد المحافظات والمدن التي يغطيها متجرك مع أجرة التوصيل لكل منطقة على حدة.</p>
+        </div>
+
+        <a data-route="merchant.html" href="merchant.html" class="secondary-button" data-t="back" style="padding:8px 16px;border-radius:8px;font-size:13px;text-decoration:none;">
+          العودة للمنتجات ➔
+        </a>
+      </div>
+
+      <!-- Live Status & Errors -->
+      <p id="status" role="status" aria-live="polite" class="bemo-live-status"></p>
+      <div id="error" class="message error-message" role="alert" hidden style="margin-bottom:16px;"></div>
+
+      <!-- Gate View (If not authenticated as seller) -->
+      <section id="gate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
+        <div style="font-size:42px;margin-bottom:12px;">🚚</div>
+        <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول لضبط مناطق التوصيل</h2>
+        <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وسجّل متجرك لتحديد وجهات الشحن وأجور المندوبين.</p>
+        <a class="primary-button" data-route="account.html" href="account.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل الدخول / فتح المتجر</a>
+      </section>
+
+      <!-- Active Workspace -->
+      <div id="workspace">
+        <form id="rulesForm" class="account-card merchant-form" style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:24px;">
+          <div style="background:#FFF1E8;border:1px solid #FED7AA;border-radius:8px;padding:14px;margin-bottom:20px;">
+            <p id="currencyInfo" style="font-weight:700;color:#9A3412;margin:0 0 4px;font-size:13px;"></p>
+            <p data-t="coverage" style="font-size:12px;color:#B45309;margin:0;"></p>
+          </div>
+
+          <div id="rules" style="margin-bottom:20px;"></div>
+
+          <div class="form-actions" style="display:flex;gap:12px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #E2E8F0;">
+            <button class="secondary-button" id="addRule" type="button" data-t="add" style="padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;">
+              ➕ إضافة منطقة توصيل جديدة
+            </button>
+            <button class="primary-button" type="submit" data-t="save" style="background:#FF5000;padding:10px 24px;border-radius:8px;font-weight:700;font-size:13px;">
+              حفظ وتثبيت التسعيرات
+            </button>
+            <button class="secondary-button" id="reload" type="button" data-t="reload" style="padding:10px 16px;border-radius:8px;font-size:13px;">
+              إعادة التحميل
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;margin-top:40px;">
+    <span>© 2026 BEMO Seller Center. جميع الحقوق محفوظة.</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="live-commerce.js"></script>
+  <script src="workspace-private.js"></script>
+  <script src="bemo-region.js"></script>
+  <script src="regions.js"></script>
+</body>
+</html>
