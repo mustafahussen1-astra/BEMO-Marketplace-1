@@ -154,9 +154,9 @@
       emptyCard.style.background = '#F8FAFC';
       emptyCard.innerHTML = `
         <div style="font-size:42px;margin-bottom:12px;">📍</div>
-        <strong style="display:block;font-size:15px;color:#0F172A;margin-bottom:6px;">${w.t('empty')}</strong>
-        <p style="color:#64748B;font-size:13px;max-width:400px;margin:0 auto 16px;">أضف عنواناً رئيسياً لتوصيل الطلبات حتى يتم ملء بيانات الشحن في السلة تلقائياً.</p>
-        <button type="button" class="primary-button" id="emptyAddBtn" style="background:#FF5000;padding:8px 18px;border-radius:6px;font-weight:700;">
+        <strong style="display:block;font-size:15px;color:var(--bemo-text);margin-bottom:6px;">${w.t('empty')}</strong>
+        <p style="color:var(--bemo-muted);font-size:13px;max-width:400px;margin:0 auto 16px;">أضف عنواناً رئيسياً لتوصيل الطلبات حتى يتم ملء بيانات الشحن في السلة تلقائياً.</p>
+        <button type="button" class="primary-button" id="emptyAddBtn" style="background:#FF5000;color:#fff;padding:8px 18px;border-radius:6px;font-weight:700;">
           ➕ إضافة عنوانك الآن
         </button>
       `;
@@ -182,13 +182,13 @@
           <div class="address-info-line">
             <span style="font-size:16px;">👤</span>
             <div>
-              <strong style="color:#0F172A;">${escapeHtml(a.delivery?.recipient || '—')}</strong>
+              <strong style="color:var(--bemo-text);">${escapeHtml(a.delivery?.recipient || '—')}</strong>
             </div>
           </div>
 
           <div class="address-info-line">
             <span style="font-size:16px;">📞</span>
-            <span dir="ltr" style="font-weight:700;color:#0F172A;">${escapeHtml(a.delivery?.phone || '—')}</span>
+            <span dir="ltr" style="font-weight:700;color:var(--bemo-text);">${escapeHtml(a.delivery?.phone || '—')}</span>
           </div>
 
           <div class="address-info-line">
@@ -196,11 +196,11 @@
             <span>${escapeHtml([a.delivery?.city, a.delivery?.region, a.delivery?.country].filter(Boolean).join(' · '))}</span>
           </div>
 
-          <div class="address-info-line" style="margin-top:10px;background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #E2E8F0;">
+          <div class="address-info-line" style="margin-top:10px;background:var(--bemo-surface-secondary);padding:10px;border-radius:8px;border:1px solid var(--bemo-border);">
             <span style="font-size:16px;">🏠</span>
             <div style="font-size:12px;line-height:1.5;">
-              <div style="color:#1E293B;font-weight:500;">${escapeHtml(a.delivery?.address || '—')}</div>
-              ${a.delivery?.note ? `<div style="color:#64748B;font-size:11px;margin-top:4px;"><strong>ملاحظة المندوب:</strong> ${escapeHtml(a.delivery.note)}</div>` : ''}
+              <div style="color:var(--bemo-text);font-weight:500;">${escapeHtml(a.delivery?.address || '—')}</div>
+              ${a.delivery?.note ? `<div style="color:var(--bemo-muted);font-size:11px;margin-top:4px;"><strong>ملاحظة المندوب:</strong> ${escapeHtml(a.delivery.note)}</div>` : ''}
             </div>
           </div>
         </div>

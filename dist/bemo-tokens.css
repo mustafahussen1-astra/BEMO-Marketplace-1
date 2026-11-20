@@ -54,21 +54,104 @@
   --transition-normal: 180ms;
 }
 
-[data-theme="dark"], html[data-theme="dark"] {
-  --bemo-bg: #121212;
-  --bemo-surface: #1C1C1C;
-  --bemo-surface-secondary: #252525;
-  --bemo-text: #F5F5F5;
-  --bemo-muted: #A3A3A3;
-  --bemo-border: #333333;
-  --bemo-primary: #FF6A24;
-  --bemo-primary-hover: #FF7D3E;
-  --bemo-primary-soft: #382219;
-  --bemo-sale: #FF7070;
-  --bemo-success: #4ADE80;
-  --bemo-warning: #FBBF24;
-  --bemo-info: #60A5FA;
-  --bemo-verified: #60A5FA;
+/* ==========================================================================
+   GLOBAL THEME SYSTEM (LIGHT & DARK DUAL PASS)
+   ========================================================================== */
+:root, [data-theme="light"], html[data-theme="light"] {
+  --bemo-bg: #F8FAFC;
+  --bemo-surface: #FFFFFF;
+  --bemo-surface-secondary: #F1F5F9;
+  --bemo-text: #0F172A;
+  --bemo-muted: #64748B;
+  --bemo-border: #E2E8F0;
+  --ink: #0F172A;
+  --canvas: #F8FAFC;
+  --surface: #FFFFFF;
+  --muted: #64748B;
+  --border: #E2E8F0;
+  color-scheme: light;
+}
+
+[data-theme="dark"], html[data-theme="dark"], html[data-theme="dark"] body {
+  --bemo-bg: #0B1120 !important;
+  --bemo-surface: #131E35 !important;
+  --bemo-surface-secondary: #1E293B !important;
+  --bemo-text: #F8FAFC !important;
+  --bemo-muted: #94A3B8 !important;
+  --bemo-border: #223250 !important;
+  --ink: #F8FAFC !important;
+  --canvas: #0B1120 !important;
+  --surface: #131E35 !important;
+  --muted: #94A3B8 !important;
+  --border: #223250 !important;
+  color-scheme: dark;
+}
+
+/* Force high contrast readability across all headings, cards, inputs & text in dark mode */
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+[data-theme="dark"] strong, [data-theme="dark"] b,
+[data-theme="dark"] .section-heading,
+[data-theme="dark"] .faq-question,
+[data-theme="dark"] .balance-kpi-card strong,
+[data-theme="dark"] .help-card h3,
+[data-theme="dark"] .account-card h2,
+[data-theme="dark"] .brand-name,
+[data-theme="dark"] .header-action-btn,
+[data-theme="dark"] .trending-keywords a {
+  color: var(--bemo-text) !important;
+}
+
+[data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] small,
+[data-theme="dark"] .section-copy, [data-theme="dark"] .help-card p, [data-theme="dark"] .help-card-list li,
+[data-theme="dark"] .brand-sub, [data-theme="dark"] .trending-keywords {
+  color: var(--bemo-muted);
+}
+
+[data-theme="dark"] .account-card,
+[data-theme="dark"] .buyer-card,
+[data-theme="dark"] .order-card,
+[data-theme="dark"] .store-card,
+[data-theme="dark"] .topup-card,
+[data-theme="dark"] .faq-section,
+[data-theme="dark"] .help-card,
+[data-theme="dark"] .balance-kpi-card,
+[data-theme="dark"] .address-card,
+[data-theme="dark"] .live-product,
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .live-empty,
+[data-theme="dark"] .category-rail {
+  background-color: var(--bemo-surface) !important;
+  border-color: var(--bemo-border) !important;
+  color: var(--bemo-text) !important;
+}
+
+[data-theme="dark"] input:not([type="radio"]):not([type="checkbox"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bemo-surface-secondary) !important;
+  color: var(--bemo-text) !important;
+  border-color: var(--bemo-border) !important;
+}
+
+[data-theme="dark"] .secondary-button,
+[data-theme="dark"] .btn-edit-addr,
+[data-theme="dark"] .theme-button,
+[data-theme="dark"] .language-button {
+  background-color: var(--bemo-surface-secondary) !important;
+  color: var(--bemo-text) !important;
+  border-color: var(--bemo-border) !important;
+}
+
+[data-theme="dark"] .tab-btn {
+  background-color: var(--bemo-surface) !important;
+  color: var(--bemo-text) !important;
+  border-color: var(--bemo-border) !important;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  background-color: #FF5000 !important;
+  color: #FFFFFF !important;
+  border-color: #FF5000 !important;
 }
 
 * {

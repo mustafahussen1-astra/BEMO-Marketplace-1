@@ -55,8 +55,8 @@
       margin-bottom: 12px;
     }
     .address-label-pill {
-      background: #F1F5F9;
-      color: #0F172A;
+      background: var(--bemo-surface-secondary);
+      color: var(--bemo-text);
       font-weight: 700;
       font-size: 13px;
       padding: 4px 10px;
@@ -70,24 +70,24 @@
       align-items: flex-start;
       gap: 8px;
       font-size: 13px;
-      color: #475569;
+      color: var(--bemo-muted);
       margin-bottom: 8px;
       line-height: 1.5;
     }
     .address-info-line strong {
-      color: #0F172A;
+      color: var(--bemo-text);
     }
     .address-action-row {
       display: flex;
       gap: 10px;
       margin-top: 16px;
       padding-top: 14px;
-      border-top: 1px solid #F1F5F9;
+      border-top: 1px solid var(--bemo-border);
     }
     .btn-edit-addr {
-      background: #F8FAFC;
-      border: 1px solid #CBD5E1;
-      color: #1E293B;
+      background: var(--bemo-surface);
+      border: 1px solid var(--bemo-border);
+      color: var(--bemo-text);
       font-weight: 600;
       font-size: 12px;
       padding: 6px 14px;
@@ -198,11 +198,11 @@
   <!-- Main Content Container -->
   <main id="main" class="container" style="max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px;">
     <!-- Page Title & Header Toolbar -->
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #E5E5E5;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--bemo-border);">
       <div>
         <span class="section-kicker" data-t="buyer" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز المشتري / عناوين الشحن</span>
-        <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#171717;">عناوين التوصيل والاستلام</h1>
-        <p style="font-size:13px;color:#64748B;margin:4px 0 0;">احفظ عناوينك لتطبيقها تلقائياً عند الدفع عند الاستلام بضغطة زر واحدة.</p>
+        <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:var(--bemo-text);">عناوين التوصيل والاستلام</h1>
+        <p style="font-size:13px;color:var(--bemo-muted);margin:4px 0 0;">احفظ عناوينك لتطبيقها تلقائياً عند الدفع عند الاستلام بضغطة زر واحدة.</p>
       </div>
 
       <button id="newAddress" class="primary-button" type="button" data-t="newAddress" style="background:#FF5000;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px;">

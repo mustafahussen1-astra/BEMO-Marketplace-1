@@ -97,18 +97,18 @@
       display: block;
       font-size: 12px;
       font-weight: 600;
-      color: #64748B;
+      color: var(--bemo-muted);
       margin-bottom: 6px;
     }
     .balance-kpi-card strong {
       display: block;
       font-size: 28px;
       font-weight: 800;
-      color: #0F172A;
+      color: var(--bemo-text);
     }
     .topup-card {
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
+      background: var(--bemo-surface);
+      border: 1px solid var(--bemo-border);
       border-radius: 12px;
       padding: 24px;
       margin-bottom: 24px;
@@ -199,11 +199,11 @@
 
     <!-- Main Workspace Content -->
     <main id="main" class="merchant-main">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--bemo-border);">
         <div>
           <span class="section-kicker" data-t="seller" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">مركز التاجر / المالية</span>
-          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#0F172A;">الرصيد والاستقطاع المالي</h1>
-          <p style="font-size:13px;color:#64748B;margin:4px 0 0;">متابعة أرصدة متجرك المتاحة، الحصص المحجوزة، وسجل الشحن والتحويلات اليدوية.</p>
+          <h1 data-t="title" style="font-size:24px;font-weight:800;margin:4px 0 0;color:var(--bemo-text);">الرصيد والاستقطاع المالي</h1>
+          <p style="font-size:13px;color:var(--bemo-muted);margin:4px 0 0;">متابعة أرصدة متجرك المتاحة، الحصص المحجوزة، وسجل الشحن والتحويلات اليدوية.</p>
         </div>
 
         <button id="refresh" type="button" class="secondary-button" data-t="refresh" style="padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">

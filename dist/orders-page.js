@@ -1,9 +1,9 @@
 (() => {
  'use strict';const $=id=>document.getElementById(id),api=window.BemoAccount,live=window.BemoLive;
  let requestedOrder=new URL(location.href).searchParams.get('id');
- let lang=new URL(location.href).searchParams.get('lang')==='en'?'en':'ar',mode=new URL(location.href).searchParams.get('view')||'buyer';if(!['buyer','seller','support','notifications'].includes(mode))mode='buyer';
+ let lang=new URL(location.href).searchParams.get('lang')==='en'?'en':'ar',mode=new URL(location.href).searchParams.get('view')||new URL(location.href).searchParams.get('tab')||'buyer';if(!['buyer','seller','support','notifications','saved'].includes(mode))mode='buyer';
  let epoch=0,identity=null,ready=false,busy=false,page=0,selected=null,activeCase=null,requestKey=null,requestSignature=null;
- const words={skip:['انتقل إلى المحتوى','Skip to content'],browse:['المنتجات','Products'],account:['حسابي','My account'],title:['الطلبات والإشعارات','Orders & notifications'],intro:['تابع كل متجر على حدة. الدفع عند الاستلام للتاجر أو مندوبه؛ لا تحتفظ BEMO بمبالغ الدفع عند الاستلام.','Track each store separately. Pay cash on delivery to the seller or courier; BEMO does not hold COD payments.'],buyer:['طلباتي','My orders'],seller:['طلبات المتجر','Store orders'],notifications:['الإشعارات','Notifications'],support:['مساحة الدعم','Support workspace'],gate:['سجّل الدخول وأكمل حسابك لعرض الطلبات.','Sign in and complete your profile to view orders.'],refresh:['تحديث','Refresh'],previous:['السابق','Previous'],next:['التالي','Next'],action:['الإجراء','Action'],reason:['السبب / تفاصيل المراجعة','Reason / review details'],receipt:['تحققت من استلام جميع القطع وفحصها وصلاحيتها للإعادة إلى المخزون.','I verified that all items were physically received, inspected and can be returned to inventory.'],noRefund:['إعادة حصة الاستقطاع لرصيد التاجر منفصلة عن رد قيمة المشتريات النقدية للمشتري.','Returning commission to the seller balance is separate from refunding the buyer’s cash payment.'],submit:['تنفيذ الإجراء','Apply action'],empty:['لا توجد عناصر هنا بعد.','No items here yet.'],loading:['جارٍ التحميل…','Loading…'],details:['التفاصيل','Details'],claim:['استلام الحالة','Claim case'],read:['تحديد كمقروء','Mark read'],private:['بيانات التسليم مخفية حتى قبول التاجر بنجاح.','Delivery details remain private until the seller accepts successfully.'],reasonRequired:['اكتب سبباً واضحاً من 20 حرفاً على الأقل.','Provide a clear reason of at least 20 characters.'],error:['تعذّر تنفيذ الإجراء. حدّث البيانات وحاول مجدداً.','The action failed. Refresh and try again.'],SUPPORT_REQUIRED:['هذه المساحة مخصصة لموظفي الدعم المخولين.','This workspace requires an assigned support role.'],STOCK_INSUFFICIENT:['المخزون لا يكفي لقبول جميع القطع. لم يُخصم أي مخزون.','There is not enough stock for all items. No stock was debited.'],VERSION_CONFLICT:['تغيّر الطلب. حدّث البيانات قبل المحاولة.','This order changed. Refresh before trying again.'],SESSION_CHANGED:['تغيرت جلسة الدخول. أعد فتح الصفحة.','The sign-in session changed. Reopen this page.'],CASE_NOT_ASSIGNED:['الحالة غير مسندة إليك.','This case is not assigned to you.'],CASE_CONFLICT_OF_INTEREST:['لا يمكنك مراجعة حالة تخص مشترياتك أو متجرك.','You cannot review a case involving your purchases or store.']};
+ const words={skip:['انتقل إلى المحتوى','Skip to content'],browse:['المنتجات','Products'],account:['حسابي','My account'],title:['الطلبات والإشعارات والمفضلة','Orders, notifications & saved'],intro:['تابع كل متجر على حدة. الدفع عند الاستلام للتاجر أو مندوبه؛ لا تحتفظ BEMO بمبالغ الدفع عند الاستلام.','Track each store separately. Pay cash on delivery to the seller or courier; BEMO does not hold COD payments.'],buyer:['طلباتي','My orders'],seller:['طلبات المتجر','Store orders'],notifications:['الإشعارات','Notifications'],support:['مساحة الدعم','Support workspace'],saved:['المفضلة والمحفوظات','Saved items'],gate:['سجّل الدخول وأكمل حسابك لعرض الطلبات والمفضلة.','Sign in and complete your profile to view orders and saved items.'],refresh:['تحديث','Refresh'],previous:['السابق','Previous'],next:['التالي','Next'],action:['الإجراء','Action'],reason:['السبب / تفاصيل المراجعة','Reason / review details'],receipt:['تحققت من استلام جميع القطع وفحصها وصلاحيتها للإعادة إلى المخزون.','I verified that all items were physically received, inspected and can be returned to inventory.'],noRefund:['إعادة حصة الاستقطاع لرصيد التاجر منفصلة عن رد قيمة المشتريات النقدية للمشتري.','Returning commission to the seller balance is separate from refunding the buyer’s cash payment.'],submit:['تنفيذ الإجراء','Apply action'],empty:['لا توجد عناصر هنا بعد.','No items here yet.'],loading:['جارٍ التحميل…','Loading…'],details:['التفاصيل','Details'],claim:['استلام الحالة','Claim case'],read:['تحديد كمقروء','Mark read'],private:['بيانات التسليم مخفية حتى قبول التاجر بنجاح.','Delivery details remain private until the seller accepts successfully.'],reasonRequired:['اكتب سبباً واضحاً من 20 حرفاً على الأقل.','Provide a clear reason of at least 20 characters.'],error:['تعذّر تنفيذ الإجراء. حدّث البيانات وحاول مجدداً.','The action failed. Refresh and try again.'],SUPPORT_REQUIRED:['هذه المساحة مخصصة لموظفي الدعم المخولين.','This workspace requires an assigned support role.'],STOCK_INSUFFICIENT:['المخزون لا يكفي لقبول جميع القطع. لم يُخصم أي مخزون.','There is not enough stock for all items. No stock was debited.'],VERSION_CONFLICT:['تغيّر الطلب. حدّث البيانات قبل المحاولة.','This order changed. Refresh before trying again.'],SESSION_CHANGED:['تغيرت جلسة الدخول. أعد فتح الصفحة.','The sign-in session changed. Reopen this page.'],CASE_NOT_ASSIGNED:['الحالة غير مسندة إليك.','This case is not assigned to you.'],CASE_CONFLICT_OF_INTEREST:['لا يمكنك مراجعة حالة تخص مشترياتك أو متجرك.','You cannot review a case involving your purchases or store.']};
  Object.assign(words,{holdDecision:['قرار حصة الاستقطاع — مستقل عن المخزون','Commission decision — separate from inventory'],chooseDecision:['اختر قرار الرصيد','Choose a balance decision'],releaseHold:['إعادة الرصيد للتاجر','Return funds to seller'],captureHold:['استقطاع الحصة','Capture commission'],BALANCE_INSUFFICIENT:['رصيد التاجر لا يكفي لحجز حصة الطلب. لم يُقبل الطلب ولم تُكشف البيانات.','Insufficient commission balance. Order not accepted and details remain private.'],BALANCE_FROZEN:['حساب الرصيد مجمّد؛ تواصل مع الإدارة.','Balance account frozen; contact administration.'],holdRequired:['اختر إعادة الرصيد أو استقطاع الحصة.','Choose whether to release or capture commission.']});
  const states={PENDING_SELLER:['بانتظار قبول التاجر','Awaiting seller'],ESCALATED_TO_SUPPORT:['أُحيل للدعم','Escalated to support'],REJECTED_BY_SELLER:['رفضه التاجر','Rejected by seller'],CANCELLED_BY_BUYER_PRE_ACCEPT:['ألغاه المشتري قبل القبول','Buyer cancelled before acceptance'],ACCEPTED:['مقبول','Accepted'],PACKING:['قيد التجهيز','Packing'],SHIPPED:['السائق في الطريق','Driver en route'],DELIVERY_ATTEMPTED:['جرت محاولة توصيل','Delivery attempted'],DELIVERED:['تم التسليم','Delivered'],CANCEL_REQUESTED:['طلب إلغاء قيد المراجعة','Cancellation requested'],RETURN_REQUESTED:['طلب إرجاع','Return requested'],RETURN_IN_REVIEW:['الإرجاع قيد المراجعة','Return under review'],RETURNED:['تم استلام المرتجع','Return received'],CANCELLED_BY_SUPPORT:['ألغاه الدعم','Cancelled by support'],FAILED_DELIVERY:['تعذر التسليم','Delivery failed'],CLOSED:['مغلق','Closed'],SELLER_REMINDER_24H:['تذكير: طلب بانتظار ردك منذ 24 ساعة','Reminder: order awaiting your response for 24 hours'],SELLER_DELAY_48H:['تأخر رد التاجر وأُحيل الطلب للدعم','Seller delay escalated to support'],ORDER_CREATED:['طلب جديد','New order']};
  const actions={ACCEPT:['قبول الطلب وفتح البيانات','Accept order & unlock details'],REJECT:['رفض الطلب','Reject order'],PACK:['بدء التجهيز','Start packing'],SHIP:['السائق في الطريق','Dispatch driver'],ATTEMPT_DELIVERY:['تأكيد وصول السائق','Confirm driver arrival'],DELIVER:['تأكيد التسليم','Confirm delivery'],FAIL_DELIVERY:['الإبلاغ عن تعذر التسليم','Report delivery failure'],CANCEL:['إلغاء قبل القبول','Cancel before acceptance'],REQUEST_CANCEL:['طلب إلغاء من الدعم','Request cancellation'],REQUEST_RETURN:['طلب مراجعة إرجاع','Request return review'],FOLLOW_UP:['إعادة الطلب للتاجر بمهلة جديدة','Return to seller with a new deadline'],CANCEL_NON_RESPONSE:['إلغاء لعدم رد التاجر','Cancel for seller non-response'],DENY_REQUEST:['رفض الطلب مع بيان السبب','Deny request with explanation'],REVIEW_RETURN:['بدء فحص الإرجاع','Start return review'],APPROVE_CANCEL:['الموافقة على الإلغاء','Approve cancellation'],CONFIRM_RETURN:['تأكيد استلام وفحص المرتجع','Confirm return receipt and inspection']};
@@ -204,7 +204,66 @@
     }
   ];
 
- async function rows(request){clearDetail();const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;let result=[];try{const r=await request(method,args);if(Array.isArray(r))result=r;}catch(_){}if(!result.length&&['buyer','seller'].includes(mode)){try{let local=JSON.parse(localStorage.getItem('bemo-orders-local')||'null');if(!local||!local.length){local=SEED_ORDERS;localStorage.setItem('bemo-orders-local',JSON.stringify(local));}if(Array.isArray(local)&&local.length)result=local;}catch(_){}}$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
+ async function rows(request){
+  clearDetail();
+  if (mode === 'saved') {
+    $('rows').replaceChildren();
+    let savedIds = [];
+    try {
+      const raw = JSON.parse(localStorage.getItem('bemo-live-saved-v1') || '[]');
+      if (Array.isArray(raw)) savedIds = raw;
+    } catch (_) {}
+    const catalog = Array.isArray(window.BEMO_CATALOG) ? window.BEMO_CATALOG : [];
+    const savedProducts = savedIds.map(id => catalog.find(p => p.id === id)).filter(Boolean);
+    if ($('ordersSavedCount')) $('ordersSavedCount').textContent = String(savedProducts.length);
+    if ($('listSubTitle')) $('listSubTitle').textContent = lang === 'ar' ? 'المنتجات التي قمت بحفظها في المفضلة' : 'Products you saved to favorites';
+
+    if (!savedProducts.length) {
+      const emptyDiv = node('div', undefined, 'live-empty');
+      emptyDiv.style.cssText = 'text-align:center;padding:48px 20px;';
+      emptyDiv.innerHTML = `
+        <div style="font-size:44px;margin-bottom:12px;">❤️</div>
+        <h3 style="font-size:18px;font-weight:800;margin:0 0 8px;color:var(--bemo-text);">${lang==='ar'?'لا توجد منتجات محفوظة حالياً':'No saved items yet'}</h3>
+        <p style="color:var(--bemo-muted);font-size:13px;margin:0 0 20px;">${lang==='ar'?'يمكنك تصفح منتجات BEMO والضغط على أيقونة القلب لحفظ أي منتج هنا والرجوع إليه دائماً.':'Explore BEMO products and click the heart icon to save products here.'}</p>
+        <a href="search.html?lang=${lang}" class="primary-button" style="background:#FF5000;color:#fff;padding:10px 24px;border-radius:8px;font-weight:700;text-decoration:none;">${lang==='ar'?'تصفح المنتجات الآن':'Browse products'}</a>
+      `;
+      $('rows').append(emptyDiv);
+      return;
+    }
+
+    const grid = node('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;';
+    for (const p of savedProducts) {
+      const card = node('article', undefined, 'account-card');
+      card.style.cssText = 'padding:14px;display:flex;flex-direction:column;border-radius:12px;background:var(--bemo-surface);border:1px solid var(--bemo-border);';
+      const img = p.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400';
+      const priceText = (p.price_cents / 100).toLocaleString() + ' ' + (p.currency || 'IQD');
+      card.innerHTML = `
+        <img src="${img}" alt="${p.title || p.name}" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+        <span style="font-size:11px;color:var(--bemo-muted);font-weight:600;">${p.store_title || p.store || 'BEMO'}</span>
+        <h3 style="font-size:14px;font-weight:700;margin:4px 0 6px;color:var(--bemo-text);line-height:1.4;">${p.title || p.name}</h3>
+        <div style="font-size:16px;font-weight:800;color:#FF5000;margin-bottom:12px;">${priceText}</div>
+        <div style="display:flex;gap:8px;margin-top:auto;">
+          <a href="product.html?id=${p.id}&lang=${lang}" class="primary-button" style="flex:1;text-align:center;padding:8px;font-size:12px;background:#FF5000;color:#fff;border-radius:6px;text-decoration:none;">${lang==='ar'?'عرض المنتج':'View'}</a>
+          <button type="button" class="secondary-button remove-saved-btn" data-id="${p.id}" style="padding:8px 12px;font-size:12px;border-radius:6px;cursor:pointer;" title="${lang==='ar'?'إزالة من المفضلة':'Remove'}">🗑️</button>
+        </div>
+      `;
+      grid.append(card);
+    }
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('.remove-saved-btn');
+      if (btn) {
+        const id = btn.dataset.id;
+        let cur = JSON.parse(localStorage.getItem('bemo-live-saved-v1') || '[]');
+        cur = cur.filter(x => x !== id);
+        localStorage.setItem('bemo-live-saved-v1', JSON.stringify(cur));
+        rows();
+      }
+    });
+    $('rows').append(grid);
+    return;
+  }
+  const method=mode==='support'?'bemo_support_queue':mode==='notifications'?'bemo_notifications':'bemo_list_orders';const args={limit_count:24,offset_count:page*24};if(['buyer','seller'].includes(mode))args.view_as=mode;let result=[];try{const r=await request(method,args);if(Array.isArray(r))result=r;}catch(_){}if(!result.length&&['buyer','seller'].includes(mode)){try{let local=JSON.parse(localStorage.getItem('bemo-orders-local')||'null');if(!local||!local.length){local=SEED_ORDERS;localStorage.setItem('bemo-orders-local',JSON.stringify(local));}if(Array.isArray(local)&&local.length)result=local;}catch(_){}}$('rows').replaceChildren();if(!result.length)$('rows').append(emptyRows());
   for(const r of result){const article=node('article'),copy=node('div'),button=node('button',tr(mode==='support'?(r.unassigned?'claim':'details'):mode==='notifications'?'read':'details'),'secondary-button');button.type='button';
    copy.append(node('h2',mode==='support'?({SELLER_DELAY:lang==='ar'?'تأخر التاجر':'Seller delay',CANCELLATION:lang==='ar'?'إلغاء':'Cancellation',RETURN:lang==='ar'?'إرجاع':'Return',DELIVERY_FAILURE:lang==='ar'?'تعذر التسليم':'Delivery failure'})[r.kind]:mode==='notifications'?(r.kind==='ADMIN_MESSAGE'?(lang==='ar'?'إشعار الإدارة':'Admin notification'):tr(r.kind,states)):r.store_title));copy.append(node('p',r.id,'order-reference'));if(r.state&&mode!=='support')copy.append(node('p',tr(r.state,states),'order-state'));if(mode==='seller'&&Array.isArray(r.items))for(const i of r.items)copy.append(node('p',i.title+' / '+i.variant_label+' × '+i.quantity,'order-line-summary'));if(r.total_minor!=null)copy.append(node('p',live.money(r.total_minor,r.currency,lang)));if(mode==='notifications'){
     if(r.body)copy.append(node('p',r.body));

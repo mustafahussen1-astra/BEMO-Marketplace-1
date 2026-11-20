@@ -49,7 +49,7 @@
       else if (action === 'sell') route('merchant.html');
       else if (action === 'orders') route('orders.html');
       else if (action === 'cart') { location.href = 'market.html?view=cart&lang=' + lang; }
-      else if (action === 'saved') window.dispatchEvent(new CustomEvent('bemo:saved'));
+      else if (action === 'saved') route('orders.html', { view: 'saved' });
       else route('help.html');
     },
     toggleSaved(id) {

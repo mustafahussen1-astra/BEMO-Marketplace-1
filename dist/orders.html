@@ -84,15 +84,16 @@
   <!-- 3. Main Workspace -->
   <main class="container" id="main" style="max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px;">
     <!-- Page Title & Tabs Strip -->
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #E5E5E5;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--bemo-border);">
       <div>
         <span class="section-kicker" style="color:#FF5000;font-size:11px;font-weight:700;letter-spacing:0.05em;display:block;">BEMO LOGISTICS</span>
-        <h1 id="pageHeading" style="font-size:24px;font-weight:800;margin:4px 0 0;color:#171717;">إدارة الطلبات والشحنات</h1>
+        <h1 id="pageHeading" style="font-size:24px;font-weight:800;margin:4px 0 0;color:var(--bemo-text);">إدارة الطلبات والمفضلة</h1>
       </div>
 
       <!-- Tabs Pill Bar -->
-      <nav class="live-tabs" id="tabs" style="margin:0;display:flex;gap:8px;">
+      <nav class="live-tabs" id="tabs" style="margin:0;display:flex;gap:8px;flex-wrap:wrap;">
         <button type="button" data-mode="buyer" class="tab-btn active" style="padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">طلباتي (مشترياتك)</button>
+        <button type="button" data-mode="saved" class="tab-btn" style="padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">❤️ المفضلة والمحفوظات</button>
         <button type="button" data-mode="seller" class="tab-btn" style="padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">طلبات المتجر (البائع)</button>
         <button type="button" data-mode="notifications" class="tab-btn" style="padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">الإشعارات</button>
         <button type="button" data-mode="support" class="tab-btn" style="padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">مساحة الدعم والشكاوى</button>
@@ -106,16 +107,16 @@
     <!-- Sign-in Gate Card -->
     <section id="gate" class="buyer-card" style="text-align:center;padding:48px 20px;max-width:550px;margin:30px auto;" hidden>
       <div style="font-size:44px;margin-bottom:12px;">📦</div>
-      <h2 style="font-size:18px;font-weight:800;margin:0 0 8px;">سجّل الدخول لمتابعة طلباتك</h2>
-      <p style="color:#737373;font-size:13px;margin:0 0 20px;">تحتاج إلى تسجيل الدخول لعرض تفاصيل شحناتك والتواصل مع التجار والمندوبين.</p>
-      <a class="primary-button" data-route="account.html" href="account.html" style="background:#FF5000;padding:10px 24px;border-radius:8px;font-weight:700;text-decoration:none;">تسجيل الدخول / فتح حساب</a>
+      <h2 style="font-size:18px;font-weight:800;margin:0 0 8px;color:var(--bemo-text);">سجّل الدخول لمتابعة طلباتك ومفضلتك</h2>
+      <p style="color:var(--bemo-muted);font-size:13px;margin:0 0 20px;">تحتاج إلى تسجيل الدخول لعرض تفاصيل شحناتك والتواصل مع التجار والمندوبين.</p>
+      <a class="primary-button" data-route="account.html" href="account.html" style="background:#FF5000;color:#fff;padding:10px 24px;border-radius:8px;font-weight:700;text-decoration:none;">تسجيل الدخول / فتح حساب</a>
     </section>
 
     <!-- Workspace Body -->
     <div id="workspace">
       <!-- Toolbar (Refresh & Stats) -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <span style="font-size:13px;color:#737373;">قائمة الطلبات المسجلة في حسابك</span>
+        <span id="listSubTitle" style="font-size:13px;color:var(--bemo-muted);">قائمة الطلبات المسجلة في حسابك</span>
         <button id="refresh" class="secondary-button" style="padding:6px 14px;font-size:12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
           <span>🔄</span> <span>تحديث القائمة</span>
         </button>

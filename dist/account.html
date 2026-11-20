@@ -133,21 +133,67 @@
         <span class="small-icon pale" aria-hidden="true">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </span>
-        <span class="section-kicker">تسجيل الدخول</span>
+        <span class="section-kicker">تسجيل الدخول / إنشاء حساب</span>
         <h2 id="signInTitle">مرحباً بك في BEMO</h2>
-        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك وتثبيت بيانات الشحن.</p>
-        
+        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك، إدارة متجرك، وتثبيت بيانات الشحن.</p>
+
+        <!-- Direct Instant Login Form -->
+        <form id="directLoginForm" class="account-form" style="margin-top:20px;">
+          <label for="directName">الاسم الكامل *</label>
+          <input id="directName" name="name" required placeholder="مثال: محمد أحمد العبيدي" minlength="2" maxlength="80">
+
+          <label for="directContact">البريد الإلكتروني أو رقم الهاتف *</label>
+          <input id="directContact" name="contact" required placeholder="name@example.com أو +964 770 123 4567">
+
+          <div style="display:flex;gap:12px;margin-top:10px;">
+            <label style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;cursor:pointer;">
+              <input type="radio" name="role" value="buyer" checked style="accent-color:#FF5000;width:18px;height:18px;">
+              <span>أنا مشتري (تسوق وطلبات)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;cursor:pointer;">
+              <input type="radio" name="role" value="seller" style="accent-color:#FF5000;width:18px;height:18px;">
+              <span>أنا تاجر (إدارة متجر ورصيد)</span>
+            </label>
+          </div>
+
+          <button class="primary-button" type="submit" style="margin-top:16px;width:100%;font-size:15px;background:#FF5000;color:#fff;">
+            تسجيل الدخول / الدخول المباشر ↵
+          </button>
+        </form>
+
+        <div style="margin-block:24px 18px;text-align:center;position:relative;">
+          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
+          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو جرب بنقرة واحدة (حسابات تجريبية فورية)</span>
+        </div>
+
+        <!-- 1-Click Demo Logins -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button id="demoBuyerBtn" type="button" class="secondary-button" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;border-radius:10px;">
+            <span>👤</span>
+            <span>دخول تجريبي (مشتري)</span>
+          </button>
+          <button id="demoSellerBtn" type="button" class="secondary-button" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;border-radius:10px;">
+            <span>🏪</span>
+            <span>دخول تجريبي (تاجر)</span>
+          </button>
+        </div>
+
+        <div style="margin-block:24px 18px;text-align:center;position:relative;">
+          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
+          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو باستخدام حساب Google</span>
+        </div>
+
         <button id="googleButton" class="google-button" type="button">
           <span class="google-letter" aria-hidden="true">G</span>
           <span>المتابعة باستخدام Google</span>
           <span class="button-arrow" aria-hidden="true">↗</span>
         </button>
         <p id="providerMessage" class="provider-message" role="status" aria-live="polite"></p>
-        <button id="providerRetry" class="text-button" type="button">تحقق مجدداً</button>
+        <button id="providerRetry" class="text-button" type="button" style="display:none;">تحقق مجدداً</button>
 
         <div class="card-divider"></div>
         <p class="quiet-copy">يمكنك استكشاف المنتجات والطلب كضيف دون تسجيل الدخول.</p>
-        <a class="secondary-button full-width" href="search.html">استكشف المنتجات</a>
+        <a class="secondary-button full-width" href="search.html">استكشف المنتجات كضيف</a>
       </section>
 
       <!-- Onboarding Panel (First-time setup: Name, Phone, Address) -->
@@ -203,20 +249,20 @@
 
         <!-- Quick Shortcuts -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-block:16px;">
-          <a href="orders.html" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+          <a href="orders.html" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
             <div style="font-size:20px;margin-bottom:4px;">📦</div>
-            <strong style="font-size:13px;display:block;">طلباتي</strong>
-            <small style="color:#64748B;font-size:11px;">تتبع الشحنات</small>
+            <strong style="font-size:13px;display:block;color:var(--bemo-text);">طلباتي</strong>
+            <small style="color:var(--bemo-muted);font-size:11px;">تتبع الشحنات</small>
           </a>
-          <a href="addresses.html" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+          <a href="addresses.html" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
             <div style="font-size:20px;margin-bottom:4px;">📍</div>
-            <strong style="font-size:13px;display:block;">عناويني</strong>
-            <small style="color:#64748B;font-size:11px;">عناوين التوصيل</small>
+            <strong style="font-size:13px;display:block;color:var(--bemo-text);">عناويني</strong>
+            <small style="color:var(--bemo-muted);font-size:11px;">عناوين التوصيل</small>
           </a>
-          <a href="market.html?view=cart" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:#1E293B;">
+          <a href="market.html?view=cart" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
             <div style="font-size:20px;margin-bottom:4px;">🛒</div>
-            <strong style="font-size:13px;display:block;">السلة</strong>
-            <small style="color:#64748B;font-size:11px;">إتمام الشراء</small>
+            <strong style="font-size:13px;display:block;color:var(--bemo-text);">السلة</strong>
+            <small style="color:var(--bemo-muted);font-size:11px;">إتمام الشراء</small>
           </a>
         </div>
 
