@@ -142,7 +142,7 @@ window.BemoTopups = function(w) {
       historyTitle.style.marginTop = '24px';
       panel.append(historyTitle);
 
-      if (!mine.rows.length) {
+      if (!mine.rows || !mine.rows.length) {
         panel.append(node('p', text('لا توجد طلبات شحن سابقة', 'No past top-up requests'), 'live-empty'));
       } else {
         const table = node('div', undefined, 'recent-orders');
@@ -222,7 +222,8 @@ window.BemoTopups = function(w) {
       APPROVED: { label: text('معتمد ومضاف للرصيد ✅', 'Approved ✅'), cls: 'order-state' },
       REJECTED: { label: text('مرفوض ❌', 'Rejected ❌'), cls: 'order-state' }
     };
-    const s = states[r.state] || { label: r.state, cls: 'order-state' };
+    const stateKey = r.state || r.status || 'PENDING';
+    const s = states[stateKey] || { label: stateKey, cls: 'order-state' };
     const rowEl = node('div', undefined, 'strip-item-card');
     rowEl.style.display = 'block';
     rowEl.style.textAlign = 'start';
@@ -242,6 +243,35 @@ window.BemoTopups = function(w) {
     return rowEl;
   }
 
+  function renderDemo(slug = 'noor_store') {
+    mine = {
+      slug,
+      banks: [
+        {
+          id: 'bank-1',
+          bank: text('مصرف الرافدين / محفظة زين كاش', 'Rafidain Bank / ZainCash'),
+          currency: 'IQD',
+          beneficiary: 'منصة BEMO للتجارة الإلكترونية',
+          account_number: 'IQ98BEMO000192837465',
+          instructions: text('يرجى كتابة معرّف المتجر في خانة ملاحظات الحوالة', 'Please write your store username in transfer notes')
+        }
+      ],
+      rows: [
+        {
+          id: 'top-101',
+          slug,
+          amount_minor: 10000000,
+          currency: 'IQD',
+          status: 'APPROVED',
+          reference: 'TRX-9981204',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          decision_note: text('تم فحص الوصل ومطابقة الحساب وإيداع الرصيد بنجاح.', 'Receipt verified and balance deposited.')
+        }
+      ]
+    };
+    render();
+  }
+
   async function load(req, staff, merchant) {
     const nextMine = merchant ? await req('bemo_topups', { operation: 'MINE' }) : null;
     const nextQueue = staff ? await req('bemo_topups', { operation: 'QUEUE' }) : null;
@@ -250,5 +280,5 @@ window.BemoTopups = function(w) {
     render();
   }
 
-  return { load, render, clear() { mine = null; queue = null; panel.replaceChildren(); } };
+  return { load, render, renderDemo, clear() { mine = null; queue = null; panel.replaceChildren(); } };
 };

@@ -324,6 +324,14 @@
     }
   });
 
+  $('demoAddressesBtn')?.addEventListener('click', () => {
+    $('gate').hidden = true;
+    $('workspace').hidden = false;
+    $('newAddress').hidden = false;
+    addresses = getLocalAddresses();
+    render();
+  });
+
   // Initial load
   addresses = getLocalAddresses();
   render();

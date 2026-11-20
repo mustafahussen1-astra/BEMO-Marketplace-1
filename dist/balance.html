@@ -180,6 +180,12 @@
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></svg>
           <span>حسابي</span>
         </a>
+        <a href="market.html?view=cart" id="cartLink" class="header-action-btn cart-btn">
+          <div class="action-icon-wrap">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+          </div>
+          <span data-t="cart">السلة</span>
+        </a>
       </nav>
     </div>
   </header>
@@ -213,8 +219,11 @@
       <section id="gate" class="account-card" style="max-width:550px;margin:40px auto;text-align:center;padding:32px;" hidden>
         <div style="font-size:42px;margin-bottom:12px;">🏪</div>
         <h2 data-t="gateTitle" style="font-size:20px;font-weight:800;margin-bottom:8px;">سجّل الدخول للوصول إلى لوحة الرصيد</h2>
-        <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وسجّل متجرك لعرض حسابك البنكي وسجل المعاملات.</p>
-        <a class="primary-button" data-route="account.html" href="account.html" data-t="account" style="background:#FF5000;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;">تسجيل الدخول / فتح المتجر</a>
+        <p data-t="gateCopy" style="color:#64748B;font-size:13px;margin-bottom:20px;">افتح حسابك وسجّل متجرك لعرض حسابك البنكي وسجل المعاملات والشحن اليدوي بالوصل.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button type="button" id="demoBalanceBtn" class="primary-button" style="background:#FF5000;font-weight:700;padding:10px 20px;border-radius:8px;">معاينة لوحة الرصيد والشحن بالوصل</button>
+          <a class="secondary-button" data-route="account.html" href="account.html" data-t="account" style="padding:10px 20px;border-radius:8px;text-decoration:none;">تسجيل الدخول / فتح المتجر</a>
+        </div>
       </section>
 
       <!-- Active Workspace -->
