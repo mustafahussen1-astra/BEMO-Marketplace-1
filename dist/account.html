@@ -140,63 +140,62 @@
         </div>
       </div>
 
-      <!-- Sign In Panel -->
+      <!-- Sign In Panel (Basic: Gmail OR Username & Password) -->
       <section id="signInPanel" class="account-card sign-in-card" aria-labelledby="signInTitle" hidden>
         <span class="small-icon pale" aria-hidden="true">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </span>
-        <span class="section-kicker">تسجيل الدخول</span>
-        <h2 id="signInTitle">تسجيل الدخول بحساب Gmail</h2>
-        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك، إدارة طلباتك، وتثبيت بيانات الشحن.</p>
+        <span class="section-kicker">تسجيل الدخول السريع</span>
+        <h2 id="signInTitle">مرحباً بك في BEMO</h2>
+        <p class="section-copy">سجّل دخولك مباشرة عبر حساب Gmail أو باسم المستخدم وكلمة المرور دون أي خطوات إضافية.</p>
 
-        <!-- Google OAuth Button -->
-        <button id="googleButton" class="google-button" type="button" style="margin-top:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          <span>المتابعة باستخدام Google</span>
-          <span class="button-arrow" aria-hidden="true" style="margin-right:auto;">↗</span>
-        </button>
-        <p id="providerMessage" class="provider-message" role="status" aria-live="polite" style="margin-top:6px;font-size:12px;color:var(--bemo-muted);"></p>
-        <button id="providerRetry" class="text-button" type="button" style="display:none;">تحقق مجدداً</button>
-
-        <div style="margin-block:22px 18px;text-align:center;position:relative;">
-          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
-          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو تسجيل دخول مباشر ببريد Gmail</span>
+        <!-- Clean 2-Mode Switcher -->
+        <div role="tablist" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding:4px;background:var(--bemo-surface-secondary);border-radius:12px;border:1px solid var(--bemo-border);">
+          <button type="button" id="tabGmailBtn" role="tab" aria-selected="true" style="padding:10px;border-radius:9px;border:none;background:#FF5000;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">📧 جيميل (Gmail)</button>
+          <button type="button" id="tabUserBtn" role="tab" aria-selected="false" style="padding:10px;border-radius:9px;border:none;background:transparent;color:var(--bemo-text);font-weight:700;font-size:13px;cursor:pointer;">👤 يوزر وباسورد</button>
         </div>
 
-        <!-- Direct Gmail Login Form -->
-        <form id="gmailLoginForm" class="account-form" style="margin-top:8px;">
-          <label for="gmailEmail">بريدك الإلكتروني في Gmail *</label>
-          <input id="gmailEmail" name="email" type="email" required placeholder="name@gmail.com" dir="ltr" autocomplete="email" style="font-size:15px;">
-
-          <label for="gmailName" style="margin-top:10px;">الاسم الكامل (اختياري)</label>
-          <input id="gmailName" name="name" placeholder="مثال: مصطفى حسين" maxlength="80">
-
-          <button class="primary-button" type="submit" style="margin-top:16px;width:100%;font-size:15px;background:#FF5000;color:#fff;border-radius:10px;padding:12px;font-weight:700;">
-            تسجيل الدخول بالجيميل ↵
+        <!-- Mode 1: Gmail / Google -->
+        <div id="gmailAuthBox" style="margin-top:18px;">
+          <button id="googleButton" class="google-button" type="button" style="width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span>المتابعة باستخدام Google</span>
+            <span class="button-arrow" aria-hidden="true" style="margin-right:auto;">↗</span>
           </button>
-        </form>
+          <p id="providerMessage" class="provider-message" role="status" aria-live="polite" style="margin-top:6px;font-size:12px;color:var(--bemo-muted);"></p>
+          <button id="providerRetry" class="text-button" type="button" style="display:none;">تحقق مجدداً</button>
 
-        <!-- Optional Username + Password Login/Registration (Without OTP) -->
-        <details style="margin-top:18px;border:1px solid var(--bemo-border);border-radius:10px;padding:12px 14px;background:var(--bemo-surface-secondary);">
-          <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--bemo-text);">أو الدخول / التسجيل باليوزر وكلمة المرور (دون OTP)</summary>
-          <form id="usernameAuthForm" class="account-form" style="margin-top:12px;">
-            <label for="authUsername">اسم المستخدم (يوزر @username) *</label>
-            <input id="authUsername" name="username" dir="ltr" required minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="mustafa.iq">
+          <div style="margin-block:18px 14px;text-align:center;position:relative;">
+            <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
+            <span style="position:relative;background:var(--bemo-surface);padding-inline:12px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو اكتب بريد Gmail مباشرة</span>
+          </div>
 
-            <label for="authPassword" style="margin-top:8px;">كلمة المرور *</label>
-            <input id="authPassword" name="password" type="password" required minlength="6" maxlength="100" placeholder="6 أحرف على الأقل">
-
-            <label for="authPhoneOptional" style="margin-top:8px;">رقم الهاتف (اختياري — لتثبيته عند الطلب أو حفظ العنوان)</label>
-            <input id="authPhoneOptional" name="phone" type="tel" dir="ltr" placeholder="+964 770 ... (اختياري)">
-
-            <button class="secondary-button full-width" type="submit" style="margin-top:12px;font-weight:700;">
-              دخول / إنشاء حساب باليوزر ↵
+          <form id="gmailLoginForm" class="account-form">
+            <label for="gmailEmail">بريدك في Gmail *</label>
+            <input id="gmailEmail" name="email" type="email" required placeholder="name@gmail.com" dir="ltr" autocomplete="email" style="font-size:15px;">
+            <button class="primary-button" type="submit" style="margin-top:12px;width:100%;font-size:15px;background:#FF5000;color:#fff;border-radius:10px;padding:12px;font-weight:700;">
+              دخول بالجيميل ↵
             </button>
           </form>
-        </details>
+        </div>
+
+        <!-- Mode 2: Username & Password (Basic, No Phone/OTP) -->
+        <div id="userAuthBox" hidden style="margin-top:18px;">
+          <form id="usernameAuthForm" class="account-form">
+            <label for="authUsername">اسم المستخدم (يوزر @username) *</label>
+            <input id="authUsername" name="username" dir="ltr" required minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="mustafa.iq" autocomplete="username">
+
+            <label for="authPassword" style="margin-top:10px;">كلمة المرور *</label>
+            <input id="authPassword" name="password" type="password" required minlength="6" maxlength="100" placeholder="6 أحرف على الأقل" autocomplete="current-password">
+
+            <button class="primary-button" type="submit" style="margin-top:16px;width:100%;font-size:15px;background:#FF5000;color:#fff;border-radius:10px;padding:12px;font-weight:700;">
+              تسجيل الدخول / إنشاء حساب ↵
+            </button>
+          </form>
+        </div>
 
         <p style="font-size:11px;color:var(--bemo-muted);margin:14px 0 0;text-align:center;">
-          باستخدامك للمنصة فأنت توافق على <a href="policies.html#terms" style="color:#FF5000;font-weight:600;">الشروط والأحكام</a> و <a href="policies.html#privacy" style="color:#FF5000;font-weight:600;">سياسة الخصوصية</a>.
+          باستخدامك للمنصة فأنت توافق على <a href="policies.html#terms" style="color:#FF5000;font-weight:600;">الشروط</a> و <a href="policies.html#privacy" style="color:#FF5000;font-weight:600;">الخصوصية</a>.
         </p>
 
         <div class="card-divider"></div>
@@ -247,10 +246,14 @@
       <section id="profilePanel" class="account-card" aria-labelledby="profileTitle" hidden>
         <div class="card-heading">
           <div>
-            <span class="section-kicker">الملف الشخصي</span>
-            <h2 tabindex="-1" id="profileTitle">بيانات حسابك</h2>
+            <span class="section-kicker">استكمال الملف الشخصي</span>
+            <h2 tabindex="-1" id="profileTitle">بيانات حسابك وصورتك</h2>
           </div>
-          <span class="account-avatar" id="accountAvatar" aria-hidden="true">👤</span>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span class="account-avatar" id="accountAvatar" aria-hidden="true" style="overflow:hidden;display:grid;place-items:center;">👤</span>
+            <label for="avatarUploadInput" style="font-size:11px;font-weight:700;color:#FF5000;cursor:pointer;">📷 تغيير الصورة</label>
+            <input id="avatarUploadInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
         </div>
 
         <p class="identity-line"><span>البريد المرتبط:</span> <b id="profileEmail" dir="ltr">user@example.com</b></p>
@@ -310,58 +313,57 @@
           </div>
         </form>
 
-        <!-- Separate Store Portal Callout (Does not clutter buyer profile) -->
-        <div style="margin-top:24px;padding:16px;background:#FFF1E8;border:1px solid #FED7AA;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <!-- Separate Store Portal Callout -->
+        <div id="storePortalBox" style="margin-top:24px;padding:16px;background:#FFF1E8;border:1px solid #FED7AA;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
           <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:28px;">🏪</span>
             <div>
-              <strong style="font-size:14px;color:#9A3412;display:block;">هل ترغب في البيع على BEMO؟</strong>
-              <p style="font-size:12px;color:#B45309;margin:2px 0 0;">افتح متجرك المستقل وابدأ إدارة منتجاتك وطلباتك بعمولة 0%.</p>
+              <strong id="storePortalTitle" style="font-size:14px;color:#9A3412;display:block;">هل تريد فتح متجر على BEMO؟</strong>
+              <p id="storePortalDesc" style="font-size:12px;color:#B45309;margin:2px 0 0;">أكمل ملحقات المتجر: اسم المتجر، @اليوزر الدائم، الشعار، والأوراق الرسمية.</p>
             </div>
           </div>
-          <a href="seller.html" class="primary-button" style="background:#FF5000;text-decoration:none;padding:8px 16px;font-size:13px;">
-            الانتقال إلى المتجر ➔
+          <a id="storePortalLink" href="seller.html" class="primary-button" style="background:#FF5000;text-decoration:none;padding:8px 16px;font-size:13px;">
+            فتح متجر واستكمال بياناته ➔
           </a>
         </div>
 
-        <!-- Account Completeness: Password, Active Sessions, Notifications, Data Export, Deletion -->
-        <div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--bemo-border);display:grid;gap:16px;">
-          <h3 style="margin:0;font-size:16px;color:var(--bemo-text);">إعدادات الأمان، الإشعارات، والبيانات</h3>
-
-          <!-- Change Password -->
+        <!-- Account Completeness: Password & Advanced Preferences -->
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bemo-border);display:grid;gap:14px;">
           <form id="passwordForm" class="account-form" style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
-            <label for="newPasswordInput" style="font-weight:700;">تعيين أو تغيير كلمة المرور (اختياري)</label>
+            <label for="newPasswordInput" style="font-weight:700;">🔑 تعيين أو تغيير كلمة المرور (لاستكمال البروفايل)</label>
             <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
               <input id="newPasswordInput" name="new_password" type="password" minlength="6" maxlength="100" required placeholder="كلمة المرور الجديدة (6+ أحرف)" style="flex:1;min-width:180px;">
               <button type="submit" class="secondary-button">حفظ كلمة المرور</button>
             </div>
           </form>
 
-          <!-- Notification Preferences -->
-          <form id="notifPrefsForm" style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
-            <strong style="display:block;font-size:13px;margin-bottom:8px;color:var(--bemo-text);">إدارة تفضيلات الإشعارات</strong>
-            <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;">
-              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefOrders" checked> تحديثات الطلبات والشحن</label>
-              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefSecurity" checked> تنبيهات الأمان والحساب</label>
-              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefPromos"> العروض والتخفيضات</label>
-            </div>
-            <button type="submit" class="secondary-button" style="margin-top:10px;font-size:12px;">حفظ تفضيلات الإشعارات</button>
-          </form>
+          <details style="border:1px solid var(--bemo-border);border-radius:10px;padding:12px 14px;background:var(--bemo-surface-secondary);">
+            <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--bemo-text);">⚙️ الإشعارات، الجلسات النشطة، تنزيل البيانات وحذف الحساب</summary>
+            <div style="display:grid;gap:12px;margin-top:12px;">
+              <form id="notifPrefsForm" style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
+                <strong style="display:block;font-size:13px;margin-bottom:8px;color:var(--bemo-text);">إدارة تفضيلات الإشعارات</strong>
+                <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;">
+                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefOrders" checked> تحديثات الطلبات</label>
+                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefSecurity" checked> تنبيهات الأمان</label>
+                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefPromos"> العروض</label>
+                </div>
+                <button type="submit" class="secondary-button" style="margin-top:10px;font-size:12px;">حفظ التفضيلات</button>
+              </form>
 
-          <!-- Active Sessions -->
-          <div style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-              <strong style="font-size:13px;color:var(--bemo-text);">إدارة الجلسات النشطة</strong>
-              <button type="button" id="signOutAllBtn" class="text-button" style="font-size:12px;">إنهاء جميع الجلسات</button>
-            </div>
-            <div id="sessionsList" style="font-size:12px;color:var(--bemo-muted);"></div>
-          </div>
+              <div style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                  <strong style="font-size:13px;color:var(--bemo-text);">الجلسات النشطة</strong>
+                  <button type="button" id="signOutAllBtn" class="text-button" style="font-size:12px;">إنهاء جميع الجلسات</button>
+                </div>
+                <div id="sessionsList" style="font-size:12px;color:var(--bemo-muted);"></div>
+              </div>
 
-          <!-- Personal Data Export & Account Deletion -->
-          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--bemo-border);border-radius:10px;">
-            <button type="button" id="exportDataBtn" class="secondary-button" style="font-size:13px;">📥 تنزيل بياناتي الشخصية (JSON)</button>
-            <button type="button" id="deleteAccountBtn" class="text-button" style="color:#DC2626;font-size:13px;font-weight:700;">🗑️ طلب حذف الحساب</button>
-          </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;">
+                <button type="button" id="exportDataBtn" class="secondary-button" style="font-size:12px;">📥 تنزيل بياناتي الشخصية (JSON)</button>
+                <button type="button" id="deleteAccountBtn" class="text-button" style="color:#DC2626;font-size:12px;font-weight:700;">🗑️ طلب حذف الحساب</button>
+              </div>
+            </div>
+          </details>
         </div>
       </section>
 

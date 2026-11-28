@@ -161,6 +161,9 @@
         legal_name: legalName,
         phone,
         address,
+        logo: $('newStoreLogo')?.files?.[0] || null,
+        cover: $('newStoreCover')?.files?.[0] || null,
+        document: $('idFrontFile')?.files?.[0] || null,
         accepted: true
       }
     };

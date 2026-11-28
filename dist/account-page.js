@@ -153,7 +153,20 @@
     if (phase === 'ready' && next.profile) {
       const profile = next.profile;
       if ($('profileEmail')) $('profileEmail').textContent = profile.email || '';
-      if ($('accountAvatar')) $('accountAvatar').textContent = Array.from(profile.display_name || 'B')[0];
+      if ($('accountAvatar')) {
+        let savedAvatar = '';
+        try { savedAvatar = localStorage.getItem('bemo-profile-avatar-v1') || ''; } catch (_) {}
+        if (savedAvatar && /^data:image\/(png|jpeg|webp);base64,/.test(savedAvatar)) {
+          $('accountAvatar').innerHTML = '';
+          const img = document.createElement('img');
+          img.src = savedAvatar;
+          img.alt = profile.display_name || 'Avatar';
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+          $('accountAvatar').appendChild(img);
+        } else {
+          $('accountAvatar').textContent = Array.from(profile.display_name || 'B')[0];
+        }
+      }
       if (profileSeededFor !== profile.id) {
         if ($('profileName')) $('profileName').value = profile.display_name || '';
         if ($('profileUsername')) $('profileUsername').value = profile.username || next.identity?.username || '';
@@ -186,6 +199,9 @@
         }
         if ($('storeInitial')) $('storeInitial').textContent = Array.from(next.store.title || 'B')[0];
         if ($('savedStoreStatus')) $('savedStoreStatus').textContent = text(['ACTIVE','CLOSED','SUSPENDED'].includes(next.store.status) ? next.store.status : 'storeStatusUnknown');
+        if ($('storePortalTitle')) $('storePortalTitle').textContent = `متجرك المفعّل: ${next.store.title || 'متجري'} (@${next.store.slug || ''})`;
+        if ($('storePortalDesc')) $('storePortalDesc').textContent = 'أدر منتجاتك، طلباتك، أسعارك، وإعدادات التوصيل من لوحة التاجر.';
+        if ($('storePortalLink')) $('storePortalLink').textContent = 'الانتقال إلى لوحة متجرك ➔';
       }
       if (!busy && location.hash === '#store' && !storeTargetShown && $('storePanel')) {
         storeTargetShown = true;
@@ -229,18 +245,46 @@
   }
   api.subscribe(render);
   bindClick('googleButton', () => api.signIn());
+  function switchLoginTab(mode) {
+    const isGmail = mode !== 'user';
+    if ($('gmailAuthBox')) $('gmailAuthBox').hidden = !isGmail;
+    if ($('userAuthBox')) $('userAuthBox').hidden = isGmail;
+    if ($('tabGmailBtn')) {
+      $('tabGmailBtn').setAttribute('aria-selected', String(isGmail));
+      $('tabGmailBtn').style.background = isGmail ? '#FF5000' : 'transparent';
+      $('tabGmailBtn').style.color = isGmail ? '#fff' : 'var(--bemo-text)';
+    }
+    if ($('tabUserBtn')) {
+      $('tabUserBtn').setAttribute('aria-selected', String(!isGmail));
+      $('tabUserBtn').style.background = !isGmail ? '#FF5000' : 'transparent';
+      $('tabUserBtn').style.color = !isGmail ? '#fff' : 'var(--bemo-text)';
+    }
+  }
+  $('tabGmailBtn')?.addEventListener('click', () => switchLoginTab('gmail'));
+  $('tabUserBtn')?.addEventListener('click', () => switchLoginTab('user'));
   $('gmailLoginForm')?.addEventListener('submit', event => {
     event.preventDefault();
     const email = $('gmailEmail')?.value.trim();
-    const name = $('gmailName')?.value.trim();
-    runAction(() => api.signInWithGmail({ email, name }), 'signedIn', $('signInTitle'));
+    runAction(() => api.signInWithGmail({ email }), 'signedIn', $('signInTitle'));
   });
   $('usernameAuthForm')?.addEventListener('submit', event => {
     event.preventDefault();
     const username = $('authUsername')?.value.trim();
     const password = $('authPassword')?.value;
-    const phone = $('authPhoneOptional')?.value.trim() || '';
-    runAction(() => api.signInWithUsername({ username, password, phone }), 'signedIn', $('signInTitle'));
+    runAction(() => api.signInWithUsername({ username, password }), 'signedIn', $('signInTitle'));
+  });
+  $('avatarUploadInput')?.addEventListener('change', event => {
+    const file = event.target?.files?.[0];
+    if (!file || file.size > 2097152) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string' && /^data:image\/(png|jpeg|webp);base64,/.test(reader.result)) {
+        try { localStorage.setItem('bemo-profile-avatar-v1', reader.result); } catch (_) {}
+        render(api.getState());
+        if ($('pageMessage')) { $('pageMessage').textContent = lang === 'ar' ? 'تم تحديث صورة الملف الشخصي.' : 'Profile photo updated.'; $('pageMessage').hidden = false; }
+      }
+    };
+    reader.readAsDataURL(file);
   });
   $('passwordForm')?.addEventListener('submit', async event => {
     event.preventDefault();

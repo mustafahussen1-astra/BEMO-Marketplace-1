@@ -563,6 +563,26 @@
         const who = await context(ticket, expected);
         if (stale(ticket)) return superseded();
         if (!who) return stopWith(failure('AUTH_REQUIRED'), ticket);
+        if (who.isLocal && who.session) {
+          const localStore = {
+            id: 'str_' + slug,
+            title,
+            slug,
+            description,
+            status: 'ACTIVE',
+            legal_name: input.registration?.legal_name || '',
+            phone: input.registration?.phone || '',
+            address: input.registration?.address || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          const nextSession = Object.assign({}, who.session, { store: localStore });
+          try {
+            localStorage.setItem('bemo-auth-session', JSON.stringify(nextSession));
+            localStorage.setItem('bemo-local-store', JSON.stringify(localStore));
+          } catch (_) {}
+          return publish(nextSession);
+        }
         let result;
         if (input.registration) {
           const availability=await who.api.rpc('bemo_slug_available',{candidate:slug});
