@@ -152,10 +152,14 @@
     }
     if (phase === 'ready' && next.profile) {
       const profile = next.profile;
+      const handle = profile.username || next.identity?.username || (profile.email ? profile.email.split('@')[0] : 'bemo_user');
       if ($('profileEmail')) $('profileEmail').textContent = profile.email || '';
+      if ($('profileTitle')) $('profileTitle').textContent = profile.display_name || handle;
+      if ($('heroProfileHandle')) $('heroProfileHandle').textContent = '@' + handle;
+      if ($('heroStoreBadge')) $('heroStoreBadge').hidden = !next.store;
+      let savedAvatar = '';
+      try { savedAvatar = localStorage.getItem('bemo-profile-avatar-v1') || ''; } catch (_) {}
       if ($('accountAvatar')) {
-        let savedAvatar = '';
-        try { savedAvatar = localStorage.getItem('bemo-profile-avatar-v1') || ''; } catch (_) {}
         if (savedAvatar && /^data:image\/(png|jpeg|webp);base64,/.test(savedAvatar)) {
           $('accountAvatar').innerHTML = '';
           const img = document.createElement('img');
@@ -164,7 +168,28 @@
           img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
           $('accountAvatar').appendChild(img);
         } else {
-          $('accountAvatar').textContent = Array.from(profile.display_name || 'B')[0];
+          $('accountAvatar').textContent = Array.from(profile.display_name || handle || 'B')[0];
+        }
+      }
+      if ($('completenessBar') && $('completenessPct') && $('completenessChips')) {
+        let savedProf = {};
+        try { savedProf = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}'); } catch (_) {}
+        const checks = [
+          ['@اليوزر', !!handle],
+          ['الصورة الشخصية', !!savedAvatar],
+          ['رقم الهاتف', !!(profile.phone || savedProf.phone)],
+          ['العنوان', !!savedProf.address],
+          ['متجرك', !!next.store]
+        ];
+        const pct = Math.round((checks.filter(c => c[1]).length / checks.length) * 100);
+        $('completenessPct').textContent = pct + '%';
+        $('completenessBar').style.width = pct + '%';
+        $('completenessChips').replaceChildren();
+        for (const [label, done] of checks) {
+          const span = document.createElement('span');
+          span.className = 'comp-chip' + (done ? ' done' : '');
+          span.textContent = (done ? '✓ ' : '+ ') + label;
+          $('completenessChips').appendChild(span);
         }
       }
       if (profileSeededFor !== profile.id) {
@@ -192,16 +217,14 @@
       if ($('existingStoreArea')) $('existingStoreArea').hidden = !next.store;
       if (next.store) {
         if ($('savedStoreName')) $('savedStoreName').textContent = next.store.title || '';
-        if ($('savedStoreSlug')) $('savedStoreSlug').textContent = next.store.slug || '';
+        if ($('savedStoreSlug')) $('savedStoreSlug').textContent = '@' + (next.store.slug || '').replace(/^@/, '');
         if ($('savedStoreDescription')) {
           $('savedStoreDescription').textContent = next.store.description || '';
           $('savedStoreDescription').hidden = !next.store.description;
         }
         if ($('storeInitial')) $('storeInitial').textContent = Array.from(next.store.title || 'B')[0];
         if ($('savedStoreStatus')) $('savedStoreStatus').textContent = text(['ACTIVE','CLOSED','SUSPENDED'].includes(next.store.status) ? next.store.status : 'storeStatusUnknown');
-        if ($('storePortalTitle')) $('storePortalTitle').textContent = `متجرك المفعّل: ${next.store.title || 'متجري'} (@${next.store.slug || ''})`;
-        if ($('storePortalDesc')) $('storePortalDesc').textContent = 'أدر منتجاتك، طلباتك، أسعارك، وإعدادات التوصيل من لوحة التاجر.';
-        if ($('storePortalLink')) $('storePortalLink').textContent = 'الانتقال إلى لوحة متجرك ➔';
+        if ($('visitPublicStoreBtn')) $('visitPublicStoreBtn').href = 'store.html?store=' + encodeURIComponent(next.store.slug || '');
       }
       if (!busy && location.hash === '#store' && !storeTargetShown && $('storePanel')) {
         storeTargetShown = true;
@@ -326,6 +349,13 @@
     });
     runAction(() => api.signOut(), 'signedOut');
   });
+  $('expandStoreWizardBtn')?.addEventListener('click', () => {
+    const f = $('storeForm');
+    if (f) {
+      f.hidden = !f.hidden;
+      if (!f.hidden) $('storeName')?.focus();
+    }
+  });
   bindClick('providerRetry', () => api.refresh());
   bindClick('retryButton', () => state?.error?.code === 'SIGNOUT_FAILED' ? api.signOut() : api.refresh());
   for (const id of ['signOutButton','onboardingSignOut','recoverySignOut']) bindClick(id, () => api.signOut(), 'signedOut');
@@ -333,17 +363,20 @@
     $(formId).addEventListener('submit', event => {
       event.preventDefault(); const form=event.currentTarget;
       const name = form.elements.display_name;
-      name.setCustomValidity(name.value.trim() ? '' : errorText('PROFILE_INVALID'));
+      const uVal = form.elements.username?.value?.trim().toLowerCase().replace(/^@/,'') || '';
+      const resolvedName = name.value.trim() || uVal;
+      if (formId === 'onboardingForm') name.setCustomValidity(name.value.trim() ? '' : errorText('PROFILE_INVALID'));
+      else name.setCustomValidity(resolvedName ? '' : errorText('PROFILE_INVALID'));
       if (!form.reportValidity()) return;
-      const input = {display_name:name.value.trim(),locale:form.elements.locale.value};
-      if (form.elements.username) input.username = form.elements.username.value.trim().toLowerCase().replace(/^@/,'');
+      const input = {display_name:resolvedName,locale:form.elements.locale.value};
+      if (form.elements.username) input.username = uVal;
       if (form.elements.phone) input.phone = form.elements.phone.value.trim();
       try {
         const phone = form.elements.phone?.value?.trim() || '';
         const city = form.elements.city?.value?.trim() || '';
         const country = form.elements.country?.value?.trim() || 'العراق (Iraq)';
         const address = form.elements.address?.value?.trim() || '';
-        const recipient = name.value.trim();
+        const recipient = resolvedName;
         const cur = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
         localStorage.setItem('bemo-profile-defaults', JSON.stringify({...cur, recipient, phone, country, city, address}));
         // Sync default address

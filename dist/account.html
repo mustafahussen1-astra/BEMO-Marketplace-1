@@ -21,6 +21,34 @@
   <meta name="apple-mobile-web-app-title" content="BEMO">
   <link rel="apple-touch-icon" href="icon-512.svg">
   <script src="pwa-installer.js" defer></script>
+  <style>
+    .profile-hero-card { padding: 0 !important; overflow: hidden; }
+    .profile-hero-banner { height: 112px; background: linear-gradient(135deg, #0F1E36 0%, #1E3A8A 55%, #FF5000 165%); position: relative; }
+    .profile-hero-inner { padding: 0 28px 28px; }
+    .profile-hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-top: -42px; flex-wrap: wrap; }
+    .profile-avatar-wrap { position: relative; width: 88px; height: 88px; flex-shrink: 0; }
+    .profile-avatar-wrap .account-avatar { width: 88px; height: 88px; border-radius: 22px; border: 4px solid var(--bemo-surface, #fff); box-shadow: 0 8px 20px rgba(0,0,0,0.16); font-size: 32px; overflow: hidden; display: grid; place-items: center; }
+    .avatar-cam-btn { position: absolute; bottom: -4px; inset-inline-end: -4px; background: #FF5000; color: #fff; border: 2px solid var(--bemo-surface, #fff); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .profile-handle-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .handle-pill { font-size: 13px; font-weight: 700; color: #FF5000; background: var(--bemo-primary-soft, #FFF1E8); padding: 2px 10px; border-radius: 20px; direction: ltr; unicode-bidi: plaintext; }
+    .store-owner-badge { font-size: 12px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 10px; border-radius: 20px; }
+    .completeness-box { background: var(--bemo-surface-secondary); border: 1px solid var(--bemo-border); border-radius: 14px; padding: 14px 16px; margin-top: 18px; }
+    .completeness-bar-track { height: 8px; border-radius: 99px; background: var(--bemo-border); overflow: hidden; margin-block: 8px 10px; }
+    .completeness-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #FF5000, #FB923C); transition: width 0.3s ease; }
+    .completeness-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .comp-chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--bemo-border); background: var(--bemo-surface); color: var(--bemo-muted); }
+    .comp-chip.done { border-color: #86EFAC; background: #F0FDF4; color: #15803D; }
+    [data-theme="dark"] .comp-chip.done { background: #064E3B; border-color: #10B981; color: #A7F3D0; }
+    .profile-shortcuts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-block: 18px; }
+    .shortcut-tile { background: var(--bemo-surface-secondary); border: 1px solid var(--bemo-border); border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; color: var(--bemo-text); transition: transform 0.15s, border-color 0.15s; }
+    .shortcut-tile:hover { transform: translateY(-2px); border-color: #FF5000; }
+    .store-launch-hero { background: linear-gradient(135deg, rgba(255,80,0,0.08), rgba(30,58,138,0.06)); border: 1.5px dashed #FF5000; border-radius: 16px; padding: 24px; }
+    .store-unified-banner { background: linear-gradient(135deg, #0F1E36, #1E3A8A); color: #fff; border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .store-actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; margin-top: 16px; }
+    .store-action-chip { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--bemo-border); background: var(--bemo-surface-secondary); font-size: 13px; font-weight: 700; text-decoration: none; color: var(--bemo-text); transition: border-color 0.15s; }
+    .store-action-chip:hover { border-color: #FF5000; color: #FF5000; }
+    @media(max-width: 640px) { .profile-hero-inner { padding: 0 18px 22px; } .profile-shortcuts-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
 </head>
 <body data-account-view="account">
   <a class="skip-link" href="#accountMain" data-i18n="skip">انتقل إلى المحتوى</a>
@@ -242,136 +270,239 @@
         <button id="onboardingSignOut" class="text-button sign-out-link" type="button">تسجيل الخروج</button>
       </section>
 
-      <!-- Profile Panel (Full User Profile with Name, Phone, Address, Orders Shortcuts) -->
-      <section id="profilePanel" class="account-card" aria-labelledby="profileTitle" hidden>
-        <div class="card-heading">
-          <div>
-            <span class="section-kicker">استكمال الملف الشخصي</span>
-            <h2 tabindex="-1" id="profileTitle">بيانات حسابك وصورتك</h2>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-            <span class="account-avatar" id="accountAvatar" aria-hidden="true" style="overflow:hidden;display:grid;place-items:center;">👤</span>
-            <label for="avatarUploadInput" style="font-size:11px;font-weight:700;color:#FF5000;cursor:pointer;">📷 تغيير الصورة</label>
-            <input id="avatarUploadInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-          </div>
-        </div>
-
-        <p class="identity-line"><span>البريد المرتبط:</span> <b id="profileEmail" dir="ltr">user@example.com</b></p>
-
-        <!-- Quick Shortcuts -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-block:16px;">
-          <a href="orders.html" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
-            <div style="font-size:20px;margin-bottom:4px;">📦</div>
-            <strong style="font-size:13px;display:block;color:var(--bemo-text);">طلباتي</strong>
-            <small style="color:var(--bemo-muted);font-size:11px;">تتبع الشحنات</small>
-          </a>
-          <a href="addresses.html" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
-            <div style="font-size:20px;margin-bottom:4px;">📍</div>
-            <strong style="font-size:13px;display:block;color:var(--bemo-text);">عناويني</strong>
-            <small style="color:var(--bemo-muted);font-size:11px;">عناوين التوصيل</small>
-          </a>
-          <a href="market.html?view=cart" style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:8px;padding:12px;text-align:center;text-decoration:none;color:var(--bemo-text);">
-            <div style="font-size:20px;margin-bottom:4px;">🛒</div>
-            <strong style="font-size:13px;display:block;color:var(--bemo-text);">السلة</strong>
-            <small style="color:var(--bemo-muted);font-size:11px;">إتمام الشراء</small>
-          </a>
-        </div>
-
-        <form id="profileForm" class="account-form">
-          <label for="profileName">الاسم الكامل *</label>
-          <input id="profileName" name="display_name" autocomplete="name" required maxlength="80" minlength="2">
-
-          <label for="profileUsername">اسم المستخدم (@username — اختياري)</label>
-          <input id="profileUsername" name="username" dir="ltr" minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="example.user">
-
-          <label for="profilePhone">رقم الهاتف للتوصيل (اختياري — أضفه متى أردت تثبيته للطلبات والعناوين)</label>
-          <input id="profilePhone" name="phone" type="tel" dir="ltr" placeholder="+964 770 ... (اختياري)">
-
-          <div class="field-pair">
-            <div>
-              <label for="profileCity">المدينة / المحافظة</label>
-              <input id="profileCity" name="city" placeholder="بغداد / المنصور">
+      <!-- Profile Panel (Modern Profile Hero, Completeness Bar, Optional Fields except editable @username) -->
+      <section id="profilePanel" class="account-card profile-hero-card" aria-labelledby="profileTitle" hidden>
+        <div class="profile-hero-banner" aria-hidden="true"></div>
+        <div class="profile-hero-inner">
+          <div class="profile-hero-top">
+            <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;">
+              <div class="profile-avatar-wrap">
+                <span class="account-avatar" id="accountAvatar" aria-hidden="true">👤</span>
+                <label for="avatarUploadInput" class="avatar-cam-btn" title="تغيير الصورة الشخصية">📷</label>
+                <input id="avatarUploadInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+              </div>
+              <div style="padding-bottom:4px;">
+                <h2 tabindex="-1" id="profileTitle" style="font-size:22px;margin:0;color:var(--bemo-text);">حسابك الشخصي</h2>
+                <div class="profile-handle-row">
+                  <span id="heroProfileHandle" class="handle-pill">@username</span>
+                  <span id="heroStoreBadge" class="store-owner-badge" hidden>🏪 صاحب متجر</span>
+                </div>
+                <p class="identity-line" style="margin:6px 0 0;"><span>البريد / المعرّف:</span> <b id="profileEmail" dir="ltr">user@example.com</b></p>
+              </div>
             </div>
-            <div>
-              <label for="profileCountry">الدولة</label>
-              <input id="profileCountry" name="country" value="العراق (Iraq)">
+            <button id="signOutButton" class="secondary-button" type="button" style="min-height:38px;padding:6px 14px;font-size:12px;">تسجيل الخروج</button>
+          </div>
+
+          <!-- Profile Completeness Progress -->
+          <div class="completeness-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;">
+              <span>✨ اكتمال ملفك الشخصي (معلومات اختيارية ما عدا اليوزر)</span>
+              <span id="completenessPct" style="color:#FF5000;">40%</span>
             </div>
+            <div class="completeness-bar-track"><div id="completenessBar" class="completeness-bar-fill" style="width:40%;"></div></div>
+            <div id="completenessChips" class="completeness-chips"></div>
           </div>
 
-          <label for="profileAddress">العنوان التفصيلي الافتراضي للشحن</label>
-          <input id="profileAddress" name="address" placeholder="الشارع، رقم المبنى، أقرب نقطة دالة">
-
-          <label for="profileLocale">لغة الحساب</label>
-          <select id="profileLocale" name="locale">
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
-          </select>
-
-          <div class="form-actions" style="margin-top:20px;">
-            <button class="primary-button" type="submit">حفظ التغييرات</button>
-            <button id="signOutButton" class="text-button" type="button">تسجيل الخروج</button>
+          <!-- Quick Shortcuts -->
+          <div class="profile-shortcuts-grid">
+            <a href="orders.html" class="shortcut-tile">
+              <div style="font-size:20px;margin-bottom:4px;">📦</div>
+              <strong style="font-size:12px;display:block;">طلباتي</strong>
+            </a>
+            <a href="orders.html?view=saved" class="shortcut-tile">
+              <div style="font-size:20px;margin-bottom:4px;">❤️</div>
+              <strong style="font-size:12px;display:block;">المفضلة</strong>
+            </a>
+            <a href="addresses.html" class="shortcut-tile">
+              <div style="font-size:20px;margin-bottom:4px;">📍</div>
+              <strong style="font-size:12px;display:block;">عناويني</strong>
+            </a>
+            <a href="market.html?view=cart" class="shortcut-tile">
+              <div style="font-size:20px;margin-bottom:4px;">🛒</div>
+              <strong style="font-size:12px;display:block;">السلة</strong>
+            </a>
           </div>
-        </form>
 
-        <!-- Separate Store Portal Callout -->
-        <div id="storePortalBox" style="margin-top:24px;padding:16px;background:#FFF1E8;border:1px solid #FED7AA;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:28px;">🏪</span>
-            <div>
-              <strong id="storePortalTitle" style="font-size:14px;color:#9A3412;display:block;">هل تريد فتح متجر على BEMO؟</strong>
-              <p id="storePortalDesc" style="font-size:12px;color:#B45309;margin:2px 0 0;">أكمل ملحقات المتجر: اسم المتجر، @اليوزر الدائم، الشعار، والأوراق الرسمية.</p>
+          <form id="profileForm" class="account-form" style="margin-top:8px;">
+            <div class="field-pair">
+              <div>
+                <label for="profileUsername">اسم المستخدم (@username — مطلوب وقابل للتعديل) *</label>
+                <input id="profileUsername" name="username" dir="ltr" required minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="mustafa.iq">
+              </div>
+              <div>
+                <label for="profileName">الاسم الظاهر <span class="optional">(اختياري)</span></label>
+                <input id="profileName" name="display_name" autocomplete="name" maxlength="80" placeholder="مثال: مصطفى حسين">
+              </div>
             </div>
-          </div>
-          <a id="storePortalLink" href="seller.html" class="primary-button" style="background:#FF5000;text-decoration:none;padding:8px 16px;font-size:13px;">
-            فتح متجر واستكمال بياناته ➔
-          </a>
-        </div>
 
-        <!-- Account Completeness: Password & Advanced Preferences -->
-        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bemo-border);display:grid;gap:14px;">
-          <form id="passwordForm" class="account-form" style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
-            <label for="newPasswordInput" style="font-weight:700;">🔑 تعيين أو تغيير كلمة المرور (لاستكمال البروفايل)</label>
-            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
-              <input id="newPasswordInput" name="new_password" type="password" minlength="6" maxlength="100" required placeholder="كلمة المرور الجديدة (6+ أحرف)" style="flex:1;min-width:180px;">
-              <button type="submit" class="secondary-button">حفظ كلمة المرور</button>
+            <div class="field-pair">
+              <div>
+                <label for="profilePhone">رقم الهاتف <span class="optional">(اختياري — يُثبّت للطلبات)</span></label>
+                <input id="profilePhone" name="phone" type="tel" dir="ltr" placeholder="+964 770 ...">
+              </div>
+              <div>
+                <label for="profileLocale">لغة الحساب</label>
+                <select id="profileLocale" name="locale">
+                  <option value="ar">العربية</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-pair">
+              <div>
+                <label for="profileCity">المدينة / المحافظة <span class="optional">(اختياري)</span></label>
+                <input id="profileCity" name="city" placeholder="بغداد / المنصور">
+              </div>
+              <div>
+                <label for="profileCountry">الدولة <span class="optional">(اختياري)</span></label>
+                <input id="profileCountry" name="country" value="العراق (Iraq)">
+              </div>
+            </div>
+
+            <label for="profileAddress">العنوان التفصيلي <span class="optional">(اختياري — للتوصيل السريع)</span></label>
+            <input id="profileAddress" name="address" placeholder="الشارع، رقم المبنى، أقرب نقطة دالة">
+
+            <div class="form-actions" style="margin-top:16px;">
+              <button class="primary-button" type="submit" style="background:#FF5000;color:#fff;">حفظ تحديثات البروفايل ✓</button>
             </div>
           </form>
 
-          <details style="border:1px solid var(--bemo-border);border-radius:10px;padding:12px 14px;background:var(--bemo-surface-secondary);">
-            <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--bemo-text);">⚙️ الإشعارات، الجلسات النشطة، تنزيل البيانات وحذف الحساب</summary>
-            <div style="display:grid;gap:12px;margin-top:12px;">
-              <form id="notifPrefsForm" style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
-                <strong style="display:block;font-size:13px;margin-bottom:8px;color:var(--bemo-text);">إدارة تفضيلات الإشعارات</strong>
-                <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;">
-                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefOrders" checked> تحديثات الطلبات</label>
-                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefSecurity" checked> تنبيهات الأمان</label>
-                  <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefPromos"> العروض</label>
-                </div>
-                <button type="submit" class="secondary-button" style="margin-top:10px;font-size:12px;">حفظ التفضيلات</button>
-              </form>
-
-              <div style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-                  <strong style="font-size:13px;color:var(--bemo-text);">الجلسات النشطة</strong>
-                  <button type="button" id="signOutAllBtn" class="text-button" style="font-size:12px;">إنهاء جميع الجلسات</button>
-                </div>
-                <div id="sessionsList" style="font-size:12px;color:var(--bemo-muted);"></div>
+          <!-- Password & Advanced Completeness -->
+          <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--bemo-border);display:grid;gap:12px;">
+            <form id="passwordForm" class="account-form" style="margin:0;padding:14px;border:1px solid var(--bemo-border);border-radius:12px;background:var(--bemo-surface-secondary);">
+              <label for="newPasswordInput" style="font-weight:700;margin-top:0;">🔑 تعيين أو تغيير كلمة المرور <span class="optional">(اختياري)</span></label>
+              <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                <input id="newPasswordInput" name="new_password" type="password" minlength="6" maxlength="100" required placeholder="كلمة المرور الجديدة (6+ أحرف)" style="flex:1;min-width:180px;">
+                <button type="submit" class="secondary-button">حفظ كلمة المرور</button>
               </div>
+            </form>
 
-              <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;">
-                <button type="button" id="exportDataBtn" class="secondary-button" style="font-size:12px;">📥 تنزيل بياناتي الشخصية (JSON)</button>
-                <button type="button" id="deleteAccountBtn" class="text-button" style="color:#DC2626;font-size:12px;font-weight:700;">🗑️ طلب حذف الحساب</button>
+            <details style="border:1px solid var(--bemo-border);border-radius:12px;padding:12px 14px;background:var(--bemo-surface-secondary);">
+              <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--bemo-text);">⚙️ الإشعارات، الجلسات النشطة، تنزيل البيانات وحذف الحساب</summary>
+              <div style="display:grid;gap:12px;margin-top:12px;">
+                <form id="notifPrefsForm" style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
+                  <strong style="display:block;font-size:13px;margin-bottom:8px;color:var(--bemo-text);">إدارة تفضيلات الإشعارات</strong>
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;">
+                    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefOrders" checked> تحديثات الطلبات</label>
+                    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefSecurity" checked> تنبيهات الأمان</label>
+                    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefPromos"> العروض</label>
+                  </div>
+                  <button type="submit" class="secondary-button" style="margin-top:10px;font-size:12px;">حفظ التفضيلات</button>
+                </form>
+
+                <div style="padding:12px;border:1px solid var(--bemo-border);border-radius:8px;background:var(--bemo-surface);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                    <strong style="font-size:13px;color:var(--bemo-text);">الجلسات النشطة</strong>
+                    <button type="button" id="signOutAllBtn" class="text-button" style="font-size:12px;">إنهاء جميع الجلسات</button>
+                  </div>
+                  <div id="sessionsList" style="font-size:12px;color:var(--bemo-muted);"></div>
+                </div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;">
+                  <button type="button" id="exportDataBtn" class="secondary-button" style="font-size:12px;">📥 تنزيل بياناتي الشخصية (JSON)</button>
+                  <button type="button" id="deleteAccountBtn" class="text-button" style="color:#DC2626;font-size:12px;font-weight:700;">🗑️ طلب حذف الحساب</button>
+                </div>
               </div>
-            </div>
-          </details>
+            </details>
+          </div>
         </div>
       </section>
 
-      <!-- Hidden placeholder for legacy storePanel to maintain script compatibility -->
-      <div id="storePanel" hidden>
-        <div id="newStoreArea" hidden></div>
-        <div id="existingStoreArea" hidden></div>
-      </div>
+      <!-- Distinct Store Experience inside User Profile (Open Store CTA -> Unified Profile + My Store) -->
+      <section id="storePanel" class="account-card" aria-labelledby="storeTitle" hidden>
+        <div id="newStoreArea" class="store-launch-hero">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div>
+              <span class="section-kicker" style="color:#FF5000;">تجربة التجار في BEMO · LAUNCH STORE</span>
+              <h2 id="storeTitle" tabindex="-1" style="font-size:22px;margin:4px 0 8px;">افتح متجرك المستقل بجانب بروفايلك</h2>
+              <p style="font-size:13px;color:var(--bemo-muted);max-width:560px;line-height:1.7;">
+                حوّل حسابك إلى تجربة متكاملة تضم بروفايلك الشخصي ومتجرك التجاري معاً: احجز معرّف <strong>@يوزر متجرك</strong>، ارفع شعارك وأوراقك الرسمية، وابدأ البيع بعمولة <strong>0%</strong>.
+              </p>
+            </div>
+            <button type="button" id="expandStoreWizardBtn" class="primary-button" style="background:#FF5000;color:#fff;padding:12px 22px;font-size:14px;border-radius:12px;font-weight:800;">
+              ✨ افتح متجرك الآن
+            </button>
+          </div>
+
+          <form id="storeForm" class="account-form" hidden style="margin-top:20px;padding-top:18px;border-top:1px dashed var(--bemo-border);">
+            <div class="field-pair">
+              <div>
+                <label for="storeName">اسم المتجر التجاري *</label>
+                <input id="storeName" name="title" required minlength="2" maxlength="80" placeholder="مثال: متجر النور للإلكترونيات">
+              </div>
+              <div>
+                <label for="storeSlug">معرّف المتجر الدائم (@store-username) *</label>
+                <input id="storeSlug" name="slug" dir="ltr" required minlength="3" maxlength="48" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="noor-store">
+                <small class="field-help">أحرف إنجليزية صغيرة وأرقام مع فواصل - (لا يتغير بعد التسجيل).</small>
+              </div>
+            </div>
+
+            <label for="storeDescription">وصف المتجر (اختياري)</label>
+            <textarea id="storeDescription" name="description" maxlength="2000" rows="2" placeholder="عرّف الزوار بما يميز متجرك..."></textarea>
+
+            <div class="field-pair">
+              <div>
+                <label for="logoFile">شعار المتجر (PNG/JPG - اختياري)</label>
+                <input id="logoFile" name="logoFile" type="file" accept="image/png,image/jpeg">
+              </div>
+              <div>
+                <label for="coverFile">غلاف المتجر (PNG/JPG - اختياري)</label>
+                <input id="coverFile" name="coverFile" type="file" accept="image/png,image/jpeg">
+              </div>
+            </div>
+
+            <div class="field-pair">
+              <div>
+                <label for="legalName">الاسم القانوني الكامل للبائع *</label>
+                <input id="legalName" name="legalName" required minlength="2" maxlength="120" placeholder="الاسم كما في الوثيقة الرسمية">
+              </div>
+              <div>
+                <label for="sellerPhone">رقم هاتف المتجر للتنسيق *</label>
+                <input id="sellerPhone" name="sellerPhone" type="tel" dir="ltr" required placeholder="+964 770 123 4567">
+              </div>
+            </div>
+
+            <label for="sellerAddress">عنوان المتجر / المستودع لاستلام الشحنات *</label>
+            <input id="sellerAddress" name="sellerAddress" required minlength="6" maxlength="300" placeholder="المدينة، الشارع، رقم المحل أو المستودع">
+
+            <label for="identityFile">الأوراق الرسمية (الهوية الوطنية / الإقامة / السجل التجاري PDF أو صورة) *</label>
+            <input id="identityFile" name="identityFile" type="file" accept="image/jpeg,image/png,application/pdf" required>
+
+            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;cursor:pointer;">
+              <input id="sellerAgreement" name="sellerAgreement" type="checkbox" required style="width:18px;height:18px;min-height:auto;accent-color:#FF5000;">
+              <span>أوافق على <a href="policies.html#seller-policy" style="color:#FF5000;text-decoration:underline;">سياسة التاجر واتفاقية البيع في BEMO</a>.</span>
+            </label>
+
+            <div class="form-actions" style="margin-top:16px;">
+              <button type="submit" class="primary-button" style="background:#FF5000;color:#fff;font-weight:800;">تأكيد إطلاق المتجر وربطه بالبروفايل ➔</button>
+              <a href="seller.html" class="secondary-button" style="text-decoration:none;">أو افتح المعالج الموسع ↗</a>
+            </div>
+          </form>
+        </div>
+
+        <div id="existingStoreArea" hidden>
+          <div class="store-unified-banner">
+            <span class="store-initial" id="storeInitial" style="width:64px;height:64px;border-radius:16px;background:#FF5000;color:#fff;font-size:26px;">B</span>
+            <div style="flex:1;min-width:180px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h3 id="savedStoreName" style="font-size:20px;margin:0;color:#fff;">متجري</h3>
+                <span id="savedStoreStatus" class="store-status" style="background:#DCFCE7;color:#15803D;font-weight:700;">نشط</span>
+              </div>
+              <p id="savedStoreSlug" class="store-identifier" style="color:#CBD5E1;margin:2px 0 0;">@store</p>
+              <p id="savedStoreDescription" class="saved-description" style="color:#E2E8F0;margin:8px 0 0;font-size:13px;"></p>
+            </div>
+          </div>
+
+          <div class="store-actions-grid">
+            <a href="seller.html" class="store-action-chip">📊 لوحة المتجر</a>
+            <a href="merchant.html" class="store-action-chip">📦 المنتجات والمخزون</a>
+            <a href="orders.html?view=seller" class="store-action-chip">🛍️ طلبات المتجر</a>
+            <a href="store-editor.html" class="store-action-chip">✏️ تخصيص الهوية</a>
+            <a id="visitPublicStoreBtn" href="stores.html" class="store-action-chip">🌐 واجهة المتجر</a>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 

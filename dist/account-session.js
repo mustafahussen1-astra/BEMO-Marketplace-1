@@ -278,8 +278,9 @@
         cleanEmail = cleanEmail + '@gmail.com';
       }
       let cleanName = (name || '').trim();
+      const localPart = cleanEmail.split('@')[0];
+      const defaultHandle = localPart.replace(/[^a-z0-9_.\-]/gi, '').slice(0, 32) || ('user' + Date.now().toString(36).slice(-4));
       if (!cleanName) {
-        const localPart = cleanEmail.split('@')[0];
         cleanName = localPart.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       }
       const cleanPhone = (phone || '').trim();
@@ -289,10 +290,11 @@
         busy: false,
         error: null,
         provider: 'ready',
-        identity: { id: userId, email: cleanEmail },
+        identity: { id: userId, email: cleanEmail, username: defaultHandle },
         profile: {
           id: userId,
           email: cleanEmail,
+          username: defaultHandle,
           display_name: cleanName,
           phone: cleanPhone,
           locale: 'ar',
