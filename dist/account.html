@@ -133,63 +133,36 @@
         <span class="small-icon pale" aria-hidden="true">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         </span>
-        <span class="section-kicker">تسجيل الدخول / إنشاء حساب</span>
-        <h2 id="signInTitle">مرحباً بك في BEMO</h2>
-        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك، إدارة متجرك، وتثبيت بيانات الشحن.</p>
+        <span class="section-kicker">تسجيل الدخول</span>
+        <h2 id="signInTitle">تسجيل الدخول بحساب Gmail</h2>
+        <p class="section-copy">سجّل دخولك لمتابعة مشترياتك، إدارة طلباتك، وتثبيت بيانات الشحن.</p>
 
-        <!-- Direct Instant Login Form -->
-        <form id="directLoginForm" class="account-form" style="margin-top:20px;">
-          <label for="directName">الاسم الكامل *</label>
-          <input id="directName" name="name" required placeholder="مثال: محمد أحمد العبيدي" minlength="2" maxlength="80">
+        <!-- Google OAuth Button -->
+        <button id="googleButton" class="google-button" type="button" style="margin-top:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>المتابعة باستخدام Google</span>
+          <span class="button-arrow" aria-hidden="true" style="margin-right:auto;">↗</span>
+        </button>
+        <p id="providerMessage" class="provider-message" role="status" aria-live="polite" style="margin-top:6px;font-size:12px;color:var(--bemo-muted);"></p>
+        <button id="providerRetry" class="text-button" type="button" style="display:none;">تحقق مجدداً</button>
 
-          <label for="directContact">البريد الإلكتروني أو رقم الهاتف *</label>
-          <input id="directContact" name="contact" required placeholder="name@example.com أو +964 770 123 4567">
+        <div style="margin-block:22px 18px;text-align:center;position:relative;">
+          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
+          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو تسجيل دخول مباشر ببريد Gmail</span>
+        </div>
 
-          <div style="display:flex;gap:12px;margin-top:10px;">
-            <label style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;cursor:pointer;">
-              <input type="radio" name="role" value="buyer" checked style="accent-color:#FF5000;width:18px;height:18px;">
-              <span>أنا مشتري (تسوق وطلبات)</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;cursor:pointer;">
-              <input type="radio" name="role" value="seller" style="accent-color:#FF5000;width:18px;height:18px;">
-              <span>أنا تاجر (إدارة متجر ورصيد)</span>
-            </label>
-          </div>
+        <!-- Direct Gmail Login Form -->
+        <form id="gmailLoginForm" class="account-form" style="margin-top:8px;">
+          <label for="gmailEmail">بريدك الإلكتروني في Gmail *</label>
+          <input id="gmailEmail" name="email" type="email" required placeholder="name@gmail.com" dir="ltr" autocomplete="email" style="font-size:15px;">
 
-          <button class="primary-button" type="submit" style="margin-top:16px;width:100%;font-size:15px;background:#FF5000;color:#fff;">
-            تسجيل الدخول / الدخول المباشر ↵
+          <label for="gmailName" style="margin-top:10px;">الاسم الكامل (اختياري)</label>
+          <input id="gmailName" name="name" placeholder="مثال: مصطفى حسين" maxlength="80">
+
+          <button class="primary-button" type="submit" style="margin-top:16px;width:100%;font-size:15px;background:#FF5000;color:#fff;border-radius:10px;padding:12px;font-weight:700;">
+            تسجيل الدخول بالجيميل ↵
           </button>
         </form>
-
-        <div style="margin-block:24px 18px;text-align:center;position:relative;">
-          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
-          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو جرب بنقرة واحدة (حسابات تجريبية فورية)</span>
-        </div>
-
-        <!-- 1-Click Demo Logins -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <button id="demoBuyerBtn" type="button" class="secondary-button" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;border-radius:10px;">
-            <span>👤</span>
-            <span>دخول تجريبي (مشتري)</span>
-          </button>
-          <button id="demoSellerBtn" type="button" class="secondary-button" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;border-radius:10px;">
-            <span>🏪</span>
-            <span>دخول تجريبي (تاجر)</span>
-          </button>
-        </div>
-
-        <div style="margin-block:24px 18px;text-align:center;position:relative;">
-          <div style="height:1px;background:var(--bemo-border);position:absolute;top:50%;left:0;right:0;"></div>
-          <span style="position:relative;background:var(--bemo-surface);padding-inline:14px;color:var(--bemo-muted);font-size:12px;font-weight:700;">أو باستخدام حساب Google</span>
-        </div>
-
-        <button id="googleButton" class="google-button" type="button">
-          <span class="google-letter" aria-hidden="true">G</span>
-          <span>المتابعة باستخدام Google</span>
-          <span class="button-arrow" aria-hidden="true">↗</span>
-        </button>
-        <p id="providerMessage" class="provider-message" role="status" aria-live="polite"></p>
-        <button id="providerRetry" class="text-button" type="button" style="display:none;">تحقق مجدداً</button>
 
         <div class="card-divider"></div>
         <p class="quiet-copy">يمكنك استكشاف المنتجات والطلب كضيف دون تسجيل الدخول.</p>

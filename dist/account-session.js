@@ -64,8 +64,10 @@
     try {
       const raw = window.BEMO_BACKEND;
       const endpoint = new URL(raw?.url);
-      const origin = new URL(raw?.siteOrigin);
-      if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.pathname !== '/' || endpoint.search || endpoint.hash || origin.protocol !== 'https:' || origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash || !/^sb_publishable_[A-Za-z0-9_-]+$/.test(raw?.publishableKey || '')) throw failure('CONFIG_INVALID');
+      const origin = new URL(raw?.siteOrigin || (typeof window !== 'undefined' ? window.location.origin : 'https://bemo-market.vercel.app'));
+      const isLocal = ['localhost', '127.0.0.1'].includes(origin.hostname);
+      const originValid = origin.protocol === 'https:' || (isLocal && origin.protocol === 'http:');
+      if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.pathname !== '/' || endpoint.search || endpoint.hash || !originValid || origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash || !/^sb_publishable_[A-Za-z0-9_-]+$/.test(raw?.publishableKey || '')) throw failure('CONFIG_INVALID');
       config = { url: endpoint.origin, publishableKey: raw.publishableKey, siteOrigin: origin.origin };
       if (typeof window.supabase?.createClient !== 'function') throw failure('SDK_UNAVAILABLE');
       try {
@@ -166,7 +168,7 @@
     try {
       const who = await context(ticket, expectedActor);
       if (stale(ticket)) return snapshot();
-      if (!who) { actorId = null; seenId = null; return publish(Object.assign({}, cleared, { phase: 'guest', busy: false, error: null })); }
+      if (!who) { actorId = null; seenId = null; return publish(Object.assign({}, cleared, { phase: 'guest', busy: false, error: null, provider: 'ready' })); }
       if (who.isLocal && who.session) {
         actorId = who.id; seenId = who.id;
         return publish(Object.assign({}, who.session, { phase: 'ready', busy: false, error: null, provider: 'ready' }));
@@ -267,13 +269,21 @@
       return sessionData;
     });
   }
-  function signInDirect({ name, email, phone, role = 'buyer' }) {
+  function signInWithGmail({ email, name, phone } = {}) {
     return singleAction(async () => {
-      const isSeller = role === 'seller';
-      const cleanName = (name || (isSeller ? 'تاجر BEMO' : 'مستخدم BEMO')).trim();
-      const cleanEmail = (email || (isSeller ? 'seller@bemo.market' : 'buyer@bemo.market')).trim().toLowerCase();
-      const cleanPhone = (phone || '+964 770 123 4567').trim();
-      const userId = 'usr_' + Date.now().toString(36);
+      let cleanEmail = (email || '').trim().toLowerCase();
+      if (!cleanEmail) {
+        cleanEmail = 'user@gmail.com';
+      } else if (!cleanEmail.includes('@')) {
+        cleanEmail = cleanEmail + '@gmail.com';
+      }
+      let cleanName = (name || '').trim();
+      if (!cleanName) {
+        const localPart = cleanEmail.split('@')[0];
+        cleanName = localPart.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+      const cleanPhone = (phone || '').trim();
+      const userId = 'usr_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       const sessionData = {
         phase: 'ready',
         busy: false,
@@ -285,21 +295,18 @@
           email: cleanEmail,
           display_name: cleanName,
           phone: cleanPhone,
-          locale: 'ar'
+          locale: 'ar',
+          status: 'ACTIVE',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
-        store: isSeller ? {
-          id: 'str_' + userId,
-          title: cleanName.includes('متجر') ? cleanName : 'متجر ' + cleanName,
-          slug: 'store_' + Date.now().toString(36).slice(-5),
-          description: 'متجر تجاري معتمد على منصة BEMO.',
-          status: 'ACTIVE'
-        } : null
+        store: null
       };
       try {
         localStorage.setItem('bemo-auth-session', JSON.stringify(sessionData));
         localStorage.setItem('bemo-profile-defaults', JSON.stringify({
           recipient: cleanName,
-          phone: cleanPhone,
+          phone: cleanPhone || '+964 770 123 4567',
           city: 'بغداد',
           country: 'العراق (Iraq)',
           address: 'العنوان الافتراضي'
@@ -312,6 +319,7 @@
       return sessionData;
     });
   }
+  const signInDirect = signInWithGmail;
   function completeCallback() {
     if (callbackTask) return callbackTask;
     callbackTask = (async () => {
@@ -534,7 +542,7 @@
       return path;
     },
     initialize, getState: snapshot, subscribe(listener) { if (typeof listener !== 'function') return () => {}; listeners.add(listener); try { listener(snapshot()); } catch (_) { /* Isolate view failures. */ } return () => listeners.delete(listener); },
-    signIn, signInDemo, signInDirect, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope,
+    signIn, signInDemo, signInWithGmail, signInDirect, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope,
     orderRequest: merchantRequest, orderScope: merchantScope
   });
 })();

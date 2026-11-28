@@ -125,8 +125,8 @@
     }
     if ($('retryButton')) $('retryButton').hidden = !next.error?.retryable;
     if ($('recoverySignOut')) $('recoverySignOut').hidden = !['blocked','error'].includes(phase) || next.error?.code === 'SIGNOUT_FAILED';
-    if ($('googleButton')) $('googleButton').disabled = busy || next.provider !== 'ready' || phase !== 'guest';
-    if ($('providerMessage')) $('providerMessage').textContent = next.provider === 'ready' ? text('providerReady') : next.provider === 'offline' ? text('providerOffline') : ['disabled','misconfigured'].includes(next.provider) ? text('providerDisabled') : text('providerChecking');
+    if ($('googleButton')) $('googleButton').disabled = busy || phase !== 'guest';
+    if ($('providerMessage')) $('providerMessage').textContent = next.provider === 'offline' ? text('providerOffline') : '';
     if ($('providerRetry')) {
       $('providerRetry').hidden = next.provider === 'ready';
       $('providerRetry').disabled = busy;
@@ -212,20 +212,11 @@
   }
   api.subscribe(render);
   bindClick('googleButton', () => api.signIn());
-  bindClick('demoBuyerBtn', () => api.signInDemo('buyer'));
-  bindClick('demoSellerBtn', () => api.signInDemo('seller'));
-  $('directLoginForm')?.addEventListener('submit', event => {
+  $('gmailLoginForm')?.addEventListener('submit', event => {
     event.preventDefault();
-    const name = $('directName').value.trim();
-    const contact = $('directContact').value.trim();
-    const role = event.target.elements.role.value;
-    const isEmail = contact.includes('@');
-    runAction(() => api.signInDirect({
-      name,
-      email: isEmail ? contact : (name.replace(/\s+/g, '.').toLowerCase() + '@bemo.local'),
-      phone: isEmail ? '+964 770 123 4567' : contact,
-      role
-    }), 'signedIn', $('signInTitle'));
+    const email = $('gmailEmail')?.value.trim();
+    const name = $('gmailName')?.value.trim();
+    runAction(() => api.signInWithGmail({ email, name }), 'signedIn', $('signInTitle'));
   });
   bindClick('providerRetry', () => api.refresh());
   bindClick('retryButton', () => state?.error?.code === 'SIGNOUT_FAILED' ? api.signOut() : api.refresh());
