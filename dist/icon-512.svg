@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5000"/>
+      <stop offset="100%" stop-color="#FF2200"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <g filter="url(#shadow)">
+    <!-- Shopping Bag Outline -->
+    <path d="M156 180 L356 180 L380 410 L132 410 Z" fill="#FFFFFF" rx="20"/>
+    <!-- Handles -->
+    <path d="M196 180 V130 C196 96 222 70 256 70 C290 70 316 96 316 130 V180" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round"/>
+    <!-- BEMO B Letter / Smile -->
+    <path d="M220 250 H270 C290 250 304 262 304 278 C304 292 292 302 276 304 C296 306 310 318 310 336 C310 354 294 368 270 368 H220 Z" fill="#FF5000"/>
+    <circle cx="250" cy="285" r="12" fill="#FFFFFF"/>
+    <circle cx="250" cy="335" r="14" fill="#FFFFFF"/>
+  </g>
+</svg>

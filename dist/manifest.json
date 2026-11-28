@@ -1,0 +1,22 @@
+{
+  "name": "BEMO — عالم من الاكتشافات الجميلة",
+  "short_name": "BEMO",
+  "description": "سوق BEMO المتكامل للتسوق والتجارة الإلكترونية مع الدفع عند الاستلام",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1120",
+  "theme_color": "#FF5000",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["shopping", "lifestyle", "business"],
+  "icons": [
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512 192x192 128x128",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
