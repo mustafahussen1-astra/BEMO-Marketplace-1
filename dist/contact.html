@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>تواصل معنا، البلاغات والشكاوى — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF5000">
+  <script src="pwa-installer.js" defer></script>
+</head>
+<body data-page="contact">
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Support & Contact</span>
+        </div>
+      </a>
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn"><span>الرئيسية</span></a>
+        <a href="policies.html" class="header-action-btn"><span>السياسات</span></a>
+        <a href="safety.html" class="header-action-btn"><span>مركز الأمان</span></a>
+        <a href="orders.html?view=support" class="header-action-btn"><span>نزاعات الطلبات</span></a>
+        <a href="account.html" class="header-action-btn"><span>حسابي</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:860px;margin:32px auto 60px;padding:0 16px;">
+    <section class="account-card" style="padding:28px;margin-bottom:22px;">
+      <span class="section-kicker" style="color:#FF5000;font-weight:700;">إشعار دعم مباشر للإدارة · SUPPORT NOTIFICATIONS</span>
+      <h1 style="font-size:26px;margin:6px 0 8px;color:var(--bemo-text);">تواصل معنا، الإبلاغ عن مشكلة، أو تقديم استئناف</h1>
+      <p style="font-size:14px;color:var(--bemo-muted);line-height:1.7;margin:0 0 20px;">
+        تُرسل جميع الرسائل والبلاغات والشكاوى هنا <strong>كإشعار فوري مباشر إلى لوحة مسؤولي المنصة</strong> لضمان السرية وعدم الحاجة لمشاركة أرقام هواتف أو بريد شخصي علناً.
+      </p>
+
+      <div id="ticketAlert" class="message success-message" hidden style="margin-bottom:16px;"></div>
+      <div id="ticketError" class="message error-message" hidden style="margin-bottom:16px;"></div>
+
+      <form id="supportTicketForm" class="account-form">
+        <label for="ticketType">نوع البلاغ / الرسالة *</label>
+        <select id="ticketType" name="type" required>
+          <option value="CONTACT">تواصل واستفسار عام للإدارة (Contact Us)</option>
+          <option value="PROBLEM_REPORT">الإبلاغ عن مشكلة تقنية في الموقع (Report a Problem)</option>
+          <option value="LISTING_REPORT">الإبلاغ عن منتج أو متجر مخالف (Report a Listing)</option>
+          <option value="BLOCK_APPEAL">طلب مراجعة ورفع حظر عن الحساب (Complaints & Appeals)</option>
+          <option value="DATA_EXPORT">طلب نسخة رسمية من البيانات الشخصية</option>
+          <option value="ACCOUNT_DELETE">طلب إغلاق وحذف الحساب نهائياً</option>
+        </select>
+
+        <label for="ticketTarget">مرجع المنتج / الطلب / الحساب (اختياري)</label>
+        <input id="ticketTarget" name="target_ref" maxlength="160" placeholder="مثال: رقم المنتج prod-15 أو رقم الطلب أو معرّف المتجر">
+
+        <label for="ticketContact">وسيلة المتابعة في الإشعار (البريد أو اليوزر — اختياري)</label>
+        <input id="ticketContact" name="contact" maxlength="160" placeholder="سيُستخدم حسابك الحالي تلقائياً إن كنت مسجلاً">
+
+        <label for="ticketSubject">عنوان الرسالة أو الشكوى *</label>
+        <input id="ticketSubject" name="subject" required minlength="3" maxlength="160" placeholder="ملخص واضح ومختصر للموضوع">
+
+        <label for="ticketMessage">التفاصيل الكاملة *</label>
+        <textarea id="ticketMessage" name="message" required minlength="10" maxlength="3000" rows="5" placeholder="اشرح المشكلة أو البلاغ أو سبب الاستئناف بالتفصيل ليتمكن المسؤول من مراجعتها والرد عليك..."></textarea>
+
+        <button type="submit" class="primary-button" style="background:#FF5000;color:#fff;margin-top:16px;padding:12px 24px;border-radius:10px;font-weight:700;">
+          إرسال إشعار فوري للمسؤول ↵
+        </button>
+      </form>
+    </section>
+
+    <section class="account-card" style="padding:24px;">
+      <h2 style="font-size:18px;margin:0 0 12px;color:var(--bemo-text);">تذاكرك وبلاغاتك المرسلة</h2>
+      <div id="myTicketsList" style="font-size:13px;color:var(--bemo-muted);">جارٍ تحميل التذاكر...</div>
+    </section>
+  </main>
+
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;border-top:1px solid var(--bemo-border);color:var(--bemo-muted);font-size:12px;">
+    <span>© 2026 BEMO Marketplace · <a href="policies.html">الشروط والسياسات</a> · <a href="about.html">من نحن</a> · <a href="safety.html">مركز الأمان</a></span>
+  </footer>
+
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="account-session.js"></script>
+  <script src="support-tickets.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const params = new URL(location.href).searchParams;
+      if (params.get('type')) $('ticketType').value = params.get('type');
+      if (params.get('target')) $('ticketTarget').value = params.get('target');
+
+      function renderMyTickets() {
+        const list = window.BemoSupport.listTickets({ onlyMine: false }).slice(0, 15);
+        const container = $('myTicketsList');
+        container.replaceChildren();
+        if (!list.length) {
+          container.textContent = 'لم ترسل أي تذاكر أو بلاغات من هذا المتصفح بعد.';
+          return;
+        }
+        for (const t of list) {
+          const box = document.createElement('div');
+          box.style.cssText = 'padding:12px;border:1px solid var(--bemo-border);border-radius:10px;margin-bottom:10px;background:var(--bemo-surface-secondary);';
+          const title = document.createElement('strong');
+          title.style.cssText = 'display:block;color:var(--bemo-text);margin-bottom:4px;';
+          title.textContent = `[${t.ticket_type}] ${t.subject}`;
+          const meta = document.createElement('small');
+          meta.style.color = 'var(--bemo-muted)';
+          meta.textContent = `الحالة: ${t.status} · المرجع: ${t.id} · ${new Date(t.created_at).toLocaleString('ar')}`;
+          const body = document.createElement('p');
+          body.style.cssText = 'margin:6px 0 0;color:var(--bemo-text);font-size:13px;';
+          body.textContent = t.message;
+          box.append(title, meta, body);
+          if (t.admin_note) {
+            const reply = document.createElement('p');
+            reply.style.cssText = 'margin:8px 0 0;padding:8px;border-radius:6px;background:var(--bemo-surface);color:#15803D;font-weight:600;';
+            reply.textContent = 'رد الإدارة: ' + t.admin_note;
+            box.append(reply);
+          }
+          container.append(box);
+        }
+      }
+
+      $('supportTicketForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        $('ticketAlert').hidden = true;
+        $('ticketError').hidden = true;
+        const res = await window.BemoSupport.submitTicket({
+          type: $('ticketType').value,
+          targetRef: $('ticketTarget').value,
+          contact: $('ticketContact').value,
+          subject: $('ticketSubject').value,
+          message: $('ticketMessage').value
+        });
+        if (!res.ok) {
+          $('ticketError').textContent = 'تحقق من كتابة عنوان (3 أحرف على الأقل) ووصف واضح (10 أحرف على الأقل).';
+          $('ticketError').hidden = false;
+          return;
+        }
+        $('ticketAlert').textContent = `تم إرسال الإشعار بنجاح إلى الإدارة! رقم المتابعة: ${res.ticket.id}`;
+        $('ticketAlert').hidden = false;
+        $('supportTicketForm').reset();
+        renderMyTickets();
+      });
+
+      window.BemoAccount?.initialize?.();
+      renderMyTickets();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>السياسات والشروط القانونية — BEMO</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <script defer src="action-feedback.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF5000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-512.svg">
+  <script src="pwa-installer.js" defer></script>
+  <style>
+    .policies-shell { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 24px; max-width: 1200px; margin: 28px auto 60px; padding: 0 16px; align-items: start; }
+    .policies-sidebar { background: var(--bemo-surface); border: 1px solid var(--bemo-border); border-radius: 14px; padding: 16px; position: sticky; top: 20px; }
+    .policies-sidebar h2 { font-size: 14px; margin: 0 0 12px; color: var(--bemo-text); }
+    .policies-nav-link { display: block; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--bemo-muted); text-decoration: none; margin-bottom: 4px; transition: background 0.15s, color 0.15s; }
+    .policies-nav-link:hover, .policies-nav-link.active { background: var(--bemo-primary-soft, #FFF1E8); color: #FF5000; }
+    .policy-banner { background: var(--bemo-primary-soft, #FFF1E8); border: 1px solid #FED7AA; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; color: #9A3412; font-size: 13px; line-height: 1.6; }
+    .policy-card { background: var(--bemo-surface); border: 1px solid var(--bemo-border); border-radius: 14px; padding: 24px; margin-bottom: 18px; scroll-margin-top: 24px; }
+    .policy-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--bemo-border); padding-bottom: 12px; margin-bottom: 14px; }
+    .policy-card-head h2 { margin: 0; font-size: 18px; color: var(--bemo-text); }
+    .policy-meta-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--bemo-surface-secondary); color: var(--bemo-muted); border: 1px solid var(--bemo-border); }
+    .policy-body { white-space: pre-line; line-height: 1.85; font-size: 14px; color: var(--bemo-text); }
+    [data-theme="dark"] .policy-banner { background: #1E293B; border-color: #F97316; color: #FDBA74; }
+    @media(max-width: 860px) { .policies-shell { grid-template-columns: 1fr; } .policies-sidebar { position: static; } }
+  </style>
+</head>
+<body data-page="policies">
+  <div class="top-flash-bar">
+    <div class="container flash-inner">
+      <div class="flash-text">
+        <span class="flash-badge">BEMO POLICIES</span>
+        <span id="topNotice">جميع السياسات والقواعد التنظيمية والشفافية التجارية للمنصة</span>
+      </div>
+      <div class="top-flash-links">
+        <a href="help.html" class="top-link">مركز المساعدة</a>
+        <span class="top-sep">|</span>
+        <a href="contact.html" class="top-link">تواصل معنا</a>
+        <span class="top-sep">|</span>
+        <button type="button" id="languageButton" class="top-lang-btn">English</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Legal & Policies</span>
+        </div>
+      </a>
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn"><span>الرئيسية</span></a>
+        <a href="about.html" class="header-action-btn"><span>من نحن</span></a>
+        <a href="safety.html" class="header-action-btn"><span>مركز الأمان</span></a>
+        <a href="contact.html" class="header-action-btn"><span>تواصل / بلاغ</span></a>
+        <a href="account.html" class="header-action-btn"><span>حسابي</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="policies-shell" id="main">
+    <aside class="policies-sidebar">
+      <h2 id="tocHeading">فهرس السياسات الـ 15</h2>
+      <input type="search" id="policyFilter" placeholder="ابحث في السياسات..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--bemo-border);background:var(--bemo-surface-secondary);color:var(--bemo-text);margin-bottom:12px;font-size:13px;">
+      <nav id="policyToc"></nav>
+    </aside>
+
+    <div>
+      <div style="margin-bottom:18px;">
+        <span class="section-kicker" style="color:#FF5000;font-weight:700;font-size:12px;">BEMO LEGAL & TRANSPARENCY</span>
+        <h1 id="pageTitle" style="margin:6px 0 10px;font-size:26px;color:var(--bemo-text);">السياسات القانونية والشروط التشغيلية</h1>
+        <p id="pageSub" style="margin:0;color:var(--bemo-muted);font-size:14px;">وثيقة شاملة توضح حقوق والتزامات المشتري والبائع، آلية الدفع عند الاستلام، وسياسات الخصوصية والحماية.</p>
+      </div>
+
+      <div class="policy-banner" role="note">
+        <strong>⚖️ <span id="reviewTitle">ملاحظة قانونية هامة:</span></strong>
+        <span id="reviewBody"></span>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(234,88,12,0.3);display:flex;gap:16px;flex-wrap:wrap;">
+          <span>🌍 <strong id="lawLabel">الإطار القانوني:</strong> <span id="lawValue"></span></span>
+          <span>🎧 <strong id="contactLabel">قناة التواصل الرسمية:</strong> <a href="contact.html" id="contactLink" style="color:inherit;font-weight:700;text-decoration:underline;"></a></span>
+        </div>
+      </div>
+
+      <div id="policiesList"></div>
+    </div>
+  </main>
+
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;border-top:1px solid var(--bemo-border);color:var(--bemo-muted);font-size:12px;">
+    <span>© 2026 BEMO Marketplace · <a href="about.html">من نحن</a> · <a href="safety.html">مركز الأمان</a> · <a href="contact.html">تواصل وبلاغات الدعم</a> · <a href="help.html">مركز المساعدة</a></span>
+  </footer>
+
+  <script src="vendor/supabase-2.118.0.js"></script>
+  <script src="backend-config.js"></script>
+  <script src="policies-data.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      let lang = new URL(location.href).searchParams.get('lang') === 'en' ? 'en' : 'ar';
+      let policies = [];
+
+      function render() {
+        const ar = lang === 'ar';
+        document.documentElement.lang = lang;
+        document.documentElement.dir = ar ? 'rtl' : 'ltr';
+        $('languageButton').textContent = ar ? 'English' : 'العربية';
+        $('tocHeading').textContent = ar ? 'فهرس السياسات الـ 15' : 'All 15 Policies';
+        $('policyFilter').placeholder = ar ? 'ابحث في السياسات...' : 'Filter policies...';
+        $('pageTitle').textContent = ar ? 'السياسات القانونية والشروط التشغيلية' : 'Legal Policies & Operational Terms';
+        $('pageSub').textContent = ar ? 'وثيقة شاملة توضح حقوق والتزامات المشتري والبائع، آلية الدفع عند الاستلام، وسياسات الخصوصية والحماية.' : 'Comprehensive marketplace policies covering Buyer/Seller terms, COD payment, seller-set returns, privacy, and anti-overprotection.';
+        $('reviewTitle').textContent = ar ? 'ملاحظة قانونية هامة:' : 'Legal Review Notice:';
+        $('reviewBody').textContent = ar ? window.BemoPolicies.META.reviewNoticeAr : window.BemoPolicies.META.reviewNoticeEn;
+        $('lawLabel').textContent = ar ? 'الإطار القانوني:' : 'Governing Law:';
+        $('lawValue').textContent = ar ? window.BemoPolicies.META.governingLawAr : window.BemoPolicies.META.governingLawEn;
+        $('contactLabel').textContent = ar ? 'قناة التواصل والشكاوى:' : 'Support Channel:';
+        $('contactLink').textContent = ar ? 'نظام إشعارات الدعم المباشر (افتح تذكرة)' : 'In-Platform Support Notification Desk';
+
+        const q = ($('policyFilter').value || '').trim().toLowerCase();
+        const toc = $('policyToc'), list = $('policiesList');
+        toc.replaceChildren(); list.replaceChildren();
+
+        for (const p of policies) {
+          const title = ar ? p.titleAr : p.titleEn;
+          const body = ar ? p.bodyAr : p.bodyEn;
+          const a = document.createElement('a');
+          a.href = '#' + p.slug;
+          a.className = 'policies-nav-link';
+          a.textContent = title;
+          toc.append(a);
+
+          if (q && !title.toLowerCase().includes(q) && !body.toLowerCase().includes(q)) continue;
+
+          const card = document.createElement('article');
+          card.id = p.slug;
+          card.className = 'policy-card';
+
+          const head = document.createElement('div');
+          head.className = 'policy-card-head';
+          const h2 = document.createElement('h2');
+          h2.textContent = title;
+          const meta = document.createElement('span');
+          meta.className = 'policy-meta-badge';
+          meta.textContent = (ar ? 'إصدار ' : 'v') + p.version + ' · ' + (ar ? 'مسودة قياسية قابلة للمراجعة القانونية' : 'Standard draft · Legal review pending');
+          head.append(h2, meta);
+
+          const pBody = document.createElement('div');
+          pBody.className = 'policy-body';
+          pBody.textContent = body;
+
+          card.append(head, pBody);
+          list.append(card);
+        }
+      }
+
+      $('languageButton').addEventListener('click', () => {
+        lang = lang === 'ar' ? 'en' : 'ar';
+        render();
+      });
+      $('policyFilter').addEventListener('input', render);
+
+      window.BemoPolicies.loadPolicies().then(rows => {
+        policies = rows;
+        render();
+        if (location.hash) {
+          const target = document.getElementById(location.hash.slice(1));
+          target?.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -130,6 +130,10 @@
       <div id="pageMessage" class="message success-message" role="status" aria-live="polite" hidden></div>
       <div id="pageError" class="message error-message" role="alert" tabindex="-1" hidden>
         <p id="pageErrorText"></p>
+        <div id="appealRecoveryBox" hidden style="margin:10px 0;padding:12px;border-radius:8px;background:rgba(255,255,255,0.08);font-size:13px;">
+          <p id="appealRecoveryInfo" style="margin:0 0 8px;"></p>
+          <a href="contact.html?type=BLOCK_APPEAL" class="primary-button" style="background:#FF5000;color:#fff;text-decoration:none;padding:6px 14px;font-size:12px;border-radius:6px;display:inline-block;">تقديم طلب مراجعة وفك حظر (استعادة الحساب) ➔</a>
+        </div>
         <div class="error-actions">
           <button id="retryButton" type="button" class="secondary-button">إعادة المحاولة</button>
           <button id="recoverySignOut" type="button" class="text-button">تسجيل الخروج</button>
@@ -171,6 +175,29 @@
             تسجيل الدخول بالجيميل ↵
           </button>
         </form>
+
+        <!-- Optional Username + Password Login/Registration (Without OTP) -->
+        <details style="margin-top:18px;border:1px solid var(--bemo-border);border-radius:10px;padding:12px 14px;background:var(--bemo-surface-secondary);">
+          <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--bemo-text);">أو الدخول / التسجيل باليوزر وكلمة المرور (دون OTP)</summary>
+          <form id="usernameAuthForm" class="account-form" style="margin-top:12px;">
+            <label for="authUsername">اسم المستخدم (يوزر @username) *</label>
+            <input id="authUsername" name="username" dir="ltr" required minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="mustafa.iq">
+
+            <label for="authPassword" style="margin-top:8px;">كلمة المرور *</label>
+            <input id="authPassword" name="password" type="password" required minlength="6" maxlength="100" placeholder="6 أحرف على الأقل">
+
+            <label for="authPhoneOptional" style="margin-top:8px;">رقم الهاتف (اختياري — لتثبيته عند الطلب أو حفظ العنوان)</label>
+            <input id="authPhoneOptional" name="phone" type="tel" dir="ltr" placeholder="+964 770 ... (اختياري)">
+
+            <button class="secondary-button full-width" type="submit" style="margin-top:12px;font-weight:700;">
+              دخول / إنشاء حساب باليوزر ↵
+            </button>
+          </form>
+        </details>
+
+        <p style="font-size:11px;color:var(--bemo-muted);margin:14px 0 0;text-align:center;">
+          باستخدامك للمنصة فأنت توافق على <a href="policies.html#terms" style="color:#FF5000;font-weight:600;">الشروط والأحكام</a> و <a href="policies.html#privacy" style="color:#FF5000;font-weight:600;">سياسة الخصوصية</a>.
+        </p>
 
         <div class="card-divider"></div>
         <p class="quiet-copy">يمكنك استكشاف المنتجات والطلب كضيف دون تسجيل الدخول.</p>
@@ -251,8 +278,11 @@
           <label for="profileName">الاسم الكامل *</label>
           <input id="profileName" name="display_name" autocomplete="name" required maxlength="80" minlength="2">
 
-          <label for="profilePhone">رقم الهاتف الأساسي للتوصيل *</label>
-          <input id="profilePhone" name="phone" type="tel" dir="ltr" placeholder="+964..." required>
+          <label for="profileUsername">اسم المستخدم (@username — اختياري)</label>
+          <input id="profileUsername" name="username" dir="ltr" minlength="3" maxlength="32" pattern="[a-zA-Z0-9_.\-]{3,32}" placeholder="example.user">
+
+          <label for="profilePhone">رقم الهاتف للتوصيل (اختياري — أضفه متى أردت تثبيته للطلبات والعناوين)</label>
+          <input id="profilePhone" name="phone" type="tel" dir="ltr" placeholder="+964 770 ... (اختياري)">
 
           <div class="field-pair">
             <div>
@@ -293,6 +323,46 @@
             الانتقال إلى المتجر ➔
           </a>
         </div>
+
+        <!-- Account Completeness: Password, Active Sessions, Notifications, Data Export, Deletion -->
+        <div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--bemo-border);display:grid;gap:16px;">
+          <h3 style="margin:0;font-size:16px;color:var(--bemo-text);">إعدادات الأمان، الإشعارات، والبيانات</h3>
+
+          <!-- Change Password -->
+          <form id="passwordForm" class="account-form" style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
+            <label for="newPasswordInput" style="font-weight:700;">تعيين أو تغيير كلمة المرور (اختياري)</label>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+              <input id="newPasswordInput" name="new_password" type="password" minlength="6" maxlength="100" required placeholder="كلمة المرور الجديدة (6+ أحرف)" style="flex:1;min-width:180px;">
+              <button type="submit" class="secondary-button">حفظ كلمة المرور</button>
+            </div>
+          </form>
+
+          <!-- Notification Preferences -->
+          <form id="notifPrefsForm" style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
+            <strong style="display:block;font-size:13px;margin-bottom:8px;color:var(--bemo-text);">إدارة تفضيلات الإشعارات</strong>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;">
+              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefOrders" checked> تحديثات الطلبات والشحن</label>
+              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefSecurity" checked> تنبيهات الأمان والحساب</label>
+              <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="prefPromos"> العروض والتخفيضات</label>
+            </div>
+            <button type="submit" class="secondary-button" style="margin-top:10px;font-size:12px;">حفظ تفضيلات الإشعارات</button>
+          </form>
+
+          <!-- Active Sessions -->
+          <div style="padding:14px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <strong style="font-size:13px;color:var(--bemo-text);">إدارة الجلسات النشطة</strong>
+              <button type="button" id="signOutAllBtn" class="text-button" style="font-size:12px;">إنهاء جميع الجلسات</button>
+            </div>
+            <div id="sessionsList" style="font-size:12px;color:var(--bemo-muted);"></div>
+          </div>
+
+          <!-- Personal Data Export & Account Deletion -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--bemo-border);border-radius:10px;">
+            <button type="button" id="exportDataBtn" class="secondary-button" style="font-size:13px;">📥 تنزيل بياناتي الشخصية (JSON)</button>
+            <button type="button" id="deleteAccountBtn" class="text-button" style="color:#DC2626;font-size:13px;font-weight:700;">🗑️ طلب حذف الحساب</button>
+          </div>
+        </div>
       </section>
 
       <!-- Hidden placeholder for legacy storePanel to maintain script compatibility -->
@@ -304,12 +374,13 @@
   </main>
 
   <footer class="account-container account-footer">
-    <span>© 2026 BEMO. عالم من الاكتشافات الجميلة.</span>
+    <span>© 2026 BEMO. عالم من الاكتشافات الجميلة · <a href="policies.html">الشروط والسياسات</a> · <a href="safety.html">مركز الأمان</a> · <a href="contact.html">تواصل وبلاغات الدعم</a></span>
   </footer>
 
   <script src="vendor/supabase-2.118.0.js"></script>
   <script src="backend-config.js"></script>
   <script src="account-session.js"></script>
+  <script src="support-tickets.js"></script>
   <script src="bemo-region.js"></script>
   <script src="account-page.js"></script>
 </body>

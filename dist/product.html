@@ -193,7 +193,7 @@
         </div>
         <div class="perk-item">
           <span class="perk-icon">🔄</span>
-          <span data-t="returnsPerk">استرجاع مجاني خلال 15 يوماً</span>
+          <span data-t="returnsPerk">مدة الاسترجاع حسب سياسة البائع (مع حق الفحص عند الاستلام)</span>
         </div>
         <div class="perk-item">
           <span class="perk-icon">🛡️</span>
@@ -259,10 +259,34 @@
           <li data-t="protect2">ضمان مطابقة الوصف والأصالة 100%</li>
           <li data-t="protect3">دفع آمن عند الاستلام لكل متجر مستقل</li>
         </ul>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bemo-border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;">
+          <a href="policies.html#refund-return" style="color:var(--bemo-muted);text-decoration:underline;">سياسة الإرجاع حسب البائع</a>
+          <a id="reportListingLink" href="contact.html?type=LISTING_REPORT" style="color:#DC2626;font-weight:700;text-decoration:none;">🚩 الإبلاغ عن هذا المنتج</a>
+        </div>
       </div>
     </aside>
 
   </article>
+
+  <!-- Customer Reviews Section -->
+  <section id="reviews" class="pdp-card" style="margin-top:24px;padding:24px;">
+    <h2 style="font-size:18px;margin:0 0 12px;color:var(--bemo-text);">⭐ تقييمات المشترين والمراجعات</h2>
+    <form id="reviewForm" style="display:grid;gap:10px;margin-bottom:18px;padding:14px;border-radius:10px;background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <label for="reviewRating" style="font-size:13px;font-weight:700;">التقييم:</label>
+        <select id="reviewRating" name="rating" style="padding:6px 10px;border-radius:6px;border:1px solid var(--bemo-border);background:var(--bemo-surface);color:var(--bemo-text);">
+          <option value="5">★★★★★ (5 - ممتاز)</option>
+          <option value="4">★★★★☆ (4 - جيد جداً)</option>
+          <option value="3">★★★☆☆ (3 - مقبول)</option>
+          <option value="2">★★☆☆☆ (2 - دون المتوقع)</option>
+          <option value="1">★☆☆☆☆ (1 - سيء)</option>
+        </select>
+      </div>
+      <textarea id="reviewComment" name="comment" required minlength="3" maxlength="1200" rows="2" placeholder="شارك رأيك حول جودة المنتج وتجربة التوصيل..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--bemo-border);background:var(--bemo-surface);color:var(--bemo-text);"></textarea>
+      <button type="submit" class="primary-button" style="width:fit-content;background:#FF5000;color:#fff;padding:8px 18px;border-radius:8px;font-weight:700;">إرسال التقييم</button>
+    </form>
+    <div id="reviewsList" style="display:grid;gap:10px;"></div>
+  </section>
 
   <!-- 4. Trust Strip below (matching 4ProductDetail.png) -->
   <section class="pdp-trust-strip">

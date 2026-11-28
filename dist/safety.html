@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>مركز الأمان واستعادة الحساب — BEMO Safety Center</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF5000">
+  <script src="pwa-installer.js" defer></script>
+</head>
+<body data-page="safety">
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">Safety & Security</span>
+        </div>
+      </a>
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn"><span>الرئيسية</span></a>
+        <a href="policies.html" class="header-action-btn"><span>السياسات</span></a>
+        <a href="contact.html" class="header-action-btn"><span>تواصل / استئناف</span></a>
+        <a href="account.html" class="header-action-btn"><span>حسابي</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:960px;margin:32px auto 60px;padding:0 16px;">
+    <section class="account-card" style="padding:30px;margin-bottom:20px;">
+      <span class="section-kicker" style="color:#15803D;font-weight:700;">مركز الأمان والحماية المتوازنة · SAFETY CENTER</span>
+      <h1 style="font-size:26px;margin:8px 0 12px;color:var(--bemo-text);">كيف نحمي حسابك وطلباتك دون إزعاج؟</h1>
+      <p style="font-size:14px;color:var(--bemo-muted);line-height:1.7;">
+        صُممت منظومة الحماية في BEMO لتعمل بصمت في الخلفية لحماية الطلبات والأرصدة والخصوصية مع تجنب الحظر الخاطئ أو تعقيد تجربة الاستخدام.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px;">
+        <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:12px;padding:18px;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:var(--bemo-text);">🛡️ منع الحظر المفرط (Anti-Overprotection)</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">تغيير شبكة الإنترنت (IP)، استخدام VPN، تبديل الجهاز، أو تقديم عدة طلبات شراء مشروعة لا يؤدي أبداً لحظرك.</p>
+        </div>
+        <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:12px;padding:18px;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:var(--bemo-text);">📦 فحص البضاعة قبل الدفع</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">لا تدفع للمندوب قبل التأكد من مطابقة المنتج؛ كما يُحجب رقم هاتفك تماماً حتى يقبل التاجر طلبك.</p>
+        </div>
+        <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:12px;padding:18px;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:var(--bemo-text);">🔓 استعادة الحساب ورفع الحظر الخاطئ</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">الحظر المؤقت يزول تلقائياً بانتهاء مدته دون حذف أي طلب أو رصيد، ويمكنك طلب مراجعة فورية عبر الدعم.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="account-card" style="padding:26px;">
+      <h2 style="font-size:19px;margin:0 0 10px;color:var(--bemo-text);">تدرج الإجراءات الأمنية في المنصة</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--bemo-border);text-align:right;color:var(--bemo-text);">
+            <th style="padding:10px;">الحالة</th>
+            <th style="padding:10px;">الإجراء التلقائي</th>
+          </tr>
+        </thead>
+        <tbody style="color:var(--bemo-muted);">
+          <tr style="border-bottom:1px solid var(--bemo-border);"><td style="padding:10px;">اشتباه منخفض</td><td style="padding:10px;">مراقبة في الخلفية فقط دون أي حظر أو تنبيه مزعج</td></tr>
+          <tr style="border-bottom:1px solid var(--bemo-border);"><td style="padding:10px;">نشاط غير معتاد</td><td style="padding:10px;">تهدئة مؤقتة قصيرة للميزة المحددة عند الضرورة فقط</td></tr>
+          <tr style="border-bottom:1px solid var(--bemo-border);"><td style="padding:10px;">اشتباه متوسط</td><td style="padding:10px;">تقييد الوظيفة المتأثرة فقط بدلاً من إيقاف الحساب بالكامل</td></tr>
+          <tr style="border-bottom:1px solid var(--bemo-border);"><td style="padding:10px;">اشتباه مرتفع</td><td style="padding:10px;">تعليق مؤقت بوقت محدد مع حفظ كافة البيانات وإتاحة الاستئناف</td></tr>
+          <tr><td style="padding:10px;">هجوم مؤكد</td><td style="padding:10px;">منع العملية الضارة وحماية الأرصدة والبيانات مع الاحتفاظ بسجل التدقيق</td></tr>
+        </tbody>
+      </table>
+      <a href="contact.html?type=BLOCK_APPEAL" class="primary-button" style="background:#FF5000;color:#fff;text-decoration:none;padding:10px 20px;border-radius:10px;font-weight:700;display:inline-block;">تقديم طلب استعادة حساب / مراجعة حظر ➔</a>
+    </section>
+  </main>
+
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;border-top:1px solid var(--bemo-border);color:var(--bemo-muted);font-size:12px;">
+    <span>© 2026 BEMO Marketplace · <a href="policies.html">الشروط والسياسات</a> · <a href="about.html">من نحن</a> · <a href="contact.html">تواصل معنا</a></span>
+  </footer>
+</body>
+</html>

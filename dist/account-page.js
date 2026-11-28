@@ -122,10 +122,18 @@
     if ($('pageError')) {
       $('pageError').hidden = !next.error;
       if ($('pageErrorText')) $('pageErrorText').textContent = next.error ? errorText(next.error.code) : '';
+      if ($('appealRecoveryBox')) {
+        const showAppeal = phase === 'blocked' || next.error?.code === 'ACCOUNT_UNAVAILABLE';
+        $('appealRecoveryBox').hidden = !showAppeal;
+        if (showAppeal && $('appealRecoveryInfo')) {
+          const untilText = next.error?.until ? (' (ينتهي تلقائياً في: ' + new Date(next.error.until).toLocaleString(lang) + ')') : '';
+          $('appealRecoveryInfo').textContent = (next.error?.reason || 'جميع طلباتك وأرصدتك محفوظة ولن تُحذف.') + untilText;
+        }
+      }
     }
     if ($('retryButton')) $('retryButton').hidden = !next.error?.retryable;
     if ($('recoverySignOut')) $('recoverySignOut').hidden = !['blocked','error'].includes(phase) || next.error?.code === 'SIGNOUT_FAILED';
-    if ($('googleButton')) $('googleButton').disabled = busy || phase !== 'guest';
+    if ($('googleButton')) $('googleButton').disabled = busy || ['disabled','misconfigured'].includes(next.provider) || phase !== 'guest';
     if ($('providerMessage')) $('providerMessage').textContent = next.provider === 'offline' ? text('providerOffline') : '';
     if ($('providerRetry')) {
       $('providerRetry').hidden = next.provider === 'ready';
@@ -148,6 +156,7 @@
       if ($('accountAvatar')) $('accountAvatar').textContent = Array.from(profile.display_name || 'B')[0];
       if (profileSeededFor !== profile.id) {
         if ($('profileName')) $('profileName').value = profile.display_name || '';
+        if ($('profileUsername')) $('profileUsername').value = profile.username || next.identity?.username || '';
         if ($('profileLocale')) $('profileLocale').value = profile.locale === 'en' ? 'en' : 'ar';
         try {
           const savedProf = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
@@ -155,7 +164,15 @@
           if ($('profileCity')) $('profileCity').value = savedProf.city || '';
           if ($('profileCountry') && savedProf.country) $('profileCountry').value = savedProf.country;
           if ($('profileAddress')) $('profileAddress').value = savedProf.address || '';
+          const prefs = JSON.parse(localStorage.getItem('bemo-notif-prefs-v1') || '{"orders":true,"security":true,"promos":false}');
+          if ($('prefOrders')) $('prefOrders').checked = prefs.orders !== false;
+          if ($('prefSecurity')) $('prefSecurity').checked = prefs.security !== false;
+          if ($('prefPromos')) $('prefPromos').checked = !!prefs.promos;
         } catch (_) {}
+        if ($('sessionsList') && typeof api.listSessions === 'function') {
+          const sess = api.listSessions();
+          $('sessionsList').textContent = sess.length ? sess.map(s => `🟢 ${s.device} (${s.email})`).join(' · ') : 'لا توجد جلسات أخرى';
+        }
         profileSeededFor = profile.id;
       }
       if ($('newStoreArea')) $('newStoreArea').hidden = !!next.store;
@@ -186,7 +203,7 @@
       actionRunning = false;
       if (result?.error) { render(result); $('pageError').focus(); return; }
       const currentOwner = result?.identity?.email || result?.profile?.email || '';
-      const confirmed = !success || (success === 'signedOut' ? result?.phase === 'guest' : result?.phase === 'ready' && currentOwner === startingOwner && (!verified || verified(result)));
+      const confirmed = !success || (success === 'signedOut' ? result?.phase === 'guest' : success === 'signedIn' ? (result?.phase === 'ready' && !!currentOwner) : result?.phase === 'ready' && currentOwner === startingOwner && (!verified || verified(result)));
       if (!confirmed) {
         render({...api.getState(), error:{code:'SESSION_CHANGED',retryable:true}});
         $('pageError').focus();
@@ -218,6 +235,53 @@
     const name = $('gmailName')?.value.trim();
     runAction(() => api.signInWithGmail({ email, name }), 'signedIn', $('signInTitle'));
   });
+  $('usernameAuthForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const username = $('authUsername')?.value.trim();
+    const password = $('authPassword')?.value;
+    const phone = $('authPhoneOptional')?.value.trim() || '';
+    runAction(() => api.signInWithUsername({ username, password, phone }), 'signedIn', $('signInTitle'));
+  });
+  $('passwordForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const pw = $('newPasswordInput')?.value;
+    if (!pw || pw.length < 6) return;
+    const res = await api.changePassword?.(pw);
+    if (res?.ok) {
+      $('newPasswordInput').value = '';
+      if ($('pageMessage')) { $('pageMessage').textContent = lang === 'ar' ? 'تم حفظ كلمة المرور بنجاح.' : 'Password saved.'; $('pageMessage').hidden = false; }
+    }
+  });
+  $('notifPrefsForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+    try {
+      localStorage.setItem('bemo-notif-prefs-v1', JSON.stringify({
+        orders: !!$('prefOrders')?.checked,
+        security: !!$('prefSecurity')?.checked,
+        promos: !!$('prefPromos')?.checked
+      }));
+      if ($('pageMessage')) { $('pageMessage').textContent = lang === 'ar' ? 'تم حفظ تفضيلات الإشعارات.' : 'Notification preferences saved.'; $('pageMessage').hidden = false; }
+    } catch (_) {}
+  });
+  $('signOutAllBtn')?.addEventListener('click', () => runAction(() => api.signOutAll ? api.signOutAll() : api.signOut(), 'signedOut'));
+  $('exportDataBtn')?.addEventListener('click', async () => {
+    const dump = await api.exportMyData?.();
+    if (!dump) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'BEMO-personal-data.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  $('deleteAccountBtn')?.addEventListener('click', async () => {
+    const ok = window.confirm(lang === 'ar' ? 'هل تريد إرسال طلب حذف الحساب نهائياً للإدارة؟ سيتم حفظ الطلب وتأكيد الخروج.' : 'Submit an account deletion request to admins and sign out?');
+    if (!ok) return;
+    await window.BemoSupport?.submitTicket?.({
+      type: 'ACCOUNT_DELETE',
+      subject: 'طلب حذف حساب مستخدم',
+      message: 'طلب المستخدم حذف حسابه وبياناته الشخصية من المنصة وفق سياسة الخصوصية.'
+    });
+    runAction(() => api.signOut(), 'signedOut');
+  });
   bindClick('providerRetry', () => api.refresh());
   bindClick('retryButton', () => state?.error?.code === 'SIGNOUT_FAILED' ? api.signOut() : api.refresh());
   for (const id of ['signOutButton','onboardingSignOut','recoverySignOut']) bindClick(id, () => api.signOut(), 'signedOut');
@@ -228,6 +292,8 @@
       name.setCustomValidity(name.value.trim() ? '' : errorText('PROFILE_INVALID'));
       if (!form.reportValidity()) return;
       const input = {display_name:name.value.trim(),locale:form.elements.locale.value};
+      if (form.elements.username) input.username = form.elements.username.value.trim().toLowerCase().replace(/^@/,'');
+      if (form.elements.phone) input.phone = form.elements.phone.value.trim();
       try {
         const phone = form.elements.phone?.value?.trim() || '';
         const city = form.elements.city?.value?.trim() || '';

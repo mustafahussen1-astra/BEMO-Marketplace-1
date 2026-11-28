@@ -122,12 +122,14 @@
 
     <!-- Workspace Body -->
     <div id="workspace">
-      <!-- Toolbar (Refresh & Stats) -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
         <span id="listSubTitle" style="font-size:13px;color:var(--bemo-muted);">قائمة الطلبات المسجلة في حسابك</span>
-        <button id="refresh" class="secondary-button" style="padding:6px 14px;font-size:12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-          <span>🔄</span> <span>تحديث القائمة</span>
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <a href="contact.html?type=PROBLEM_REPORT" class="secondary-button" style="padding:6px 12px;font-size:12px;border-radius:6px;text-decoration:none;">🎧 إشعار دعم / شكوى</a>
+          <button id="refresh" class="secondary-button" style="padding:6px 14px;font-size:12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+            <span>🔄</span> <span>تحديث القائمة</span>
+          </button>
+        </div>
       </div>
 
       <!-- Orders List Container -->
@@ -188,7 +190,7 @@
   </main>
 
   <footer class="account-container account-footer">
-    <span>© 2026 BEMO. جميع الحقوق محفوظة.</span>
+    <span>© 2026 BEMO. جميع الحقوق محفوظة · <a href="policies.html#refund-return">سياسة الإرجاع حسب البائع</a> · <a href="contact.html">إرسال بلاغ دعم</a></span>
   </footer>
 
   <!-- Scripts -->

@@ -120,17 +120,66 @@
 
           <button class="primary-button" data-t="save" style="background:#0F1E36;padding:8px 20px;border-radius:6px;font-weight:700;width:fit-content;">حفظ وتطبيق</button>
         </form>
+
+        <!-- New Operational Modules: Support Tickets/Appeals, Policies CMS, Security & Block Control -->
+        <section id="adminOperationsHub" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--bemo-border);display:grid;gap:22px;">
+          <!-- 1. Support Notifications, Complaints, Listing Reports & Block Appeals -->
+          <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:10px;padding:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+              <h2 style="font-size:16px;font-weight:800;margin:0;color:var(--bemo-text);">🔔 إشعارات الدعم، البلاغات، الشكاوى والاستئنافات</h2>
+              <button type="button" id="refreshTicketsBtn" class="secondary-button" style="font-size:12px;">تحديث القائمة</button>
+            </div>
+            <div id="adminTicketsQueue" style="display:grid;gap:10px;font-size:13px;"></div>
+          </div>
+
+          <!-- 2. Security, Anti-Overprotection & Block Management -->
+          <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:10px;padding:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+              <div>
+                <h2 style="font-size:16px;font-weight:800;margin:0;color:var(--bemo-text);">🛡️ منظومة الحماية، الاستثناءات وإدارة الحظر</h2>
+                <small id="monitorModeStatus" style="color:var(--bemo-muted);"></small>
+              </div>
+              <button type="button" id="toggleMonitorBtn" class="secondary-button" style="font-size:12px;">تبديل وضع المراقبة (Monitor Mode)</button>
+            </div>
+            <form id="securityControlForm" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <input id="secTargetId" placeholder="معرّف المستخدم / @username" required style="flex:1;min-width:160px;padding:8px;border:1px solid var(--bemo-border);border-radius:6px;">
+              <select id="secAction" style="padding:8px;border:1px solid var(--bemo-border);border-radius:6px;">
+                <option value="LIFT_BLOCK">رفع الحظر يدوياً (Lift Block)</option>
+                <option value="TEMP_SUSPEND">تعليق مؤقت (24 ساعة)</option>
+                <option value="ALLOWLIST">استثناء من قواعد التقييد (Allowlist)</option>
+                <option value="REMOVE_ALLOWLIST">إزالة الاستثناء</option>
+              </select>
+              <input id="secReason" placeholder="السبب الإداري المسجل..." required minlength="3" style="flex:1.5;min-width:200px;padding:8px;border:1px solid var(--bemo-border);border-radius:6px;">
+              <button type="submit" class="primary-button" style="background:#0F1E36;padding:8px 14px;border-radius:6px;font-size:12px;">تنفيذ وتسجيل</button>
+            </form>
+            <div id="securityEventsList" style="font-size:12px;color:var(--bemo-muted);"></div>
+          </div>
+
+          <!-- 3. Policies Editor CMS -->
+          <div style="background:var(--bemo-surface-secondary);border:1px solid var(--bemo-border);border-radius:10px;padding:18px;">
+            <h2 style="font-size:16px;font-weight:800;margin:0 0 12px;color:var(--bemo-text);">⚖️ محرر السياسات القانونية الـ 15</h2>
+            <form id="policyEditorForm" style="display:grid;gap:10px;">
+              <select id="policySlugSelect" style="padding:8px;border:1px solid var(--bemo-border);border-radius:6px;"></select>
+              <input id="policyTitleArInput" placeholder="عنوان السياسة بالعربية" required style="padding:8px;border:1px solid var(--bemo-border);border-radius:6px;">
+              <textarea id="policyBodyArInput" rows="5" placeholder="نص السياسة بالعربية..." required style="padding:8px;border:1px solid var(--bemo-border);border-radius:6px;font-family:inherit;"></textarea>
+              <button type="submit" class="primary-button" style="background:#FF5000;width:fit-content;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;">حفظ وتحديث السياسة</button>
+            </form>
+            <p id="policySaveStatus" style="margin:8px 0 0;font-size:12px;color:#15803D;"></p>
+          </div>
+        </section>
       </section>
     </div>
   </main>
 
   <footer class="account-container account-footer" style="text-align:center;padding:24px;color:#94A3B8;border-top:1px solid #E2E8F0;font-size:12px;">
-    <span>© 2026 BEMO Administration</span>
+    <span>© 2026 BEMO Administration · <a href="policies.html">السياسات</a> · <a href="contact.html">تذاكر الدعم</a></span>
   </footer>
 
   <script src="vendor/supabase-2.118.0.js"></script>
   <script src="backend-config.js"></script>
   <script src="account-session.js"></script>
+  <script src="support-tickets.js"></script>
+  <script src="policies-data.js"></script>
   <script src="live-commerce.js"></script>
   <script src="workspace-private.js"></script>
   <script src="bemo-region.js"></script>

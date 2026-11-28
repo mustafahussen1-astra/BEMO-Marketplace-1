@@ -320,6 +320,150 @@
     });
   }
   const signInDirect = signInWithGmail;
+
+  function simpleHash(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+    }
+    return 'h_' + (h >>> 0).toString(16);
+  }
+
+  function checkSuspensionState(userKey) {
+    try {
+      const sec = JSON.parse(localStorage.getItem('bemo-security-state-v1') || '{}');
+      const rec = sec?.suspended?.[userKey];
+      if (!rec) return null;
+      if (rec.until && Date.now() > new Date(rec.until).getTime()) {
+        delete sec.suspended[userKey];
+        localStorage.setItem('bemo-security-state-v1', JSON.stringify(sec));
+        return null;
+      }
+      return rec;
+    } catch (_) { return null; }
+  }
+
+  function signInWithUsername({ username, password, phone = '', displayName = '' } = {}) {
+    return singleAction(async () => {
+      const cleanUser = String(username || '').trim().toLowerCase().replace(/^@/, '');
+      const cleanPass = String(password || '');
+      if (!/^[a-z0-9_.-]{3,32}$/.test(cleanUser) || cleanPass.length < 6) {
+        return publish(Object.assign({}, cleared, { phase: 'guest', busy: false, error: failure('PROFILE_INVALID') }));
+      }
+      let users = {};
+      try { users = JSON.parse(localStorage.getItem('bemo-local-users-v1') || '{}'); } catch (_) {}
+      const passHash = simpleHash(cleanUser + ':' + cleanPass);
+      const existing = users[cleanUser];
+      if (existing && existing.passHash !== passHash) {
+        return publish(Object.assign({}, cleared, { phase: 'guest', busy: false, error: failure('AUTH_EXPIRED') }));
+      }
+      const userId = existing?.id || ('usr_' + simpleHash(cleanUser).slice(2));
+      const cleanName = (displayName || existing?.displayName || cleanUser).trim();
+      const cleanPhone = (phone || existing?.phone || '').trim();
+      const email = existing?.email || (cleanUser + '@users.bemo.local');
+
+      if (!existing) {
+        users[cleanUser] = { id: userId, username: cleanUser, passHash, displayName: cleanName, phone: cleanPhone, email, createdAt: new Date().toISOString() };
+        try { localStorage.setItem('bemo-local-users-v1', JSON.stringify(users)); } catch (_) {}
+      } else if (cleanPhone && cleanPhone !== existing.phone) {
+        existing.phone = cleanPhone;
+        try { localStorage.setItem('bemo-local-users-v1', JSON.stringify(users)); } catch (_) {}
+      }
+
+      const susp = checkSuspensionState(userId) || checkSuspensionState(cleanUser);
+      if (susp) {
+        return publish(Object.assign({}, cleared, {
+          phase: 'blocked', busy: false, provider: 'ready',
+          error: { code: 'ACCOUNT_UNAVAILABLE', reason: susp.reason, until: susp.until, rule: susp.rule, retryable: false }
+        }));
+      }
+
+      const sessionData = {
+        phase: 'ready', busy: false, error: null, provider: 'ready',
+        identity: { id: userId, email, username: cleanUser, sessionId: 'sess_' + Date.now().toString(36) },
+        profile: {
+          id: userId, email, username: cleanUser, display_name: cleanName, phone: cleanPhone,
+          locale: 'ar', status: 'ACTIVE', created_at: existing?.createdAt || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        store: null
+      };
+      try {
+        localStorage.setItem('bemo-auth-session', JSON.stringify(sessionData));
+        if (cleanPhone) {
+          const cur = JSON.parse(localStorage.getItem('bemo-profile-defaults') || '{}');
+          localStorage.setItem('bemo-profile-defaults', JSON.stringify({ ...cur, recipient: cleanName, phone: cleanPhone }));
+        }
+      } catch (_) {}
+      actorId = userId; seenId = userId;
+      publish(sessionData);
+      window.dispatchEvent(new CustomEvent('bemo:auth-changed', { detail: sessionData }));
+      return sessionData;
+    });
+  }
+
+  async function changePassword(newPassword) {
+    if (!newPassword || String(newPassword).length < 6) return { ok: false, error: failure('PROFILE_INVALID') };
+    try {
+      if (client?.auth) {
+        const s = await client.auth.getSession();
+        if (s.data?.session) {
+          const res = await client.auth.updateUser({ password: newPassword });
+          if (res.error) return { ok: false, error: safeError(res.error) };
+        }
+      }
+      const uName = state?.profile?.username || state?.identity?.username;
+      if (uName) {
+        const users = JSON.parse(localStorage.getItem('bemo-local-users-v1') || '{}');
+        if (users[uName]) {
+          users[uName].passHash = simpleHash(uName + ':' + newPassword);
+          localStorage.setItem('bemo-local-users-v1', JSON.stringify(users));
+        }
+      }
+      return { ok: true };
+    } catch (e) { return { ok: false, error: safeError(e) }; }
+  }
+
+  function listSessions() {
+    const cur = state?.identity;
+    if (!cur) return [];
+    return [{
+      id: cur.sessionId || 'current-browser',
+      device: (typeof navigator !== 'undefined' ? navigator.platform : 'Web') + ' · المتصفح الحالي',
+      email: cur.email || state?.profile?.email || '',
+      active: true,
+      startedAt: state?.profile?.updated_at || new Date().toISOString()
+    }];
+  }
+
+  async function signOutAll() {
+    try { if (client?.auth) await client.auth.signOut({ scope: 'global' }); } catch (_) {}
+    return signOut();
+  }
+
+  async function exportMyData() {
+    let remote = null;
+    try {
+      if (client?.auth) {
+        const s = await client.auth.getSession();
+        if (s.data?.session) {
+          const res = await client.rpc('bemo_export_my_data');
+          if (!res.error) remote = res.data;
+        }
+      }
+    } catch (_) {}
+    const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch (_) { return d; } };
+    return remote || {
+      exported_at: new Date().toISOString(),
+      profile: state.profile,
+      profile_defaults: read('bemo-profile-defaults', {}),
+      addresses: read('bemo-user-addresses', []),
+      orders: read('bemo-orders-local', []),
+      saved_items: read('bemo-live-saved-v1', []),
+      support_tickets: read('bemo-support-tickets-v1', [])
+    };
+  }
   function completeCallback() {
     if (callbackTask) return callbackTask;
     callbackTask = (async () => {
@@ -376,6 +520,21 @@
         const who = await context(ticket, expected);
         if (stale(ticket)) return superseded();
         if (!who) return stopWith(failure('AUTH_REQUIRED'), ticket);
+        if (who.isLocal && who.session) {
+          const nextProfile = Object.assign({}, who.session.profile, {
+            display_name: name,
+            locale: input.locale,
+            username: input.username !== undefined ? input.username : who.session.profile?.username,
+            phone: input.phone !== undefined ? input.phone : who.session.profile?.phone,
+            updated_at: new Date().toISOString()
+          });
+          const nextSession = Object.assign({}, who.session, {
+            phase: 'ready', busy: false, error: null, provider: 'ready',
+            profile: nextProfile
+          });
+          try { localStorage.setItem('bemo-auth-session', JSON.stringify(nextSession)); } catch (_) {}
+          return publish(nextSession);
+        }
         const result = await who.api.rpc(initialPhase === 'onboarding' ? 'bemo_onboard' : 'bemo_update_profile', { display_name: name, locale: input.locale });
         if (stale(ticket)) return superseded();
         if (result.error) throw result.error;
@@ -542,7 +701,7 @@
       return path;
     },
     initialize, getState: snapshot, subscribe(listener) { if (typeof listener !== 'function') return () => {}; listeners.add(listener); try { listener(snapshot()); } catch (_) { /* Isolate view failures. */ } return () => listeners.delete(listener); },
-    signIn, signInDemo, signInWithGmail, signInDirect, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope,
+    signIn, signInDemo, signInWithGmail, signInWithUsername, signInDirect, changePassword, listSessions, signOutAll, exportMyData, completeCallback, refresh, saveProfile, createStore, signOut, merchantRequest, merchantMedia, merchantScope,
     orderRequest: merchantRequest, orderScope: merchantScope
   });
 })();

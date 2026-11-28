@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>عن منصة BEMO — من نحن وكيف تعمل المنصة</title>
+  <link rel="stylesheet" href="bemo-tokens.css">
+  <link rel="stylesheet" href="storefront.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="bemo-ui.css">
+  <script src="bemo-ui.js" defer></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF5000">
+  <script src="pwa-installer.js" defer></script>
+</head>
+<body data-page="about">
+  <header class="main-header">
+    <div class="container header-inner">
+      <a class="bemo-brand" href="index.html">
+        <div class="brand-square">B</div>
+        <div class="brand-text">
+          <span class="brand-name">BEMO</span>
+          <span class="brand-sub">About Us</span>
+        </div>
+      </a>
+      <nav class="header-actions">
+        <a href="index.html" class="header-action-btn"><span>الرئيسية</span></a>
+        <a href="policies.html" class="header-action-btn"><span>السياسات الـ 15</span></a>
+        <a href="safety.html" class="header-action-btn"><span>مركز الأمان</span></a>
+        <a href="contact.html" class="header-action-btn"><span>تواصل معنا</span></a>
+        <a href="help.html" class="header-action-btn"><span>المساعدة</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:960px;margin:32px auto 60px;padding:0 16px;">
+    <section class="account-card" style="padding:32px;margin-bottom:24px;">
+      <span class="section-kicker" style="color:#FF5000;font-weight:700;">عن المنصة · ABOUT US</span>
+      <h1 style="font-size:28px;margin:8px 0 12px;color:var(--bemo-text);">منصة BEMO للتجارة الإلكترونية متعددة المتاجر</h1>
+      <p style="font-size:15px;line-height:1.8;color:var(--bemo-muted);margin-bottom:20px;">
+        <strong>BEMO</strong> هي منصة تسوق حديثة تجمع آلاف المنتجات من متاجر مستقلة ومتنوعة في مكان واحد، مع التركيز الكامل على الشفافية التجارية، حماية خصوصية العملاء، ونظام الدفع عند الاستلام (COD) بعد الفحص والمعاينة.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px;">
+        <div style="background:var(--bemo-surface-secondary);padding:18px;border-radius:12px;border:1px solid var(--bemo-border);">
+          <div style="font-size:26px;margin-bottom:8px;">💵</div>
+          <h3 style="margin:0 0 6px;font-size:16px;color:var(--bemo-text);">دفع عند الاستلام (0% على المشتري)</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">لا نجمع بطاقات ائتمان ولا نحتجز أموال المشترين؛ تدفع نقداً لمندوب التاجر بعد التأكد من سلامة شحنتك.</p>
+        </div>
+        <div style="background:var(--bemo-surface-secondary);padding:18px;border-radius:12px;border:1px solid var(--bemo-border);">
+          <div style="font-size:26px;margin-bottom:8px;">🔒</div>
+          <h3 style="margin:0 0 6px;font-size:16px;color:var(--bemo-text);">حجب بيانات التواصل حتى القبول</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">يُحجب رقم الهاتف والعنوان التفصيلي تماماً ولا يُكشف للتاجر إلا عند قبوله الرسمي للطلب والتزامه بالتجهيز.</p>
+        </div>
+        <div style="background:var(--bemo-surface-secondary);padding:18px;border-radius:12px;border:1px solid var(--bemo-border);">
+          <div style="font-size:26px;margin-bottom:8px;">🏪</div>
+          <h3 style="margin:0 0 6px;font-size:16px;color:var(--bemo-text);">متاجر مستقلة ورسوم شفافة</h3>
+          <p style="margin:0;font-size:13px;color:var(--bemo-muted);line-height:1.6;">تتيح المنصة للتجار الانطلاق بعمولة 0% في الإصدار الحالي وتحديد سياسة الاسترجاع والتوصيل بوضوح تام.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="account-card" style="padding:28px;">
+      <h2 style="font-size:20px;margin:0 0 14px;color:var(--bemo-text);">كيف تعمل BEMO؟ (How It Works)</h2>
+      <ol style="line-height:1.9;font-size:14px;color:var(--bemo-text);padding-inline-start:20px;margin:0 0 20px;">
+        <li><strong>للمشتري:</strong> تصفح المنتجات، أضف للسلة، ثبّت عنوانك الاختياري (أو أدخله عند الطلب)، وأرسل طلب COD مع رؤية رسوم توصيل كل متجر ومدة الإرجاع بوضوح.</li>
+        <li><strong>للتاجر:</strong> يستلم إشعار الطلب الجديد، يتحقق من المخزون ويقبل الطلب فتُفتح بيانات الشحن، ثم يشحن المنتج ويسجل مراحل التوصيل خطوة بخطوة.</li>
+        <li><strong>الدعم وحل النزاعات:</strong> أي استفسار، شكوى، بلاغ منتج، أو استئناف يُرفع مباشرة عبر <a href="contact.html" style="color:#FF5000;font-weight:700;">نظام إشعارات الدعم الفني</a> ليصل فوراً لإدارة المنصة.</li>
+      </ol>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="policies.html" class="primary-button" style="background:#FF5000;color:#fff;text-decoration:none;padding:10px 20px;border-radius:10px;font-weight:700;">مراجعة جميع السياسات القانونية</a>
+        <a href="contact.html" class="secondary-button" style="text-decoration:none;padding:10px 20px;border-radius:10px;">تواصل مع الدعم والإدارة</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="account-container account-footer" style="text-align:center;padding:24px;border-top:1px solid var(--bemo-border);color:var(--bemo-muted);font-size:12px;">
+    <span>© 2026 BEMO Marketplace · <a href="policies.html">الشروط والسياسات</a> · <a href="safety.html">مركز الأمان</a> · <a href="contact.html">تواصل معنا</a></span>
+  </footer>
+</body>
+</html>

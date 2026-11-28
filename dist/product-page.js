@@ -31,7 +31,7 @@
     colorLabel: ['اللون:', 'Color:'],
     bundleLabel: ['الحزمة / الخيار:', 'Bundle / Option:'],
     freeExpressTitle: ['شحن سريع 2-4 أيام', 'Free express 2-4 days'],
-    returnsPerk: ['استرجاع مجاني خلال 15 يوماً', '15-day free returns'],
+    returnsPerk: ['مدة الاسترجاع حسب سياسة البائع (مع حق الفحص عند الاستلام)', 'Return period set per seller (COD doorstep inspection)'],
     addToCart: ['أضف إلى السلة', 'Add to cart'],
     buyNowCod: ['شراء الآن (دفع عند الاستلام) ➔', 'Buy now (COD) ➔'],
     productDescription: ['تفاصيل المنتج ومواصفاته', 'Product Description & Specs'],
@@ -320,6 +320,54 @@
     }
   }
 
+  function renderReviews() {
+    const list = $('reviewsList');
+    if (!list) return;
+    const key = 'bemo-reviews-' + (product?.id || id);
+    let rows = [];
+    try { rows = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) {}
+    list.replaceChildren();
+    if (!rows.length) {
+      const p = document.createElement('p');
+      p.style.cssText = 'margin:0;font-size:13px;color:var(--bemo-muted);';
+      p.textContent = lang === 'ar' ? 'لا توجد مراجعات مضافة على هذه النسخة بعد — كن أول من يقيّم هذا المنتج.' : 'No customer reviews added yet — be the first to review.';
+      list.append(p);
+      return;
+    }
+    for (const r of rows) {
+      const card = document.createElement('div');
+      card.style.cssText = 'padding:12px;border:1px solid var(--bemo-border);border-radius:10px;background:var(--bemo-surface-secondary);';
+      const head = document.createElement('strong');
+      head.style.cssText = 'display:block;font-size:13px;color:var(--bemo-text);margin-bottom:4px;';
+      head.textContent = `${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} · ${r.author_name || 'عميل BEMO'}`;
+      const body = document.createElement('p');
+      body.style.cssText = 'margin:0;font-size:13px;color:var(--bemo-text);';
+      body.textContent = r.comment;
+      card.append(head, body);
+      list.append(card);
+    }
+  }
+
+  $('reviewForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    const rating = Number($('reviewRating')?.value || 5);
+    const comment = ($('reviewComment')?.value || '').trim();
+    if (comment.length < 3) return;
+    const pid = product?.id || id;
+    const key = 'bemo-reviews-' + pid;
+    let rows = [];
+    try { rows = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) {}
+    let author = 'عميل BEMO';
+    try {
+      const sess = JSON.parse(localStorage.getItem('bemo-auth-session') || 'null');
+      if (sess?.profile?.display_name) author = sess.profile.display_name;
+    } catch (_) {}
+    rows.unshift({ rating, comment, author_name: author, created_at: new Date().toISOString() });
+    try { localStorage.setItem(key, JSON.stringify(rows.slice(0, 50))); } catch (_) {}
+    $('reviewForm').reset();
+    renderReviews();
+  });
+
   window.addEventListener('bemo:region-change', () => {
     if (product) {
       render();
@@ -328,5 +376,9 @@
   });
 
   language();
-  load();
+  load().then(() => {
+    const rLink = $('reportListingLink');
+    if (rLink) rLink.href = 'contact.html?type=LISTING_REPORT&target=' + encodeURIComponent(product?.id || id);
+    renderReviews();
+  });
 })();
